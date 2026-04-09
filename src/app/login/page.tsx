@@ -1,8 +1,9 @@
 'use client'
+export const dynamic = 'force-dynamic'
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase'
-import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 
 export default function Login() {
   const [email, setEmail] = useState('')
@@ -26,24 +27,24 @@ export default function Login() {
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
           <Link href="/" className="font-serif text-2xl text-[#C9A84C]">✂ Noble</Link>
-          <p className="text-white/50 mt-2 text-sm">Sign in to your account</p>
+          <p className="text-white/50 text-sm mt-2">Sign in to your account</p>
         </div>
         <form onSubmit={handleLogin} className="bg-white/5 border border-white/10 rounded-xl p-6 space-y-4">
           {error && <div className="bg-red-500/10 border border-red-500/30 text-red-400 text-sm px-3 py-2 rounded">{error}</div>}
           <div>
-            <label className="text-white/60 text-sm mb-1 block">Email</label>
-            <input type="email" value={email} onChange={e => setEmail(e.target.value)} required
-              className="w-full bg-white/10 border border-white/20 rounded px-3 py-2 text-white text-sm focus:outline-none focus:border-[#C9A84C]"
-              placeholder="you@example.com" />
+            <label className="text-sm text-white/60 mb-1 block">Email</label>
+            <input type="email" value={email} onChange={e => setEmail(e.target.value)}
+              className="w-full bg-white/10 border border-white/20 rounded px-3 py-2 text-white text-sm outline-none focus:border-[#C9A84C]"
+              placeholder="you@example.com" required />
           </div>
           <div>
-            <label className="text-white/60 text-sm mb-1 block">Password</label>
-            <input type="password" value={password} onChange={e => setPassword(e.target.value)} required
-              className="w-full bg-white/10 border border-white/20 rounded px-3 py-2 text-white text-sm focus:outline-none focus:border-[#C9A84C]"
-              placeholder="••••••••" />
+            <label className="text-sm text-white/60 mb-1 block">Password</label>
+            <input type="password" value={password} onChange={e => setPassword(e.target.value)}
+              className="w-full bg-white/10 border border-white/20 rounded px-3 py-2 text-white text-sm outline-none focus:border-[#C9A84C]"
+              placeholder="••••••••" required />
           </div>
           <button type="submit" disabled={loading}
-            className="w-full bg-[#C9A84C] text-black font-semibold py-2 rounded hover:bg-[#e8d08a] transition disabled:opacity-50">
+            className="w-full bg-[#C9A84C] text-black font-bold py-2 rounded hover:bg-[#e8d08a] transition disabled:opacity-50">
             {loading ? 'Signing in...' : 'Sign in →'}
           </button>
         </form>
