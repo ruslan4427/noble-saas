@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import TrialBanner from '@/components/TrialBanner'
 
 interface Org {
   id: string
@@ -79,17 +80,8 @@ export default function Dashboard() {
   return (
     <main className="min-h-screen bg-[#0F0A00] text-white">
 
-      {/* Trial banner */}
-      {org?.sub_status === 'trialing' && days !== null && (
-        <div className="bg-[#C9A84C]/10 border-b border-[#C9A84C]/30 px-6 py-2 flex items-center justify-between">
-          <span className="text-[#C9A84C] text-sm">
-            ⏳ {days} day{days !== 1 ? 's' : ''} left in your free trial
-          </span>
-          <Link href="/billing" className="text-xs bg-[#C9A84C] text-black font-bold px-3 py-1 rounded hover:bg-[#e8d08a] transition">
-            Upgrade →
-          </Link>
-        </div>
-      )}
+      {/* Trial Banner */}
+      <TrialBanner />
 
       {/* Nav */}
       <nav className="flex items-center justify-between px-6 py-4 border-b border-white/10 sticky top-0 bg-[#0F0A00]/95 backdrop-blur z-50">
@@ -120,7 +112,7 @@ export default function Dashboard() {
           ))}
         </div>
 
-        {/* Overview tab */}
+        {/* Overview */}
         {activeTab === 'overview' && (
           <div className="space-y-6">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -169,7 +161,7 @@ export default function Dashboard() {
           </div>
         )}
 
-        {/* Staff tab */}
+        {/* Staff */}
         {activeTab === 'staff' && (
           <div className="space-y-4">
             <div className="flex items-center justify-between">
@@ -180,7 +172,7 @@ export default function Dashboard() {
             </div>
             {staff.length === 0 ? (
               <div className="bg-white/5 border border-white/10 rounded-xl p-8 text-center text-white/40">
-                No staff members yet. Add your first barber.
+                No staff members yet.
               </div>
             ) : (
               <div className="space-y-2">
@@ -198,7 +190,7 @@ export default function Dashboard() {
           </div>
         )}
 
-        {/* Settings tab */}
+        {/* Settings */}
         {activeTab === 'settings' && (
           <div className="space-y-4 max-w-md">
             <h2 className="font-semibold text-lg">Salon settings</h2>
@@ -216,6 +208,16 @@ export default function Dashboard() {
               <button className="bg-[#C9A84C] text-black font-bold px-4 py-2 rounded hover:bg-[#e8d08a] transition text-sm">
                 Save changes
               </button>
+            </div>
+            <div className="bg-white/5 border border-white/10 rounded-xl p-6">
+              <h3 className="font-semibold mb-3">Subscription</h3>
+              <p className="text-white/50 text-sm mb-4">
+                Current plan: <span className="text-white capitalize">{org?.plan_id}</span> · 
+                Status: <span className="text-white capitalize">{org?.sub_status}</span>
+              </p>
+              <Link href="/billing" className="bg-[#C9A84C] text-black font-bold px-4 py-2 rounded hover:bg-[#e8d08a] transition text-sm">
+                Manage billing →
+              </Link>
             </div>
           </div>
         )}
