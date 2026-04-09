@@ -22,7 +22,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Bad signature' }, { status: 400 })
   }
 
-  // Idempotency check
   const { data: seen } = await supabase
     .from('billing_events')
     .select('id')
@@ -47,13 +46,10 @@ async function handle(event: Stripe.Event) {
       if (s.subscription) await sync(s.subscription as string)
       break
     }
-    case 'invoice.paid': {
-      const inv = event.data.object as Stripe.Invoice
-      if (inv.subscription) await sync(inv.subscription as string)
-      break
-    }
+    case 'invoice.paid':
     case 'invoice.payment_failed': {
-      const inv = event.data.object as Stripe.Invoice
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const inv = event.data.object as any
       if (inv.subscription) await sync(inv.subscription as string)
       break
     }
@@ -67,20 +63,22 @@ async function handle(event: Stripe.Event) {
 }
 
 async function sync(subId: string, cached?: Stripe.Subscription) {
-  const sub    = cached ?? await stripe.subscriptions.retrieve(subId)
+  const sub = cached ?? await stripe.subscriptions.retrieve(subId)
   const orgId  = sub.metadata?.org_id
   const planId = sub.metadata?.plan_id ?? 'starter'
-
   if (!orgId) return
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const subAny = sub as any
 
   await supabase.from('organizations').update({
     plan_id:                planId,
     stripe_subscription_id: sub.id,
     sub_status:             sub.status,
-    current_period_end:     new Date(sub.current_period_end * 1000).toISOString(),
+    current_period_end:     new Date(subAny.current_period_end * 1000).toISOString(),
     cancel_at_period_end:   sub.cancel_at_period_end,
-    trial_ends_at: sub.trial_end
-      ? new Date(sub.trial_end * 1000).toISOString()
+    trial_ends_at:          subAny.trial_end
+      ? new Date(subAny.trial_end * 1000).toISOString()
       : null,
   }).eq('id', orgId)
 }
