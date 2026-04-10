@@ -35,7 +35,17 @@ export async function POST(req: NextRequest) {
   const { data: userData } = await supabase.auth.admin.getUserById(org.owner_id)
   const email = userData?.user?.email ?? ''
 
+  // Always create new customer or verify existing one
   let customerId = org.stripe_customer_id
+  if (customerId) {
+    try {
+      await stripe.customers.retrieve(customerId)
+    } catch {
+      customerId = null
+      await supabase.from('organizations').update({ stripe_customer_id: null }).eq('id', org_id)
+    }
+  }
+
   if (!customerId) {
     const customer = await stripe.customers.create({
       email,
