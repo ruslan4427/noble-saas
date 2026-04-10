@@ -1,1 +1,2082 @@
-curl -s https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js | head -1 | wc -c
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title id="page-title">Barbershop</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════════════════
+   NOBLE DESIGN SYSTEM — Full Token Set
+═══════════════════════════════════════════════════════ */
+:root{
+  --ink:#1a1208;--ink-80:rgba(26,18,8,.8);--ink-40:rgba(26,18,8,.4);
+  --cream:#f5f0e8;--paper:#faf7f2;--white:#fff;
+  --gold:#c9a84c;--gold-lt:#e8d08a;--gold-dk:#9a7830;--gold-pale:#fef3c7;
+  --success:#2d7a4f;--success-bg:#d1fae5;
+  --warning:#d97706;--warning-bg:#fef3c7;
+  --danger:#c0392b;--danger-bg:#fee2e2;
+  --info:#2c5f8a;--info-bg:#dbeafe;
+  --gray-50:#f9fafb;--gray-100:#f3f4f6;--gray-200:#e8dfc9;
+  --gray-300:#d4c9b8;--gray-400:#a09080;--gray-500:#8b7a65;--gray-600:#6b5d48;
+  --mc0:#3b6ea5;--mc1:#7b4ea5;--mc2:#a54e4e;--mc3:#4ea57b;--mc4:#c9a84c;--mc5:#c06080;
+  --mb0:#dbeafe;--mb1:#ede9fe;--mb2:#fee2e2;--mb3:#d1fae5;--mb4:#fef3c7;--mb5:#fce7f3;
+  --font-display:'Playfair Display',Georgia,serif;
+  --font-body:'DM Sans',system-ui,sans-serif;
+  --font-mono:'DM Mono','Courier New',monospace;
+  --text-xs:.70rem;--text-sm:.78rem;--text-base:.875rem;--text-md:1rem;
+  --text-lg:1.125rem;--text-xl:1.375rem;--text-2xl:1.75rem;--text-3xl:2.25rem;
+  --sp-1:4px;--sp-2:8px;--sp-3:12px;--sp-4:16px;--sp-5:20px;
+  --sp-6:24px;--sp-8:32px;--sp-10:40px;--sp-12:48px;--sp-16:64px;
+  --r-sm:3px;--r-md:6px;--r-lg:10px;--r-xl:16px;--r-full:9999px;
+  --sh-sm:0 1px 4px rgba(26,18,8,.10);--sh-md:0 2px 8px rgba(26,18,8,.14);
+  --sh-lg:0 8px 24px rgba(26,18,8,.18);--sh-xl:0 16px 48px rgba(26,18,8,.22);
+  --sh-gold:0 6px 20px rgba(201,168,76,.35);
+  --t-fast:.15s ease;--t-base:.22s ease;--t-slow:.38s ease;
+  --ease:cubic-bezier(.175,.885,.32,1.275);
+}
+
+/* ── Reset ── */
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html,body{max-width:100%;overflow-x:hidden;}
+body{font-family:var(--font-body);font-size:var(--text-base);color:var(--ink);background:var(--paper);min-height:100vh;line-height:1.6;}
+img,video,svg{max-width:100%;display:block;}
+a{color:var(--gold-dk);text-decoration:none;}
+
+/* ── Utilities ── */
+.hidden{display:none!important;}
+.view{display:none;}.view.active{display:block;}
+
+/* ── Animations ── */
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+@keyframes popIn{from{transform:scale(.3);opacity:0}to{transform:scale(1);opacity:1}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+
+/* ══════════════════════════════════════════
+   BUTTONS — DS compliant
+══════════════════════════════════════════ */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:var(--sp-2);
+  padding:10px 22px;border:none;border-radius:var(--r-sm);
+  font-family:var(--font-body);font-size:var(--text-base);font-weight:500;
+  letter-spacing:.02em;cursor:pointer;
+  transition:all var(--t-base);
+  white-space:nowrap;position:relative;overflow:hidden;
+  text-decoration:none;
+}
+.btn::after{content:'';position:absolute;inset:0;background:rgba(255,255,255,0);transition:background var(--t-fast);}
+.btn:hover::after{background:rgba(255,255,255,.08);}
+.btn:active{transform:scale(.98);}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none!important;box-shadow:none!important;}
+
+.btn-primary{background:var(--ink);color:var(--gold);box-shadow:0 4px 14px rgba(26,18,8,.2);}
+.btn-primary:hover{background:#2d2010;transform:translateY(-1px);box-shadow:var(--sh-lg);}
+.btn-gold{background:var(--gold);color:var(--ink);}
+.btn-gold:hover{background:var(--gold-dk);transform:translateY(-1px);box-shadow:var(--sh-gold);}
+.btn-ghost{background:transparent;color:var(--gray-500);border:2px solid var(--gray-300);}
+.btn-ghost:hover{border-color:var(--ink);color:var(--ink);}
+.btn-danger{background:var(--danger);color:#fff;}
+.btn-danger:hover{background:#a93226;}
+.btn-success{background:var(--success);color:#fff;}
+.btn-success:hover{background:#256040;}
+.btn-warn{background:var(--warning);color:#fff;}
+.btn-warn:hover{background:#b45309;}
+
+.btn-sm{padding:var(--sp-1) var(--sp-3);font-size:var(--text-sm);}
+.btn-xs{padding:3px var(--sp-2);font-size:var(--text-xs);}
+.btn-lg{padding:14px var(--sp-8);font-size:var(--text-md);}
+.btn-full{width:100%;}
+
+/* ── Mobile full-width buttons ── */
+@media(max-width:640px){
+  .btn-mobile-full{width:100%;justify-content:center;}
+  .pf .btn{flex:1;justify-content:center;}
+  .pf{gap:var(--sp-2);}
+}
+
+/* ══════════════════════════════════════════
+   FORM ELEMENTS
+══════════════════════════════════════════ */
+.fg{display:flex;flex-direction:column;gap:5px;margin-bottom:14px;}
+.fg label{font-size:var(--text-xs);font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--gray-500);}
+.fg input,.fg select,.fg textarea{
+  padding:10px 13px;border:2px solid var(--gray-200);border-radius:var(--r-sm);
+  font-family:var(--font-body);font-size:var(--text-base);color:var(--ink);
+  background:var(--white);outline:none;width:100%;
+  transition:border-color var(--t-fast),box-shadow var(--t-fast);
+  -webkit-appearance:none;
+}
+.fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,168,76,.15);}
+.fg .hint{font-size:var(--text-xs);color:var(--gray-400);}
+.fg .hint.err{color:var(--danger);}
+.fg .hint.ok{color:var(--success);}
+.fg input.error{border-color:var(--danger);}
+.fg input.success{border-color:var(--success);}
+
+@media(max-width:640px){
+  .fg input,.fg select,.fg textarea{font-size:16px;min-height:44px;}
+}
+
+/* ══════════════════════════════════════════
+   TOAST
+══════════════════════════════════════════ */
+.toast{
+  position:fixed;bottom:var(--sp-6);right:var(--sp-6);
+  background:var(--ink);color:var(--cream);
+  padding:10px 18px;border-radius:var(--r-sm);font-size:var(--text-sm);
+  box-shadow:var(--sh-xl);border-left:3px solid var(--gold);
+  transform:translateY(80px);opacity:0;
+  transition:all .35s var(--ease);z-index:9999;max-width:320px;
+  display:flex;align-items:center;gap:var(--sp-2);
+}
+.toast.show{transform:translateY(0);opacity:1;}
+.toast.err{border-left-color:var(--danger);}
+.toast.ok{border-left-color:var(--success);}
+
+/* ══════════════════════════════════════════
+   MODAL
+══════════════════════════════════════════ */
+.modal-overlay{
+  position:fixed;inset:0;background:rgba(26,18,8,.55);
+  display:flex;align-items:center;justify-content:center;
+  z-index:800;opacity:0;pointer-events:none;
+  transition:opacity var(--t-base);padding:var(--sp-4);
+}
+.modal-overlay.open{opacity:1;pointer-events:all;}
+.modal{
+  background:var(--white);border-radius:var(--r-lg);padding:var(--sp-6);
+  max-width:440px;width:100%;box-shadow:var(--sh-xl);
+  transform:translateY(18px);transition:transform var(--t-base);
+  max-height:90vh;overflow-y:auto;
+}
+.modal-overlay.open .modal{transform:translateY(0);}
+.modal h3{font-family:var(--font-display);font-size:1.2rem;margin-bottom:6px;}
+.modal p.sub{font-size:var(--text-sm);color:var(--gray-600);margin-bottom:20px;line-height:1.55;}
+.modal-actions{display:flex;gap:var(--sp-2);justify-content:flex-end;margin-top:var(--sp-5);padding-top:var(--sp-4);border-top:1px solid var(--gray-100);}
+
+@media(max-width:640px){
+  .modal{padding:20px 16px;border-radius:var(--r-lg) var(--r-lg) 0 0;margin:auto auto 0;}
+  .modal-overlay{align-items:flex-end;padding:0;}
+  .modal-actions{flex-direction:column-reverse;}
+  .modal-actions .btn{width:100%;justify-content:center;}
+}
+
+/* ══════════════════════════════════════════
+   CALENDAR
+══════════════════════════════════════════ */
+.cal-toolbar{display:flex;align-items:center;gap:var(--sp-3);margin-bottom:var(--sp-4);flex-wrap:wrap;}
+.cal-toolbar h2{font-family:var(--font-display);font-size:1.4rem;flex:1;}
+.cal-toolbar h2 span{color:var(--gold);font-style:italic;}
+.cal-week-nav{display:flex;align-items:center;gap:6px;}
+.cal-week-lbl{font-size:var(--text-sm);font-weight:500;min-width:168px;text-align:center;}
+.cal-wrap{overflow-x:auto;border-radius:var(--r-md);box-shadow:var(--sh-md);-webkit-overflow-scrolling:touch;}
+.cal-grid{display:grid;grid-template-columns:54px repeat(7,1fr);background:var(--white);min-width:540px;}
+.cal-head{background:var(--ink);padding:9px 5px;text-align:center;font-size:.68rem;font-weight:600;color:var(--gold);text-transform:uppercase;letter-spacing:.05em;border-right:1px solid rgba(255,255,255,.07);}
+.cal-head.today-h{background:#2a1e08;}
+.cal-head .dn{font-size:1rem;font-weight:700;display:block;line-height:1.2;font-family:var(--font-display);}
+.cal-tcell{padding:3px 5px 0;font-size:.64rem;color:var(--gray-400);text-align:right;border-right:1px solid var(--gray-200);border-bottom:1px solid var(--gray-100);height:50px;display:flex;align-items:flex-start;background:var(--white);}
+.cal-slot{border-right:1px solid var(--gray-100);border-bottom:1px solid var(--gray-100);height:50px;position:relative;background:var(--white);cursor:pointer;transition:background var(--t-fast);}
+.cal-slot:hover{background:#fdf9f3;}
+.cal-slot.today-s{background:#fffef5;}
+.cal-chip{position:absolute;left:2px;right:2px;border-radius:var(--r-sm);padding:2px 5px;font-size:.67rem;line-height:1.3;overflow:hidden;cursor:pointer;z-index:2;border-left:3px solid rgba(0,0,0,.15);}
+.cal-chip:hover{filter:brightness(1.06);}
+.chip-cl{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.chip-sv,.chip-ph,.chip-st{font-size:.62rem;opacity:.85;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.chip-break{background:#f1f5f9!important;color:#64748b!important;border-left-color:#94a3b8!important;font-style:italic;}
+.chip-dayoff{background:var(--danger-bg)!important;color:#991b1b!important;border-left-color:#f87171!important;font-style:italic;}
+.chip-done{opacity:.58;}
+.chip-cancel{opacity:.36;text-decoration:line-through;}
+
+/* ══════════════════════════════════════════
+   POPUP
+══════════════════════════════════════════ */
+.cpop{position:fixed;z-index:500;background:var(--white);border-radius:var(--r-md);padding:14px;box-shadow:var(--sh-xl);width:216px;font-size:var(--text-sm);line-height:1.75;border-top:3px solid var(--gold);}
+.cpop h4{font-family:var(--font-display);font-size:.9rem;margin-bottom:6px;}
+.cpop .pr{display:flex;gap:6px;}
+.cpop .pl{color:var(--gray-400);min-width:64px;font-size:var(--text-xs);text-transform:uppercase;letter-spacing:.03em;}
+.cpop-actions{display:flex;gap:5px;margin-top:9px;border-top:1px solid var(--gray-100);padding-top:9px;flex-wrap:wrap;}
+
+/* ══════════════════════════════════════════
+   LEGEND
+══════════════════════════════════════════ */
+.legend{display:flex;gap:var(--sp-3);flex-wrap:wrap;margin-bottom:var(--sp-3);}
+.legend-item{display:flex;align-items:center;gap:5px;font-size:var(--text-sm);color:var(--gray-600);}
+.legend-dot{width:9px;height:9px;border-radius:50%;}
+
+/* ══════════════════════════════════════════
+   CLIENT — NAVIGATION
+══════════════════════════════════════════ */
+.client-nav{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:14px var(--sp-6);
+  background:linear-gradient(135deg,var(--ink) 0%,#2d2010 100%);
+  position:fixed;top:0;left:0;right:0;z-index:300;box-shadow:0 2px 16px rgba(0,0,0,.3);
+}
+.nav-brand-wrap{display:flex;align-items:center;gap:var(--sp-2);}
+.nav-brand{font-family:var(--font-display);color:var(--gold);font-size:1.05rem;letter-spacing:.04em;}
+.nav-brand em{font-style:italic;}
+.nav-logo-img{height:30px;max-width:120px;object-fit:contain;border-radius:2px;}
+.nav-links{display:flex;gap:6px;}
+.nav-link{
+  font-size:var(--text-xs);color:rgba(255,255,255,.5);cursor:pointer;
+  border:1px solid rgba(255,255,255,.12);padding:5px 12px;
+  border-radius:var(--r-sm);transition:all var(--t-fast);
+  text-transform:uppercase;letter-spacing:.05em;
+  display:flex;align-items:center;gap:5px;background:transparent;
+}
+.nav-link:hover{color:var(--gold-lt);border-color:var(--gold);}
+
+/* ══════════════════════════════════════════
+   CLIENT — HERO
+══════════════════════════════════════════ */
+.client-hero{
+  text-align:center;padding:96px 20px 32px;
+  background:radial-gradient(ellipse at 20% 50%,rgba(201,168,76,.09) 0%,transparent 60%),
+             radial-gradient(ellipse at 80% 20%,rgba(139,58,42,.07) 0%,transparent 50%),
+             var(--paper);
+}
+.hero-rule{display:flex;align-items:center;gap:14px;justify-content:center;margin-bottom:14px;}
+.hero-rule span{height:1px;width:50px;background:var(--gold);}
+.client-hero h1{font-family:var(--font-display);font-size:clamp(1.8rem,5vw,2.9rem);font-weight:700;line-height:1.1;}
+.client-hero h1 em{font-style:italic;color:var(--gold);}
+.client-hero .tagline{margin-top:8px;font-size:var(--text-md);font-weight:300;color:var(--gray-500);}
+.client-info{display:flex;justify-content:center;gap:var(--sp-5);margin-top:16px;flex-wrap:wrap;}
+.client-info span{font-size:var(--text-sm);color:var(--gray-500);display:flex;align-items:center;gap:5px;}
+
+/* ══════════════════════════════════════════
+   STEPPER
+══════════════════════════════════════════ */
+.stepper{display:flex;justify-content:center;align-items:center;margin:22px auto 28px;max-width:440px;padding:0 20px;}
+.step{display:flex;flex-direction:column;align-items:center;gap:5px;flex:1;}
+.step-circle{
+  width:32px;height:32px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:var(--text-sm);font-weight:500;
+  border:2px solid var(--gray-300);color:var(--gray-400);
+  background:var(--paper);transition:all .3s;
+}
+.step.active .step-circle{background:var(--gold);border-color:var(--gold);color:var(--white);box-shadow:0 4px 12px rgba(201,168,76,.4);}
+.step.done .step-circle{background:var(--ink);border-color:var(--ink);color:var(--gold);}
+.step-lbl{font-size:var(--text-xs);font-weight:500;letter-spacing:.05em;text-transform:uppercase;color:var(--gray-400);}
+.step.active .step-lbl,.step.done .step-lbl{color:var(--ink);}
+.step-line{flex:1;height:1px;background:var(--gray-300);margin-bottom:18px;max-width:36px;transition:background .3s;}
+.step-line.done{background:var(--ink);}
+
+/* ══════════════════════════════════════════
+   BOOKING CARD & PANELS
+══════════════════════════════════════════ */
+.bcard{max-width:540px;margin:0 auto 56px;padding:0 20px;}
+.panel{background:var(--white);border-radius:var(--r-lg);box-shadow:var(--sh-md),0 12px 40px rgba(26,18,8,.07);overflow:hidden;display:none;animation:fadeUp .38s ease both;}
+.panel.active{display:block;}
+.ph{background:linear-gradient(135deg,var(--ink),#2d2010);padding:18px 24px;display:flex;align-items:center;gap:12px;}
+.ph .badge-n{width:26px;height:26px;border-radius:50%;background:var(--gold);display:flex;align-items:center;justify-content:center;font-size:var(--text-xs);font-weight:700;color:var(--white);flex-shrink:0;}
+.ph h2{font-family:var(--font-display);font-size:1.1rem;font-weight:400;color:var(--cream);}
+.pb{padding:24px;}
+.pf{padding:0 24px 24px;display:flex;justify-content:space-between;align-items:center;gap:var(--sp-3);}
+
+/* Masters grid */
+.mgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.mc{border:2px solid var(--gray-200);border-radius:var(--r-md);padding:14px;cursor:pointer;transition:all var(--t-base);position:relative;text-align:center;}
+.mc:hover{border-color:var(--gold-lt);background:#fdf9f3;transform:translateY(-1px);}
+.mc.sel{border-color:var(--gold);background:linear-gradient(135deg,#fdf9f3,#fef8e8);box-shadow:0 4px 18px rgba(201,168,76,.18);}
+.mc.sel::after{content:'✓';position:absolute;top:8px;right:10px;color:var(--gold);font-weight:700;font-size:.85rem;}
+.mc .av{width:48px;height:48px;border-radius:50%;margin:0 auto 8px;display:flex;align-items:center;justify-content:center;font-size:1.25rem;}
+.mc .mn{font-family:var(--font-display);font-size:.92rem;font-weight:700;margin-bottom:2px;}
+.mc .ms{font-size:var(--text-xs);color:var(--gray-500);margin-bottom:4px;}
+.mc .mr{font-size:var(--text-xs);color:var(--gold);}
+
+/* Services list */
+.slist{display:flex;flex-direction:column;gap:8px;}
+.si{display:flex;align-items:center;gap:12px;border:2px solid var(--gray-200);border-radius:var(--r-md);padding:12px 14px;cursor:pointer;transition:all var(--t-base);}
+.si:hover{border-color:var(--gold-lt);background:#fdf9f3;}
+.si.sel{border-color:var(--gold);background:linear-gradient(135deg,#fdf9f3,#fef8e8);}
+.si .ck{width:20px;height:20px;border-radius:50%;border:2px solid var(--gray-300);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.63rem;transition:all var(--t-base);}
+.si.sel .ck{background:var(--gold);border-color:var(--gold);color:var(--white);}
+.si .si-name{font-weight:500;font-size:var(--text-base);flex:1;}
+.si .si-dur{font-size:var(--text-xs);color:var(--gray-400);}
+.si .si-price{font-family:var(--font-display);font-weight:700;color:var(--danger);font-size:var(--text-md);margin-left:auto;}
+
+/* Date-time grid */
+.dtgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;}
+
+/* Summary */
+.sumblock{background:#fdf9f2;border-radius:var(--r-md);border:1px solid var(--gray-200);padding:18px;margin-top:12px;font-size:var(--text-sm);}
+.sumrow{display:flex;justify-content:space-between;border-bottom:1px solid var(--gray-200);padding:6px 0;}
+.sumrow:last-child{border-bottom:none;font-weight:600;font-size:var(--text-md);}
+
+/* Success */
+.success-wrap{text-align:center;padding:48px 24px;}
+.suc-icon{width:68px;height:68px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold-lt));display:flex;align-items:center;justify-content:center;font-size:1.9rem;margin:0 auto 18px;box-shadow:var(--sh-gold);animation:popIn .5s var(--ease) both;}
+.ccard{background:var(--ink);color:var(--cream);border-radius:var(--r-md);padding:18px 20px;text-align:left;font-size:var(--text-sm);line-height:2;}
+.ccard .cr{display:flex;gap:var(--sp-3);border-bottom:1px solid rgba(255,255,255,.08);padding:3px 0;}
+.ccard .cr:last-child{border-bottom:none;}
+.ccard .cl{color:var(--gold);font-weight:500;min-width:100px;font-size:var(--text-xs);text-transform:uppercase;letter-spacing:.04em;}
+
+/* ══════════════════════════════════════════
+   LOGIN
+══════════════════════════════════════════ */
+.login-bg{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;background:var(--paper);}
+.login-box{background:var(--white);border-radius:var(--r-lg);padding:36px 32px;max-width:360px;width:100%;box-shadow:var(--sh-md),0 20px 56px rgba(26,18,8,.1);animation:fadeUp .38s ease both;}
+.login-box h2{font-family:var(--font-display);font-size:1.55rem;margin-bottom:4px;}
+.login-box .lsub{font-size:var(--text-sm);color:var(--gray-500);margin-bottom:24px;line-height:1.5;}
+.login-err{font-size:var(--text-sm);color:var(--danger);min-height:18px;margin-top:6px;}
+.login-hint{font-size:var(--text-xs);color:var(--gray-400);text-align:center;margin-top:12px;}
+
+/* ══════════════════════════════════════════
+   MANAGER — NAV
+══════════════════════════════════════════ */
+.mgr-nav{
+  display:flex;align-items:center;padding:0 var(--sp-5);
+  background:linear-gradient(135deg,var(--ink),#2d2010);
+  position:fixed;top:0;left:0;right:0;z-index:300;height:52px;gap:var(--sp-1);
+  box-shadow:0 2px 16px rgba(0,0,0,.3);
+}
+.mgr-brand{font-family:var(--font-display);color:var(--gold);font-size:.95rem;margin-right:var(--sp-5);white-space:nowrap;display:flex;align-items:center;gap:var(--sp-2);}
+.mgr-brand em{font-style:italic;}
+.mgr-brand .nav-logo-img{height:26px;}
+.mtab{
+  padding:6px 14px;border-radius:var(--r-sm);
+  font-size:var(--text-xs);font-weight:500;cursor:pointer;border:none;
+  transition:all var(--t-fast);text-transform:uppercase;letter-spacing:.04em;
+  color:rgba(255,255,255,.45);background:transparent;
+  display:inline-flex;align-items:center;gap:6px;
+}
+.mtab:hover{color:rgba(255,255,255,.85);}
+.mtab.active{background:rgba(201,168,76,.18);color:var(--gold-lt);}
+.mgr-right{display:flex;align-items:center;gap:var(--sp-3);margin-left:auto;}
+.logout-btn{font-size:var(--text-xs);color:rgba(255,255,255,.4);cursor:pointer;padding:4px 10px;border:1px solid rgba(255,255,255,.12);border-radius:var(--r-sm);transition:all var(--t-fast);background:transparent;}
+.logout-btn:hover{color:var(--danger);border-color:var(--danger);}
+
+/* Master nav */
+.mst-nav{display:flex;align-items:center;padding:0 var(--sp-5);background:linear-gradient(135deg,var(--ink),#2d2010);position:fixed;top:0;left:0;right:0;z-index:300;height:52px;gap:6px;box-shadow:0 2px 16px rgba(0,0,0,.3);}
+.mst-who{font-family:var(--font-display);color:var(--gold);font-size:.95rem;margin-right:18px;}
+.mst-who em{font-style:italic;}
+
+/* ══════════════════════════════════════════
+   MANAGER — BODY
+══════════════════════════════════════════ */
+.mgr-body{padding:72px 20px 56px;max-width:1100px;margin:0 auto;}
+.mst-body{padding:72px 18px 56px;max-width:1000px;margin:0 auto;}
+.sec-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:var(--sp-3);}
+.sec-head h2{font-family:var(--font-display);font-size:1.5rem;}
+.sec-head h2 span{color:var(--gold);font-style:italic;}
+
+/* ══════════════════════════════════════════
+   STATS
+══════════════════════════════════════════ */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:22px;}
+.stat-card{background:var(--white);border-radius:var(--r-sm);padding:16px 18px;box-shadow:var(--sh-md);border-left:3px solid var(--gold);}
+.stat-card.sb{border-color:var(--info);}
+.stat-card.sg{border-color:var(--success);}
+.stat-card.sr{border-color:var(--danger);}
+.stat-val{font-family:var(--font-display);font-size:1.85rem;font-weight:700;line-height:1;}
+.stat-lbl{font-size:var(--text-xs);color:var(--gray-400);text-transform:uppercase;letter-spacing:.06em;margin-top:4px;}
+
+/* ══════════════════════════════════════════
+   JOURNAL TABLE
+══════════════════════════════════════════ */
+.table-wrap{background:var(--white);border-radius:var(--r-md);box-shadow:var(--sh-md);overflow:hidden;}
+.table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+table{width:100%;border-collapse:collapse;}
+thead{background:var(--ink);}
+thead th{padding:10px 14px;text-align:left;font-size:var(--text-xs);font-weight:600;color:var(--gold);text-transform:uppercase;letter-spacing:.06em;white-space:nowrap;}
+tbody tr{border-bottom:1px solid var(--gray-100);transition:background var(--t-fast);}
+tbody tr:last-child{border-bottom:none;}
+tbody tr:hover{background:#fdf9f3;}
+tbody td{padding:10px 14px;font-size:var(--text-base);vertical-align:middle;}
+.tdp{font-family:var(--font-display);font-weight:700;color:var(--danger);}
+
+/* Badges */
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:var(--r-sm);font-size:var(--text-xs);font-weight:600;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap;}
+.bn{background:var(--info-bg);color:var(--info);}
+.bd{background:var(--success-bg);color:var(--success);}
+.bc{background:var(--danger-bg);color:var(--danger);}
+
+/* Filters */
+.fbar{display:flex;gap:var(--sp-2);margin-bottom:14px;flex-wrap:wrap;align-items:center;}
+.fbar input,.fbar select{padding:8px 12px;border:2px solid var(--gray-200);border-radius:var(--r-sm);font-family:var(--font-body);font-size:var(--text-sm);color:var(--ink);background:var(--white);outline:none;transition:border-color var(--t-fast);-webkit-appearance:none;}
+.fbar input{flex:1;min-width:140px;}
+.fbar input:focus,.fbar select:focus{border-color:var(--gold);}
+
+/* Spinner / empty */
+.spinner{width:28px;height:28px;border:3px solid var(--gray-200);border-top-color:var(--gold);border-radius:50%;animation:spin .7s linear infinite;margin:32px auto;}
+.empty-st{text-align:center;padding:44px 20px;color:var(--gray-400);}
+.empty-st .bi{font-size:2.2rem;margin-bottom:var(--sp-2);}
+
+/* ══════════════════════════════════════════
+   MASTERS
+══════════════════════════════════════════ */
+.mm-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;}
+.mm-card{background:var(--white);border-radius:var(--r-lg);padding:20px;box-shadow:var(--sh-md);border-top:4px solid var(--gold);transition:box-shadow var(--t-base),transform var(--t-base);}
+.mm-card:hover{box-shadow:var(--sh-lg);transform:translateY(-2px);}
+.mm-av{width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.35rem;margin-bottom:10px;}
+.mm-name{font-family:var(--font-display);font-size:1rem;font-weight:700;margin-bottom:2px;}
+.mm-spec{font-size:var(--text-xs);color:var(--gray-500);margin-bottom:4px;}
+.mm-phone{font-size:var(--text-sm);color:var(--ink);margin-bottom:8px;display:flex;align-items:center;gap:5px;}
+.mm-pwd{font-size:var(--text-xs);color:var(--gray-400);margin-bottom:10px;display:flex;align-items:center;gap:4px;}
+.mm-actions{display:flex;gap:var(--sp-2);flex-wrap:wrap;}
+.add-card{background:var(--white);border-radius:var(--r-lg);padding:20px;box-shadow:var(--sh-sm);border:2px dashed var(--gray-300);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;cursor:pointer;transition:all var(--t-base);min-height:160px;}
+.add-card:hover{border-color:var(--gold);background:var(--gold-pale);transform:translateY(-1px);}
+.add-card .plus{font-size:2rem;color:var(--gray-300);}
+.add-card:hover .plus{color:var(--gold);}
+
+/* Masters table */
+.masters-table{width:100%;border-collapse:collapse;}
+.masters-table thead tr{background:var(--ink);}
+.masters-table thead th{padding:10px 14px;text-align:left;font-size:var(--text-xs);font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--gold);white-space:nowrap;}
+.masters-table tbody tr{border-bottom:1px solid var(--gray-100);transition:background var(--t-fast);}
+.masters-table tbody tr:last-child{border-bottom:none;}
+.masters-table tbody tr:hover{background:#fdf9f3;}
+.masters-table td{padding:13px 14px;vertical-align:middle;font-size:var(--text-base);}
+.mt-num{color:var(--gray-400);font-size:var(--text-xs);font-weight:500;width:40px;}
+.mt-photo{width:38px;height:38px;border-radius:50%;object-fit:cover;flex-shrink:0;background:var(--gray-100);display:flex;align-items:center;justify-content:center;font-size:1.05rem;border:1.5px solid var(--gray-200);}
+.mt-name{font-weight:600;font-size:.9rem;margin-bottom:1px;}
+.mt-spec{font-size:var(--text-xs);color:var(--gray-500);}
+.mt-phone{font-size:var(--text-sm);margin-bottom:2px;}
+.mt-pwd{font-size:var(--text-xs);color:var(--gray-400);}
+.mt-status{display:inline-flex;align-items:center;gap:6px;font-size:var(--text-sm);font-weight:500;}
+.mt-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.mt-dot.busy{background:var(--danger);}.mt-dot.mid{background:var(--warning);}.mt-dot.free{background:var(--success);}
+.mt-load-text.busy{color:var(--danger);}.mt-load-text.mid{color:var(--warning);}.mt-load-text.free{color:var(--success);}
+.mt-actions{display:flex;gap:5px;white-space:nowrap;}
+
+/* View toggle */
+.view-toggle{display:flex;gap:3px;background:var(--gray-100);padding:3px;border-radius:var(--r-md);}
+.view-toggle-btn{padding:5px 10px;border:none;border-radius:var(--r-sm);cursor:pointer;font-size:var(--text-xs);background:transparent;color:var(--gray-500);transition:all var(--t-fast);display:flex;align-items:center;gap:6px;line-height:1;}
+.view-toggle-btn svg{flex-shrink:0;}
+.view-toggle-btn.active{background:var(--white);color:var(--ink);box-shadow:var(--sh-sm);font-weight:600;}
+
+/* ══════════════════════════════════════════
+   LOAD BAR
+══════════════════════════════════════════ */
+.mm-load-wrap{margin-bottom:12px;}
+.mm-load-label{display:flex;justify-content:space-between;font-size:var(--text-xs);color:var(--gray-400);margin-bottom:4px;}
+.mm-load-bar{height:5px;background:var(--gray-200);border-radius:var(--r-full);overflow:hidden;}
+.mm-load-fill{height:100%;border-radius:var(--r-full);transition:width .4s var(--ease);}
+.mm-load-fill.load-low{background:var(--success);}
+.mm-load-fill.load-mid{background:var(--warning);}
+.mm-load-fill.load-high{background:var(--danger);}
+
+/* ══════════════════════════════════════════
+   SERVICES
+══════════════════════════════════════════ */
+.sv-list{background:var(--white);border-radius:var(--r-md);box-shadow:var(--sh-md);overflow:hidden;}
+.sv-item{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--gray-100);}
+.sv-item:last-child{border-bottom:none;}
+.sv-name{font-weight:500;flex:1;}
+.sv-dur{font-size:var(--text-xs);color:var(--gray-400);min-width:56px;}
+.sv-price{font-family:var(--font-display);font-weight:700;color:var(--danger);min-width:56px;text-align:right;}
+
+/* ══════════════════════════════════════════
+   SETTINGS
+══════════════════════════════════════════ */
+.settings-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+.settings-card{background:var(--white);border-radius:var(--r-lg);padding:22px;box-shadow:var(--sh-md);}
+.settings-card h3{font-family:var(--font-display);font-size:1.05rem;margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid var(--gray-100);}
+
+/* Break add */
+.break-add{background:var(--white);border-radius:var(--r-md);box-shadow:var(--sh-md);padding:18px;margin-bottom:18px;}
+.break-add h3{font-family:var(--font-display);font-size:1rem;margin-bottom:14px;}
+.break-row{display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:10px;align-items:end;}
+
+/* ══════════════════════════════════════════
+   MOBILE BOTTOM NAV
+══════════════════════════════════════════ */
+.mob-bottom-nav{display:none!important;position:fixed;bottom:0;left:0;right:0;z-index:300;background:linear-gradient(135deg,var(--ink),#2d2010);border-top:1px solid rgba(255,255,255,.08);padding:6px 0 max(6px,env(safe-area-inset-bottom));box-shadow:0 -4px 24px rgba(0,0,0,.3);}
+.mob-bottom-nav .mbn-items{display:flex;justify-content:space-around;}
+.mbn-item{display:flex;flex-direction:column;align-items:center;gap:3px;padding:4px 10px;cursor:pointer;border-radius:var(--r-md);transition:all var(--t-fast);border:none;background:transparent;color:rgba(255,255,255,.38);font-family:var(--font-body);}
+.mbn-item.active{color:var(--gold);}
+.mbn-item .mbn-ico{font-size:1.2rem;line-height:1;display:flex;align-items:center;justify-content:center;}
+.mbn-item .mbn-lbl{font-size:.58rem;font-weight:500;letter-spacing:.04em;text-transform:uppercase;}
+.has-bottom-nav .mgr-body,.has-bottom-nav .mst-body{padding-bottom:80px;}
+.cal-scroll-hint{display:none;font-size:var(--text-xs);color:var(--gray-400);text-align:center;padding:6px 0;margin-bottom:var(--sp-2);}
+
+/* ══════════════════════════════════════════
+   PHOTO UPLOAD
+══════════════════════════════════════════ */
+.photo-upload-wrap{display:flex;align-items:center;gap:16px;margin-bottom:16px;}
+.photo-preview{width:80px;height:80px;border-radius:50%;background:var(--gray-100);border:2px dashed var(--gray-300);display:flex;align-items:center;justify-content:center;font-size:1.8rem;overflow:hidden;flex-shrink:0;cursor:pointer;transition:all var(--t-base);position:relative;}
+.photo-preview:hover{border-color:var(--gold);background:var(--gold-pale);}
+.photo-preview img{width:100%;height:100%;object-fit:cover;border-radius:50%;}
+.photo-preview .photo-overlay{position:absolute;inset:0;background:rgba(26,18,8,.45);border-radius:50%;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity var(--t-base);font-size:var(--text-xs);color:var(--white);font-weight:600;}
+.photo-preview:hover .photo-overlay{opacity:1;}
+.photo-upload-meta{flex:1;}
+.photo-upload-meta .label{font-size:var(--text-xs);font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--gray-500);margin-bottom:6px;display:block;}
+.photo-upload-meta .hint{font-size:var(--text-xs);color:var(--gray-400);margin-top:4px;line-height:1.45;}
+.photo-upload-btn{padding:6px 14px;border:2px solid var(--gray-300);border-radius:var(--r-sm);background:transparent;font-family:var(--font-body);font-size:var(--text-sm);color:var(--gray-500);cursor:pointer;transition:all var(--t-base);}
+.photo-upload-btn:hover{border-color:var(--gold);color:var(--ink);}
+#am-photo-input{display:none;}
+
+/* ══════════════════════════════════════════
+   LOGO UPLOAD
+══════════════════════════════════════════ */
+.logo-upload-wrap{display:flex;align-items:center;gap:16px;margin-bottom:16px;}
+.logo-preview{width:120px;height:60px;border-radius:var(--r-md);background:var(--gray-100);border:2px dashed var(--gray-300);display:flex;align-items:center;justify-content:center;overflow:hidden;cursor:pointer;transition:all var(--t-base);position:relative;flex-shrink:0;}
+.logo-preview:hover{border-color:var(--gold);background:var(--gold-pale);}
+.logo-preview img{width:100%;height:100%;object-fit:contain;padding:4px;}
+.logo-preview .logo-placeholder{font-size:var(--text-xs);color:var(--gray-400);text-align:center;line-height:1.4;}
+.logo-upload-meta .hint{font-size:var(--text-xs);color:var(--gray-400);margin-top:4px;line-height:1.5;}
+#set-logo-input{display:none;}
+
+/* ══════════════════════════════════════════
+   SCHEDULE GRID
+══════════════════════════════════════════ */
+.sched-grid{display:flex;flex-direction:column;gap:8px;margin-top:6px;}
+.sched-day{display:grid;grid-template-columns:100px 36px 1fr;align-items:center;gap:10px;padding:8px 12px;background:var(--gray-50);border-radius:var(--r-md);border:1px solid var(--gray-200);transition:opacity var(--t-fast);}
+.sched-day.day-off{opacity:.5;}
+.sched-day-name{font-size:var(--text-sm);font-weight:600;}
+.sched-toggle{position:relative;display:inline-block;width:34px;height:20px;}
+.sched-toggle input{opacity:0;width:0;height:0;}
+.sched-slider{position:absolute;inset:0;background:var(--gray-300);border-radius:20px;cursor:pointer;transition:.2s;}
+.sched-slider:before{content:'';position:absolute;height:14px;width:14px;left:3px;bottom:3px;background:var(--white);border-radius:50%;transition:.2s;box-shadow:var(--sh-sm);}
+.sched-toggle input:checked+.sched-slider{background:var(--gold);}
+.sched-toggle input:checked+.sched-slider:before{transform:translateX(14px);}
+.sched-times{display:flex;align-items:center;gap:6px;font-size:var(--text-sm);}
+.sched-times input[type=time]{padding:4px 8px;border:1px solid var(--gray-200);border-radius:var(--r-sm);font-family:var(--font-body);font-size:var(--text-sm);color:var(--ink);outline:none;width:88px;}
+.sched-times input[type=time]:focus{border-color:var(--gold);}
+.sched-times span{color:var(--gray-400);}
+.day-closed-lbl{font-size:var(--text-xs);color:var(--gray-400);font-style:italic;}
+
+/* ══════════════════════════════════════════
+   RATING
+══════════════════════════════════════════ */
+.rating-stars{display:flex;gap:6px;justify-content:center;margin:12px 0;}
+.rating-star{font-size:2.2rem;cursor:pointer;color:var(--gray-300);transition:color var(--t-fast),transform var(--t-fast);line-height:1;}
+.rating-star:hover{color:var(--gold);transform:scale(1.15);}
+.rating-panel{text-align:center;padding:20px 0 4px;border-top:1px solid var(--gray-100);margin-top:16px;}
+.rating-panel h3{font-family:var(--font-display);font-size:1.05rem;margin-bottom:4px;}
+.rating-panel p{font-size:var(--text-sm);color:var(--gray-500);margin-bottom:14px;}
+.rating-submitted{background:var(--success-bg);border-radius:var(--r-md);padding:12px;margin-top:12px;text-align:center;font-size:var(--text-sm);color:var(--success);font-weight:500;}
+
+/* ══════════════════════════════════════════
+   ICON SYSTEM (SVG)
+══════════════════════════════════════════ */
+.icon{display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;}
+.icon svg{display:block;}
+
+/* ══════════════════════════════════════════
+   RESPONSIVE
+══════════════════════════════════════════ */
+@media(max-width:900px){
+  .settings-grid{grid-template-columns:1fr;}
+  .stats-row{grid-template-columns:1fr 1fr;}
+}
+
+@media(max-width:768px){
+  /* Layout */
+  .client-hero{padding:28px 16px 22px;}
+  .client-info{flex-direction:column;gap:6px;align-items:center;}
+  .bcard{padding:0 12px;}
+  .pb{padding:18px;}
+  .pf{padding:0 16px 16px;flex-wrap:wrap;}
+  .ph{padding:14px 18px;}
+
+  /* Stepper */
+  .stepper{padding:0 12px;margin:14px auto 18px;}
+  .step-lbl{font-size:.58rem;}
+  .step-circle{width:28px;height:28px;font-size:.7rem;}
+  .step-line{max-width:22px;}
+
+  /* Navs */
+  .mgr-nav{display:none!important;}
+  .mst-nav{display:none!important;}
+  .mob-bottom-nav{display:block!important;}
+  .mgr-body{padding:68px 14px 80px;}
+  .mst-body{padding:68px 14px 80px;}
+
+  /* Calendar */
+  .cal-toolbar{flex-wrap:wrap;gap:8px;}
+  .cal-toolbar h2{font-size:1.1rem;width:100%;}
+  .cal-week-nav{width:100%;justify-content:center;}
+  .cal-scroll-hint{display:block;}
+
+  /* Grids */
+  .mgrid{grid-template-columns:1fr 1fr;}
+  .dtgrid{grid-template-columns:1fr 1fr;}
+  .stats-row{grid-template-columns:1fr 1fr;gap:10px;}
+  .break-row{grid-template-columns:1fr 1fr;row-gap:10px;}
+  .break-row button{grid-column:1/-1;}
+
+  /* Tables */
+  .table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+  thead th:nth-child(3),tbody td:nth-child(3),
+  thead th:nth-child(7),tbody td:nth-child(7){display:none;}
+  .masters-table thead th:nth-child(4),
+  .masters-table tbody td:nth-child(4),
+  .masters-table thead th:nth-child(5),
+  .masters-table tbody td:nth-child(5){display:none;}
+
+  /* Sec head */
+  .sec-head{flex-direction:column;align-items:flex-start;gap:10px;}
+  .sec-head>div{width:100%;}
+
+  /* Modal */
+  .modal{padding:20px 16px;}
+  .modal-actions{flex-direction:column-reverse;}
+  .modal-actions .btn{width:100%;justify-content:center;}
+  .cpop{position:fixed!important;bottom:72px!important;left:8px!important;right:8px!important;top:auto!important;width:auto!important;border-radius:var(--r-xl) var(--r-xl) var(--r-md) var(--r-md);}
+
+  /* Toast */
+  .toast{bottom:76px;left:12px;right:12px;max-width:none;}
+
+  /* Buttons adaptive width */
+  .btn-mobile-full,.sec-head .btn{width:100%;justify-content:center;}
+  .mm-actions .btn{flex:1;}
+  .pf .btn{flex:1;justify-content:center;min-width:0;}
+}
+
+@media(max-width:480px){
+  .mgrid{grid-template-columns:1fr;}
+  .dtgrid{grid-template-columns:1fr;}
+  .mm-grid{grid-template-columns:1fr;}
+  .client-hero h1{font-size:clamp(1.45rem,6vw,2rem);}
+  .mc{padding:12px;}
+  .ph h2{font-size:.96rem;}
+  .step-circle{width:26px;height:26px;font-size:.68rem;}
+  .step-line{max-width:16px;}
+  .bcard{padding:0 10px;}
+  .fbar{flex-direction:column;}
+  .fbar input,.fbar select{width:100%;}
+  .mgr-body,.mst-body{padding:12px 10px 80px;}
+  .stat-val{font-size:1.5rem;}
+  thead th:nth-child(4),tbody td:nth-child(4),
+  thead th:nth-child(5),tbody td:nth-child(5),
+  thead th:nth-child(6),tbody td:nth-child(6){display:none;}
+  .photo-preview{width:64px;height:64px;}
+  .photo-upload-wrap{gap:12px;}
+  .sched-day{grid-template-columns:70px 32px 1fr;gap:8px;}
+}
+
+@media(hover:none) and (pointer:coarse){
+  .mc{min-height:88px;}
+  .si{padding:14px;}
+  .btn{min-height:42px;}
+  .btn-sm{min-height:36px;}
+  .cal-slot{height:52px;}
+  .cal-tcell{height:52px;}
+  .fg input,.fg select,.fg textarea{min-height:44px;font-size:16px!important;}
+  .mbn-item{min-width:52px;}
+}
+
+@supports(padding-bottom:env(safe-area-inset-bottom)){
+  .mob-bottom-nav{padding-bottom:max(8px,env(safe-area-inset-bottom));}
+  .has-bottom-nav .mgr-body,.has-bottom-nav .mst-body{padding-bottom:calc(72px + env(safe-area-inset-bottom));}
+  .toast{bottom:calc(76px + env(safe-area-inset-bottom));}
+}
+
+.rsd{flex:1;height:4px;border-radius:2px;background:#ece6dc;transition:background .3s}.rsd.active{background:var(--gold)}.rsd.done{background:var(--ink)}
+.shop-card{display:flex;align-items:center;gap:10px;padding:11px 13px;border:2px solid #ece6dc;border-radius:4px;cursor:pointer;transition:all .15s;background:white}
+.shop-card:hover{border-color:var(--gold);background:#fdf9f3}
+.shop-av-sm{width:34px;height:34px;border-radius:4px;background:linear-gradient(135deg,#e8d08a,#f5f0e8);display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-weight:700;color:#9a7830;font-size:.88rem;flex-shrink:0}
+.my-shop-row{padding:13px 16px;border-bottom:1px solid #f0ebe0;display:flex;align-items:center;gap:12px}
+.my-shop-row:last-child{border-bottom:none}
+
+/* ── Lang dropdown ── */
+.lang-dropdown{position:relative;margin-right:6px}
+.lang-drop-btn{display:flex;align-items:center;gap:5px;padding:5px 10px;border:none;border-radius:3px;background:rgba(255,255,255,.08);color:rgba(255,255,255,.7);font-size:.72rem;font-weight:600;cursor:pointer;transition:all .15s;letter-spacing:.04em}
+.lang-drop-btn:hover,.lang-drop-btn.open{background:rgba(255,255,255,.14);color:rgba(255,255,255,.95)}
+.lang-chevron{transition:transform .15s;flex-shrink:0}
+.lang-drop-btn.open .lang-chevron{transform:rotate(180deg)}
+.lang-drop-menu{position:absolute;top:calc(100% + 8px);right:0;background:white;border-radius:6px;box-shadow:0 8px 32px rgba(0,0,0,.18);min-width:168px;overflow:hidden;opacity:0;transform:translateY(-6px);pointer-events:none;transition:opacity .15s,transform .15s;z-index:1000;border:1px solid #e8e0d4}
+.lang-drop-menu.open{opacity:1;transform:translateY(0);pointer-events:all}
+.lang-opt{display:flex;align-items:center;gap:10px;width:100%;padding:10px 14px;border:none;background:transparent;cursor:pointer;font-size:.84rem;color:var(--ink);transition:background .12s;text-align:left}
+.lang-opt:hover{background:#fdf9f3}.lang-opt.active{background:#f5f0e8;font-weight:600}
+.lang-flag{font-size:1rem;flex-shrink:0}.lang-code{font-size:.68rem;color:#a09080;font-weight:600;margin-left:auto}
+/* ── Burger button ── */
+.burger-btn{display:none;flex-direction:column;justify-content:center;align-items:center;gap:5px;width:38px;height:38px;background:rgba(255,255,255,.08);border:none;border-radius:3px;cursor:pointer;padding:7px;transition:background .15s;margin-left:auto;flex-shrink:0}
+.burger-btn:hover{background:rgba(255,255,255,.16)}
+.burger-line{display:block;width:18px;height:2px;background:rgba(255,255,255,.85);border-radius:2px;transition:transform .25s,opacity .25s;transform-origin:center}
+.burger-btn.open .burger-line:nth-child(1){transform:translateY(7px) rotate(45deg)}
+.burger-btn.open .burger-line:nth-child(2){opacity:0;transform:scaleX(0)}
+.burger-btn.open .burger-line:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
+/* ── Overlay ── */
+.burger-overlay{display:none;position:fixed;inset:0;background:rgba(26,18,8,.6);z-index:399;opacity:0;transition:opacity .25s}
+.burger-overlay.open{opacity:1}
+/* ── Panel ── */
+.burger-menu{position:fixed;top:0;right:0;bottom:0;width:min(300px,85vw);background:var(--ink);z-index:400;transform:translateX(100%);transition:transform .3s cubic-bezier(.25,.46,.45,.94);display:flex;flex-direction:column;box-shadow:-8px 0 32px rgba(0,0,0,.4);overflow-y:auto}
+.burger-menu.open{transform:translateX(0)}
+.burger-header{display:flex;align-items:center;justify-content:space-between;padding:18px 20px;border-bottom:1px solid rgba(255,255,255,.08);flex-shrink:0}
+.burger-brand{font-family:'Playfair Display',serif;color:var(--gold);font-size:1.1rem;letter-spacing:.04em}
+.burger-close{width:32px;height:32px;border:none;border-radius:3px;background:rgba(255,255,255,.08);color:rgba(255,255,255,.7);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.burger-close:hover{background:rgba(201,168,76,.2);color:var(--gold)}
+.burger-section-title{padding:16px 20px 8px;font-size:.68rem;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:rgba(255,255,255,.3)}
+.burger-lang-grid{display:flex;flex-direction:column;gap:2px;padding:0 12px 4px}
+.burger-lang-btn{display:flex;align-items:center;gap:12px;width:100%;padding:12px;border:none;border-radius:4px;background:transparent;color:rgba(255,255,255,.55);font-size:.9rem;cursor:pointer;transition:all .15s;text-align:left;min-height:44px}
+.burger-lang-btn:hover{background:rgba(255,255,255,.07);color:rgba(255,255,255,.9)}
+.burger-lang-btn.active{background:rgba(201,168,76,.15);color:var(--gold);font-weight:600}
+.burger-lang-btn span:first-child{font-size:1.2rem;flex-shrink:0}
+.burger-divider{height:1px;background:rgba(255,255,255,.08);margin:10px 20px}
+.burger-nav-item{display:flex;align-items:center;gap:14px;width:100%;padding:16px 20px;border:none;background:transparent;color:rgba(255,255,255,.6);font-size:1rem;cursor:pointer;transition:all .15s;text-align:left;min-height:52px}
+.burger-nav-item:hover{background:rgba(255,255,255,.06);color:rgba(255,255,255,.95)}
+.burger-nav-item svg{flex-shrink:0;opacity:.6}
+.burger-nav-item:hover svg{opacity:1}
+@media(max-width:640px){.burger-btn{display:flex!important}#nav-links-desktop{display:none!important}}
+@media(min-width:641px){.burger-overlay,.burger-menu{display:none!important}}
+
+
+/* ── DS Toggle ── */
+.ds-toggle{position:relative;display:inline-block;width:44px;height:24px;flex-shrink:0}
+.ds-toggle input{opacity:0;width:0;height:0;position:absolute}
+.ds-slider{position:absolute;inset:0;background:#d4c9b8;border-radius:24px;cursor:pointer;transition:.2s}
+.ds-slider:before{content:'';position:absolute;height:18px;width:18px;left:3px;bottom:3px;background:white;border-radius:50%;transition:.2s;box-shadow:0 1px 4px rgba(0,0,0,.2)}
+.ds-toggle input:checked + .ds-slider{background:var(--gold)}
+.ds-toggle input:checked + .ds-slider:before{transform:translateX(20px)}
+.ds-toggle input:disabled + .ds-slider{opacity:.5;cursor:not-allowed}
+
+
+/* ── Platform nav ── */
+.platform-nav{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 24px;background:var(--ink);
+  position:fixed;top:0;left:0;right:0;z-index:300;
+  box-shadow:0 2px 16px rgba(0,0,0,.3);
+}
+.platform-nav-links{display:flex;gap:8px;}
+@media(max-width:640px){
+  .platform-nav-links{display:none!important;}
+  .platform-nav .burger-btn{display:flex!important;}
+}
+
+
+</style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+</head>
+<body>
+<!-- CLIENT -->
+<div class="view" id="view-client"> <nav class="client-nav"> <div class="nav-brand" id="nav-salon-name">Barbershop <em>Noble</em></div> <div class="nav-links" id="nav-links-desktop">
+  <div class="lang-dropdown" id="lang-dropdown">
+    <button class="lang-drop-btn" onclick="toggleLangDrop()" id="lang-drop-trigger">
+      <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6"/><path d="M8 2c-2 2-3 4-3 6s1 4 3 6M8 2c2 2 3 4 3 6s-1 4-3 6M2 8h12"/></svg>
+      <span id="lang-current-label">UA</span>
+      <svg class="lang-chevron" width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 3.5l3 3 3-3"/></svg>
+    </button>
+    <div class="lang-drop-menu" id="lang-drop-menu">
+      <button class="lang-opt active" onclick="setLang('uk')" data-lang="uk"><span class="lang-flag">🇺🇦</span><span>Українська</span><span class="lang-code">UA</span></button>
+      <button class="lang-opt" onclick="setLang('en')" data-lang="en"><span class="lang-flag">🇬🇧</span><span>English</span><span class="lang-code">EN</span></button>
+      <button class="lang-opt" onclick="setLang('es')" data-lang="es"><span class="lang-flag">🇪🇸</span><span>Español</span><span class="lang-code">ES</span></button>
+    </div>
+  </div>
+  <span class="nav-link" onclick="showLogin('master')">✂ Майстер</span>
+  <span class="nav-link" onclick="showLogin('manager')">⚙ Менеджер</span>
+</div>
+<button class="burger-btn" id="burger-btn" onclick="toggleBurger()" aria-label="Menu">
+  <span class="burger-line"></span><span class="burger-line"></span><span class="burger-line"></span>
+</button>
+</nav>
+<div class="burger-overlay" id="burger-overlay" onclick="closeBurger()"></div>
+<div class="burger-menu" id="burger-menu">
+  <div class="burger-header">
+    <div class="burger-brand">Noble</div>
+    <button class="burger-close" onclick="closeBurger()"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4l10 10M14 4L4 14"/></svg></button>
+  </div>
+  <div class="burger-section-title">Мова / Language</div>
+  <div class="burger-lang-grid">
+    <button class="burger-lang-btn active" onclick="setLang('uk');closeBurger()" data-lang="uk"><span>🇺🇦</span><span>Українська</span></button>
+    <button class="burger-lang-btn" onclick="setLang('en');closeBurger()" data-lang="en"><span>🇬🇧</span><span>English</span></button>
+    <button class="burger-lang-btn" onclick="setLang('es');closeBurger()" data-lang="es"><span>🇪🇸</span><span>Español</span></button>
+  </div>
+  <div class="burger-divider"></div>
+  <button class="burger-nav-item" onclick="showLogin('master');closeBurger()">
+    <svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="5.5" cy="10.5" r="2.5"/><circle cx="10.5" cy="10.5" r="2.5"/><path d="M5.5 10.5L10 4l4.5-2"/></svg>
+    Майстер
+  </button>
+  <button class="burger-nav-item" onclick="showLogin('manager');closeBurger()">
+    <svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="2.5"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.05 3.05l1.42 1.42M11.53 11.53l1.42 1.42M3.05 12.95l1.42-1.42M11.53 4.47l1.42-1.42"/></svg>
+    Менеджер
+  </button>
+</div> <div class="client-hero"> <div class="hero-rule"><span></span> <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="color:var(--gold)"><path d="M3 3l9 9m0 0l9-9M12 12l9 9M12 12L3 21"/></svg> <span></span></div> <h1 id="hero-title">Barbershop <em>Noble</em></h1> <p class="tagline" id="hero-tagline" style="display:none"></p> <div class="client-info"> <span>&#128205; <span id="info-address">вул. Хрещатик, 22</span></span> <span>&#128222; <span id="info-phone">+1 (555) 123-4567</span></span> <span>&#128336; <span id="info-hours">09:00 &#8211; 19:00</span></span> </div> </div> <div class="stepper"> <div class="step active" id="s1"><div class="step-circle">1</div><div class="step-lbl">Майстер</div></div> <div class="step-line" id="line1"></div> <div class="step" id="s2" style="opacity:.42"><div class="step-circle">2</div><div class="step-lbl">Послуга</div></div> <div class="step-line" id="line2"></div> <div class="step" id="s3" style="opacity:.42"><div class="step-circle">3</div><div class="step-lbl">Час</div></div> <div class="step-line" id="line3"></div> <div class="step" id="s4" style="opacity:.42"><div class="step-circle">4</div><div class="step-lbl">Підсумок</div></div> </div> <div class="bcard"> <div class="panel active" id="panel-1"> <div class="ph"><div class="badge-n">1</div><h2>Оберіть майстра</h2></div> <div class="pb"><div class="mgrid" id="client-masters"></div></div> <div class="pf"><div></div><button class="btn btn-primary" id="btn1" disabled onclick="goTo(2)">&#8594; Далі</button></div> </div> <div class="panel" id="panel-2"> <div class="ph"><div class="badge-n">2</div><h2>Оберіть послугу</h2></div> <div class="pb"><div class="slist" id="client-services"></div></div> <div class="pf"><button class="btn btn-ghost" onclick="goTo(1)">&#8592; Назад</button><button class="btn btn-primary" id="btn2" disabled onclick="goTo(3)">&#8594; Далі</button></div> </div> <div class="panel" id="panel-3"> <div class="ph"><div class="badge-n">3</div><h2>Дата, час та контакти</h2></div> <div class="pb"> <div class="dtgrid"> <div class="fg" style="margin:0"><label>Дата</label><input type="date" id="inp-date"></div> <div class="fg" style="margin:0"><label>Час</label><select id="inp-time"><option value="">&#8212; оберіть &#8212;</option></select></div> </div> <div class="fg"><label>Ваше ім'я</label><input type="text" id="inp-name" placeholder="Іван Петренко"></div> <div class="fg"> <label>Телефон (US)</label> <input type="tel" id="inp-phone" placeholder="+1 (555) 123-4567" maxlength="17"> <span id="phone-hint" style="font-size:.69rem;color:#a09080;margin-top:2px">Формат: +1XXXXXXXXXX</span> </div> <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:.84rem;color:#5a4d3c"> <input type="checkbox" id="inp-sms" checked style="accent-color:var(--gold)"> SMS-підтвердження
+        </label> </div> <div class="pf"><button class="btn btn-ghost" onclick="goTo(2)">&#8592; Назад</button><button class="btn btn-primary" id="btn3" disabled onclick="goTo(4)">&#8594; Далі</button></div> </div> <div class="panel" id="panel-4"> <div class="ph"><div class="badge-n">4</div><h2>Підтвердження</h2></div> <div class="pb"> <p style="font-size:.82rem;color:#8b7a65;margin-bottom:10px">Перевірте деталі:</p> <div class="sumblock"> <div class="sumrow"><span>Майстер</span><strong id="sum-master">&#8212;</strong></div> <div class="sumrow"><span>Послуга</span><strong id="sum-service">&#8212;</strong></div> <div class="sumrow"><span>Тривалість</span><strong id="sum-dur">&#8212;</strong></div> <div class="sumrow"><span>Дата</span><strong id="sum-date">&#8212;</strong></div> <div class="sumrow"><span>Час</span><strong id="sum-time">&#8212;</strong></div> <div class="sumrow"><span>Клієнт</span><strong id="sum-name">&#8212;</strong></div> <div class="sumrow"><span>Телефон</span><strong id="sum-phone">&#8212;</strong></div> <div class="sumrow"><span>До сплати</span><strong id="sum-price" style="color:var(--r)">&#8212;</strong></div> </div> </div> <div class="pf"> <button class="btn btn-ghost" onclick="goTo(3)">&#8592; Змінити</button> <button class="btn btn-primary" id="btn-confirm" onclick="doConfirm()">&#10003; Записатися</button> </div> </div> <div class="panel" id="panel-success"> <div class="success-wrap"> <div class="suc-icon">&#9986;&#65039;</div> <h2 style="font-family:'Playfair Display',serif;font-size:1.55rem;margin-bottom:7px">Запис підтверджено!</h2> <p style="color:#8b7a65;font-size:.88rem;margin-bottom:20px">Чекаємо на вас!</p> <div class="ccard"> <div class="cr"><span class="cl">Майстер:</span><span id="c-master">&#8212;</span></div> <div class="cr"><span class="cl">Послуга:</span><span id="c-service">&#8212;</span></div> <div class="cr"><span class="cl">Дата та час:</span><span id="c-dt">&#8212;</span></div> <div class="cr"><span class="cl">Адреса:</span><span id="c-addr">&#8212;</span></div> </div> <button class="btn btn-ghost" style="margin-top:16px;width:100%" onclick="restart()">Зробити новий запис</button> </div> </div> </div>
+</div>
+<!-- LOGIN -->
+<div class="view" id="view-login"> <div class="login-bg"> <div class="login-box"> <h2 id="login-title">Вхід</h2> <p class="lsub" id="login-sub">Введіть дані для входу</p> <div id="login-master-sel" class="fg hidden"> <label>Оберіть майстра</label> <select id="login-master-select"><option value="">&#8212; оберіть &#8212;</option></select> </div> <div class="fg"><label>Пароль</label> <input type="password" id="login-pwd" placeholder="&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;" onkeydown="if(event.key==='Enter')doLogin()"> </div> <div class="login-err" id="login-err"></div> <button class="btn btn-primary" style="width:100%;margin-top:14px;justify-content:center" onclick="doLogin()">Увійти &#8594;</button> <button class="btn btn-ghost" style="width:100%;margin-top:8px;font-size:.8rem;justify-content:center" onclick="showView('client')">&#8592; Повернутись</button> <p class="login-hint" id="login-hint">Тестовий доступ: 1234</p> </div> </div>
+</div>
+<!-- MANAGER -->
+<div class="view" id="view-manager"> <nav class="mgr-nav"> <div class="mgr-brand" id="mgr-salon-brand">Noble <em>Manager</em></div> <button class="mtab active" id="mgrtab-calendar" onclick="mgrTab('calendar',this)"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="12" height="11" rx="1.5"/><path d="M5 1v3M11 1v3M2 7h12"/></svg> Розклад</button> <button class="mtab" id="mgrtab-masters" onclick="mgrTab('masters',this)"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="6" cy="6" r="3.5"/><circle cx="11.5" cy="11.5" r="2.5"/><path d="M8.5 3.5l4 4"/></svg> Майстри</button> <button class="mtab" id="mgrtab-services" onclick="mgrTab('services',this)"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4h10M3 8h7M3 12h5"/><circle cx="13" cy="11" r="2"/></svg> Послуги</button> <button class="mtab" id="mgrtab-journal" onclick="mgrTab('journal',this)"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="2" width="10" height="12" rx="1.5"/><path d="M5.5 5.5h5M5.5 8h5M5.5 10.5h3"/></svg> Журнал</button> <button class="mtab" id="mgrtab-settings" onclick="mgrTab('settings',this)"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="2.5"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.05 3.05l1.42 1.42M11.53 11.53l1.42 1.42M3.05 12.95l1.42-1.42M11.53 4.47l1.42-1.42"/></svg> Налаштування</button> <div class="mgr-right"><button class="logout-btn" onclick="doLogout()">Вийти</button></div> </nav> <nav class="mob-bottom-nav" id="mgr-mob-nav"> <div class="mbn-items"> <button class="mbn-item active" id="mbn-calendar" onclick="mgrTab('calendar',document.getElementById('mgrtab-calendar'));mbnActive('mgr','calendar')"><span class="mbn-ico"><svg width="20" height="20" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="12" height="11" rx="1.5"/><path d="M5 1v3M11 1v3M2 7h12"/></svg></span><span class="mbn-lbl">Розклад</span></button> <button class="mbn-item" id="mbn-masters" onclick="mgrTab('masters',document.getElementById('mgrtab-masters'));mbnActive('mgr','masters')"><span class="mbn-ico"><svg width="20" height="20" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="5.5" cy="10.5" r="2.5"/><circle cx="10.5" cy="10.5" r="2.5"/><path d="M5.5 10.5L10 4l4.5-2"/></svg></span><span class="mbn-lbl">Майстри</span></button> <button class="mbn-item" id="mbn-services" onclick="mgrTab('services',document.getElementById('mgrtab-services'));mbnActive('mgr','services')"><span class="mbn-ico"><svg width="20" height="20" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 4h12M2 8h8M2 12h5"/><circle cx="13" cy="11" r="2"/></svg></span><span class="mbn-lbl">Послуги</span></button> <button class="mbn-item" id="mbn-journal" onclick="mgrTab('journal',document.getElementById('mgrtab-journal'));mbnActive('mgr','journal')"><span class="mbn-ico"><svg width="20" height="20" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="2" width="10" height="12" rx="1.5"/><path d="M5.5 5.5h5M5.5 8h5M5.5 10.5h3"/></svg></span><span class="mbn-lbl">Журнал</span></button> <button class="mbn-item" id="mbn-settings" onclick="mgrTab('settings',document.getElementById('mgrtab-settings'));mbnActive('mgr','settings')"><span class="mbn-ico"><svg width="20" height="20" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="2.5"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.05 3.05l1.42 1.42M11.53 11.53l1.42 1.42M3.05 12.95l1.42-1.42M11.53 4.47l1.42-1.42"/></svg></span><span class="mbn-lbl">Налаш.</span></button> </div> </nav> <div class="mgr-body"> <div id="mgr-calendar"> <div class="cal-toolbar"> <h2>Розклад <span>тижня</span></h2> <div class="cal-week-nav"> <button class="btn btn-ghost btn-sm" onclick="shiftWeek('mgr',-1)">&#8249;</button> <span class="cal-week-lbl" id="mgr-week-lbl">&#8230;</span> <button class="btn btn-ghost btn-sm" onclick="shiftWeek('mgr',1)">&#8250;</button> <button class="btn btn-ghost btn-sm" onclick="goToday('mgr')">Сьогодні</button> </div> <select id="mgr-cal-filter" style="padding:7px 11px;border:2px solid #ece6dc;border-radius:4px;font-family:'DM Sans',sans-serif;font-size:.8rem;outline:none;background:white;" onchange="renderCal('mgr')"> <option value="">Всі майстри</option> </select> </div> <div class="legend" id="mgr-legend"></div> <div class="cal-scroll-hint">&#8592; Свайпайте щоб побачити всі дні &#8594;</div> <div class="cal-wrap"><div class="cal-grid" id="mgr-cal-grid"></div></div> </div> <div id="mgr-masters" class="hidden"><div class="sec-head"><h2>Майстри <span>салону</span></h2><div style="display:flex;align-items:center;gap:10px"><div class="view-toggle"><button class="view-toggle-btn active" id="vt-cards" onclick="setMastersView('cards')">&#9638; Картки</button><button class="view-toggle-btn" id="vt-list" onclick="setMastersView('list')">&#9776; Таблиця</button></div><button class="btn btn-primary btn-sm" onclick="openModal('add-master-modal')">+ Додати</button></div></div><div id="list-view-header" style="display:none;background:var(--ink);grid-template-columns:40px 1fr 1fr 150px auto;gap:12px;padding:9px 15px;border-radius:6px 6px 0 0;font-size:.67rem;font-weight:600;color:var(--gold);text-transform:uppercase;letter-spacing:.06em;"><div></div><div>Ім’я / спеціалізація</div><div>Телефон / пароль</div><div>Завантаженість</div><div>Дії</div></div><div class="mm-grid" id="mgr-masters-grid"></div></div> <div id="mgr-services" class="hidden"> <div class="sec-head"> <h2>Послуги <span>та ціни</span></h2> <button class="btn btn-primary btn-sm" onclick="openModal('add-service-modal')">+ Додати послугу</button> </div> <div class="sv-list" id="mgr-sv-list"></div> </div> <div id="mgr-journal" class="hidden"> <div class="sec-head"><h2>Журнал <span>записів</span></h2><button class="btn btn-ghost btn-sm" onclick="renderJournal()">&#8635; Оновити</button></div> <div class="stats-row"> <div class="stat-card"><div class="stat-val" id="st-total">&#8212;</div><div class="stat-lbl">Всього</div></div> <div class="stat-card sb"><div class="stat-val" id="st-new" style="color:var(--b)">&#8212;</div><div class="stat-lbl">Очікують</div></div> <div class="stat-card sg"><div class="stat-val" id="st-done" style="color:var(--g)">&#8212;</div><div class="stat-lbl">Виконано</div></div> <div class="stat-card sr"><div class="stat-val" id="st-rev" style="color:var(--r)">&#8212;</div><div class="stat-lbl">Виручка</div></div> </div> <div class="fbar"> <input id="f-search" placeholder="&#128269; Пошук&#8230;" oninput="renderJournal()"> <select id="f-master" onchange="renderJournal()"><option value="">Всі майстри</option></select> <select id="f-status" onchange="renderJournal()"><option value="">Всі статуси</option><option value="new">Очікує</option><option value="done">Виконано</option><option value="cancel">Скасовано</option></select> </div> <div class="table-wrap"> <div id="j-spin" class="spinner"></div> <table id="j-table" style="display:none"><thead><tr><th>#</th><th>Клієнт</th><th>Телефон</th><th>Майстер</th><th>Послуга</th><th>Дата/Час</th><th>Сума</th><th>Статус</th><th>Дії</th></tr></thead><tbody id="j-tbody"></tbody></table> <div id="j-empty" class="empty-st" style="display:none"><div class="bi">&#128203;</div><p>Записів не знайдено</p></div> </div> </div> <div id="mgr-settings" class="hidden"> <div class="sec-head"><h2>Налаштування <span>салону</span></h2><button class="btn btn-primary" onclick="saveSettings()">&#128190; Зберегти</button></div> <div class="settings-grid"> <div class="settings-card"> <h3>&#127978; Інформація</h3> <div class="logo-upload-wrap"><div class="logo-preview" id="logo-preview-box" onclick="document.getElementById('set-logo-input').click()"><div class="logo-placeholder" id="logo-placeholder">Логотип<br>&#128247;</div></div><div class="logo-upload-meta"><span class="ds-label" style="display:block;margin-bottom:6px">Логотип салону</span><button type="button" class="photo-upload-btn" onclick="document.getElementById('set-logo-input').click()">&#128247; Завантажити</button><button type="button" class="photo-upload-btn" style="margin-left:6px;color:var(--r);border-color:var(--r)" onclick="removeLogo()" id="logo-remove-btn" style="display:none">&#215; Видалити</button><p class="hint">PNG, SVG, JPG до 1MB.<br>Відображається в навігації.</p></div></div><input type="file" id="set-logo-input" accept="image/*" onchange="handleLogoUpload(this)"><div class="fg"><label>Назва салону</label><input type="text" id="set-name" placeholder="Barbershop Noble"></div> <div class="fg"><label>Слоган</label><input type="text" id="set-tagline" placeholder="Запис до майстра онлайн"></div> <div class="fg"><label>Адреса</label><input type="text" id="set-address" placeholder="вул. Хрещатик, 22"></div> <div class="fg"><label>Телефон</label><input type="text" id="set-phone" placeholder="+1 (555) 123-4567"></div> </div> <div class="settings-card"> <h3>&#128336; Робочі години</h3> <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px"> <div class="fg" style="margin:0"><label>Початок</label><input type="time" id="set-open" value="09:00"></div> <div class="fg" style="margin:0"><label>Кінець</label><input type="time" id="set-close" value="19:00"></div> </div> <div class="fg" style="margin-top:14px"><label>Крок запису</label> <select id="set-step"><option value="30">30 хвилин</option><option value="15">15 хвилин</option><option value="60">1 година</option></select> </div> <div class="fg"><label>Новий пароль менеджера</label><input type="password" id="set-mgr-pwd" placeholder="Залиште порожнім щоб не змінювати"></div><div class="fg">
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:white;border:2px solid #ece6dc;border-radius:4px;">
+    <div>
+      <div style="font-size:.86rem;font-weight:600;color:var(--ink)">Рейтинг майстрів</div>
+      <div style="font-size:.72rem;color:#a09080;margin-top:2px">Клієнт бачить зірки при виборі майстра</div>
+    </div>
+    <label class="ds-toggle" style="flex-shrink:0;margin-left:16px">
+      <input type="checkbox" id="set-show-rating" checked
+        onchange="renderMasters();renderClientMasters()">
+      <span class="ds-slider"></span>
+    </label>
+  </div>
+</div></div><div class="settings-card" style="grid-column:1/-1;margin-top:0"><h3>&#128197; Графік роботи по днях тижня</h3><p style="font-size:.78rem;color:#8b7a65;margin-bottom:14px">Вимкніть дні коли салон не працює. Клієнти не зможуть записатись в ці дні.</p><div class="sched-grid" id="sched-grid"></div></div></div> </div> </div> </div>
+</div>
+<!-- MASTER -->
+<div class="view" id="view-master"> <nav class="mst-nav"> <div class="mst-who" id="mst-salon-brand">&#9986; <em id="mst-name-nav">Майстер</em></div> <button class="mtab active" id="msttab-calendar" onclick="mstTab('calendar',this)"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="12" height="11" rx="1.5"/><path d="M5 1v3M11 1v3M2 7h12"/></svg> Мій розклад</button> <button class="mtab" id="msttab-breaks" onclick="mstTab('breaks',this)"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6"/><path d="M8 5v3.5l2 2"/></svg> Перерви та вихідні</button> <div class="mgr-right"><button class="logout-btn" onclick="doLogout()">Вийти</button></div> </nav> <nav class="mob-bottom-nav" id="mst-mob-nav"> <div class="mbn-items"> <button class="mbn-item active" id="mbn-mst-calendar" onclick="mstTab('calendar',document.getElementById('msttab-calendar'));mbnActive('mst','calendar')"><span class="mbn-ico"><svg width="20" height="20" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="12" height="11" rx="1.5"/><path d="M5 1v3M11 1v3M2 7h12"/></svg></span><span class="mbn-lbl">Розклад</span></button> <button class="mbn-item" id="mbn-mst-breaks" onclick="mstTab('breaks',document.getElementById('msttab-breaks'));mbnActive('mst','breaks')"><span class="mbn-ico"><svg width="20" height="20" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6"/><path d="M8 5v3.5l2 2"/></svg></span><span class="mbn-lbl">Вихідні</span></button> <button class="mbn-item" id="mbn-mst-logout" onclick="doLogout()"><span class="mbn-ico">&#128682;</span><span class="mbn-lbl">Вийти</span></button> </div> </nav> <div class="mst-body"> <div id="mst-calendar"> <div class="cal-toolbar"> <h2 id="mst-cal-title">Мій <span>розклад</span></h2> <div class="cal-week-nav"> <button class="btn btn-ghost btn-sm" onclick="shiftWeek('mst',-1)">&#8249;</button> <span class="cal-week-lbl" id="mst-week-lbl">&#8230;</span> <button class="btn btn-ghost btn-sm" onclick="shiftWeek('mst',1)">&#8250;</button> <button class="btn btn-ghost btn-sm" onclick="goToday('mst')">Сьогодні</button> </div> </div> <div class="cal-scroll-hint">&#8592; Свайпайте щоб побачити всі дні &#8594;</div> <div class="cal-wrap"><div class="cal-grid" id="mst-cal-grid"></div></div> </div> <div id="mst-breaks" class="hidden"> <div class="sec-head"><h2>Перерви та <span>вихідні</span></h2></div> <div style="display:flex;gap:4px;margin-bottom:18px;background:white;padding:5px;border-radius:6px;box-shadow:0 1px 4px var(--sh);width:fit-content"> <button class="btn btn-primary btn-sm" id="brk-tab-break" onclick="brkSubTab('break')">&#9749; Перерва</button> <button class="btn btn-ghost btn-sm" id="brk-tab-dayoff" onclick="brkSubTab('dayoff')">&#127958; Вихідний</button> </div> <div id="brk-sub-break"> <div class="break-add"> <h3>Заблокувати час</h3> <div class="break-row"> <div class="fg" style="margin:0"><label>Дата</label><input type="date" id="brk-date"></div> <div class="fg" style="margin:0"><label>Початок</label><select id="brk-from"></select></div> <div class="fg" style="margin:0"><label>Кінець</label><select id="brk-to"></select></div> <button class="btn btn-warn" onclick="addBreak()" style="margin-bottom:0;align-self:flex-end">+ Додати</button> </div> <div class="fg" style="margin-top:12px"><label>Причина</label><input type="text" id="brk-reason" placeholder="Обід, особиста справа&#8230;"></div> </div> </div> <div id="brk-sub-dayoff" class="hidden"> <div class="break-add"> <h3>Вихідний день</h3> <p style="font-size:.82rem;color:#8b7a65;margin-bottom:16px;line-height:1.5">Весь день буде заблоковано. Існуючі записи <strong>не скасовуються</strong> автоматично.</p> <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px"> <div class="fg" style="margin:0"><label>Тип</label> <select id="doff-type" onchange="toggleDoffType()"> <option value="single">Один день</option> <option value="range">Діапазон дат (відпустка)</option> <option value="weekly">Щотижневий вихідний</option> </select> </div> <div class="fg" style="margin:0" id="doff-weekday-wrap"> <label>День тижня</label> <select id="doff-weekday"> <option value="1">Понеділок</option><option value="2">Вівторок</option> <option value="3">Середа</option><option value="4">Четвер</option> <option value="5">П'ятниця</option><option value="6">Субота</option> <option value="0">Неділя</option> </select> </div> </div> <div id="doff-single-wrap" style="display:grid;grid-template-columns:1fr auto;gap:12px;align-items:end"> <div class="fg" style="margin:0"><label>Дата</label><input type="date" id="doff-date"></div> <button class="btn btn-danger" onclick="addDayOff()" style="margin-bottom:0">&#127958; Додати</button> </div> <div id="doff-range-wrap" class="hidden" style="display:grid;grid-template-columns:1fr 1fr auto;gap:12px;align-items:end"> <div class="fg" style="margin:0"><label>З дати</label><input type="date" id="doff-from"></div> <div class="fg" style="margin:0"><label>По дату</label><input type="date" id="doff-to"></div> <button class="btn btn-danger" onclick="addDayOff()" style="margin-bottom:0">&#127958; Додати</button> </div> <div id="doff-weekly-wrap" class="hidden" style="display:grid;grid-template-columns:1fr 1fr auto;gap:12px;align-items:end"> <div class="fg" style="margin:0"><label>З дати</label><input type="date" id="doff-weekly-from"></div> <div class="fg" style="margin:0"><label>По (порожньо = без кінця)</label><input type="date" id="doff-weekly-to"></div> <button class="btn btn-danger" onclick="addDayOff()" style="margin-bottom:0">&#128260; Додати</button> </div> <div class="fg" style="margin-top:12px"><label>Коментар</label><input type="text" id="doff-reason" placeholder="Відпустка, хвороба&#8230;"></div> </div> </div> <div id="breaks-list"></div> </div> </div>
+</div>
+<!-- MODALS -->
+<div class="modal-overlay" id="del-modal"> <div class="modal"><h3>Видалити запис?</h3><p class="sub">Цю дію неможливо скасувати.</p> <div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal('del-modal')">Відміна</button><button class="btn btn-danger" onclick="confirmDelete()">Видалити</button></div></div>
+</div>
+<div class="modal-overlay" id="add-master-modal"> <div class="modal" style="max-width:480px"><h3 id="am-modal-title">Додати майстра</h3><p class="sub">Заповніть інформацію про майстра</p><div class="photo-upload-wrap"><div class="photo-preview" id="am-photo-preview" onclick="document.getElementById('am-photo-input').click()"><span id="am-photo-emoji">&#9986;&#65039;</span><div class="photo-overlay">&#128247; Змінити</div></div><div class="photo-upload-meta"><span class="label">Фото майстра</span><button type="button" class="photo-upload-btn" onclick="document.getElementById('am-photo-input').click()">&#128247; Завантажити фото</button><p class="hint">JPG, PNG до 2MB.<br>Або оберіть аватар нижче.</p></div></div><input type="file" id="am-photo-input" accept="image/*" onchange="handlePhotoUpload(this)"><div class="fg"><label>Ім'я та прізвище</label><input type="text" id="am-name" placeholder="Артем Василенко"></div><div class="fg"><label>Спеціалізація</label><input type="text" id="am-spec" placeholder="Барбер, стиліст"></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:12px"><div class="fg" style="margin:0"><label>Телефон</label><input type="tel" id="am-phone" placeholder="+380 XX XXX XX XX"></div><div class="fg" style="margin:0"><label>Пароль входу</label><input type="text" id="am-pwd" placeholder="barber123"></div></div><div class="fg"><label>Аватар (якщо немає фото)</label><select id="am-emoji" onchange="updateModalEmoji(this.value)"><option value="&#9986;&#65039;">&#9986;&#65039; Ножиці</option><option value="&#128136;">&#128136; Барбер</option><option value="&#129746;">&#129746; Бритва</option><option value="&#127912;">&#127912; Фарба</option><option value="&#128135;">&#128135; Зачіска</option></select></div><input type="hidden" id="am-photo-data"><input type="hidden" id="am-rating" value="0">
+<div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal('add-master-modal')">Відміна</button><button class="btn btn-primary" id="am-submit-btn" onclick="saveMaster()">Додати &#8594;</button></div></div>
+</div>
+<div class="modal-overlay" id="del-master-modal"> <div class="modal"><h3>Видалити майстра?</h3><p class="sub" id="del-mst-msg">Майстер буде видалений.</p> <div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal('del-master-modal')">Відміна</button><button class="btn btn-danger" onclick="confirmDelMaster()">Видалити</button></div></div>
+</div>
+<div class="modal-overlay" id="add-service-modal"> <div class="modal"><h3>Додати послугу</h3><p class="sub">Нова послуга з'явиться у формі запису</p> <div class="fg"><label>Назва</label><input type="text" id="sv-name" placeholder="Стрижка з укладкою"></div> <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px"> <div class="fg" style="margin:0"><label>Ціна (грн)</label><input type="number" id="sv-price" placeholder="350" min="0"></div> <div class="fg" style="margin:0"><label>Тривалість (хв)</label><input type="number" id="sv-dur" placeholder="45" min="15" step="15"></div> </div> <div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal('add-service-modal')">Відміна</button><button class="btn btn-primary" onclick="saveService()">Додати &#8594;</button></div></div>
+</div>
+<div id="cpop" class="cpop" style="display:none"></div>
+<div class="toast" id="toast"></div>
+<div class="view active" id="view-platform">
+<nav class="platform-nav">
+  <div style="font-family:'Playfair Display',serif;color:var(--gold);font-size:1.05rem;letter-spacing:.04em">✂ Noble <em style="font-style:italic;opacity:.7">Platform</em></div>
+
+  <!-- Desktop buttons -->
+  <div class="platform-nav-links" id="platform-nav-links">
+    <button class="btn btn-ghost btn-sm" style="color:rgba(255,255,255,.6);border-color:rgba(255,255,255,.2)" onclick="showPlatformTab('my-shops')">Мої салони</button>
+    <button class="btn btn-ghost btn-sm" style="color:rgba(255,255,255,.6);border-color:rgba(255,255,255,.2)" onclick="showPlatformTab('login-shop')">Увійти в салон</button>
+    <button class="btn btn-primary btn-sm" onclick="showPlatformTab('register')">Створити салон →</button>
+  </div>
+
+  <!-- Mobile burger -->
+  <button class="burger-btn" id="platform-burger-btn" onclick="togglePlatformBurger()" aria-label="Menu">
+    <span class="burger-line"></span>
+    <span class="burger-line"></span>
+    <span class="burger-line"></span>
+  </button>
+</nav>
+
+<div class="burger-overlay" id="platform-burger-overlay" onclick="closePlatformBurger()"></div>
+<div class="burger-menu" id="platform-burger-menu">
+  <div class="burger-header">
+    <div class="burger-brand">✂ Noble</div>
+    <button class="burger-close" onclick="closePlatformBurger()">
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4l10 10M14 4L4 14"/></svg>
+    </button>
+  </div>
+  <div class="burger-divider"></div>
+  <button class="burger-nav-item" onclick="showPlatformTab('register');closePlatformBurger()">
+    <svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="12" height="12" rx="2"/><path d="M8 5v6M5 8h6"/></svg>
+    Створити салон
+  </button>
+  <button class="burger-nav-item" onclick="showPlatformTab('login-shop');closePlatformBurger()">
+    <svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10 2h3a1 1 0 011 1v10a1 1 0 01-1 1h-3M7 11l3-3-3-3M2 8h8"/></svg>
+    Увійти в салон
+  </button>
+  <button class="burger-nav-item" onclick="showPlatformTab('my-shops');closePlatformBurger()">
+    <svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 6h12M2 6l2-3h8l2 3M2 6v7a1 1 0 001 1h10a1 1 0 001-1V6"/></svg>
+    Мої салони
+  </button>
+</div>
+<div style="text-align:center;padding:100px 20px 32px"><h1 style="font-family:'Playfair Display',serif;font-size:clamp(1.9rem,5vw,2.9rem);font-weight:700;line-height:1.1;margin-bottom:10px">Ваш барбершоп —<br><em style="font-style:italic;color:var(--gold)">онлайн за 5 хвилин</em></h1><p style="font-size:.93rem;color:#6b5d48;max-width:440px;margin:0 auto 24px;line-height:1.6;font-weight:300">Сторінка запису, розклад майстрів, журнал — усе під вашим посиланням.</p><div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap"><button class="btn btn-primary" onclick="showPlatformTab('register')">Створити салон безкоштовно</button><button class="btn btn-ghost" onclick="showPlatformTab('login-shop')">Увійти в існуючий</button></div></div>
+<div style="max-width:480px;margin:0 auto;padding:0 18px 56px">
+<div id="platform-tab-register"><div style="background:white;border-radius:6px;box-shadow:0 2px 12px rgba(26,18,8,.1);overflow:hidden"><div style="background:var(--ink);padding:18px 22px"><div style="font-family:'Playfair Display',serif;color:var(--gold);font-size:1.1rem;margin-bottom:3px">Реєстрація салону</div><div style="font-size:.72rem;color:rgba(255,255,255,.4)">3 кроки — і ваш салон готовий</div></div><div style="padding:22px"><div id="reg-step-dots" style="display:flex;gap:6px;margin-bottom:20px"><div class="rsd active" data-s="1"></div><div class="rsd" data-s="2"></div><div class="rsd" data-s="3"></div></div>
+<div id="reg-step-1"><div class="fg"><label>Назва салону</label><input type="text" id="reg-name" placeholder="Noble Barbershop" oninput="updateRegSlug()"></div><input type="hidden" id="reg-slug"><span id="reg-slug-hint" style="display:none"></span><div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px"><div class="fg" style="margin:0"><label>Відкриття</label><input type="time" id="reg-open" value="09:00"></div><div class="fg" style="margin:0"><label>Закриття</label><input type="time" id="reg-close" value="19:00"></div></div><div class="fg"><label>Адреса</label><input type="text" id="reg-address" placeholder="вул. Хрещатик, 1"></div><div class="fg"><label>Телефон</label><input type="tel" id="reg-phone" placeholder="+380 XX XXX XX XX"></div><button class="btn btn-primary" style="width:100%;justify-content:center" onclick="regNext(2)">Далі →</button></div>
+<div id="reg-step-2" class="hidden"><div style="background:#fef9f0;border-radius:4px;padding:11px 13px;margin-bottom:16px;font-size:.82rem;color:#6b5d48;border-left:3px solid var(--gold)">Крок 2 з 3. Налаштуйте доступ менеджера.</div><div class="fg"><label>Email</label><input type="email" id="reg-email" placeholder="owner@mysalon.com"></div><div class="fg"><label>Пароль</label><input type="password" id="reg-pwd" placeholder="Мінімум 6 символів"></div><div class="fg"><label>Підтвердження</label><input type="password" id="reg-pwd2" placeholder="Повторіть пароль"></div><div style="display:flex;gap:8px"><button class="btn btn-ghost" onclick="regNext(1)">← Назад</button><button class="btn btn-primary" style="flex:1;justify-content:center" onclick="regNext(3)">Зареєструвати →</button></div></div>
+<div id="reg-step-3" class="hidden"><div style="text-align:center;padding:10px 0 20px"><div style="width:60px;height:60px;border-radius:50%;background:linear-gradient(135deg,var(--gold),#e8d08a);display:flex;align-items:center;justify-content:center;font-size:1.6rem;margin:0 auto 14px">✂</div><div style="font-family:'Playfair Display',serif;font-size:1.3rem;margin-bottom:6px">Салон створено!</div><div style="font-size:.82rem;color:#8b7a65;margin-bottom:12px">Посилання для клієнтів:</div><div id="reg-result-url" onclick="copyShopURL()" style="background:#f5f0e8;border-radius:4px;padding:10px 14px;font-family:monospace;font-size:.75rem;color:var(--ink);word-break:break-all;margin-bottom:16px;cursor:pointer;border:1px solid #e8dfc9"></div><div style="display:flex;flex-direction:column;gap:8px"><button class="btn btn-primary" style="width:100%;justify-content:center" onclick="openMyShopAsManager()">⚙ Відкрити панель менеджера</button><button class="btn btn-ghost" style="width:100%;justify-content:center" onclick="copyShopURL()">Скопіювати посилання</button><button class="btn btn-ghost" style="width:100%;justify-content:center;font-size:.8rem" onclick="showPlatformTab('my-shops')">Усі мої салони</button></div></div></div>
+<div id="reg-err" style="color:#c0392b;font-size:.78rem;margin-top:8px;min-height:16px"></div></div></div></div>
+<div id="platform-tab-login-shop" class="hidden"><div style="background:white;border-radius:6px;box-shadow:0 2px 12px rgba(26,18,8,.1);overflow:hidden"><div style="background:var(--ink);padding:18px 22px"><div style="font-family:'Playfair Display',serif;color:var(--gold);font-size:1.1rem">Вхід у салон</div></div><div style="padding:22px"><div class="fg"><label>Slug або назва</label><input type="text" id="login-shop-slug" placeholder="noble-barbershop" style="font-family:monospace" oninput="searchShops(this.value)"></div><div id="shop-search-results" style="display:flex;flex-direction:column;gap:6px;margin-bottom:14px;max-height:200px;overflow-y:auto"></div><div id="login-shop-err" style="color:#c0392b;font-size:.78rem;min-height:16px;margin-bottom:10px"></div><button class="btn btn-primary" style="width:100%;justify-content:center" onclick="openShopFromInput()">Відкрити салон →</button><div style="text-align:center;margin-top:12px"><button style="background:none;border:none;cursor:pointer;color:#a09080;font-size:.75rem;text-decoration:underline" onclick="showPlatformTab('register')">Ще немає салону? Зареєструватись</button></div></div></div></div>
+<div id="platform-tab-my-shops" class="hidden"><div style="background:white;border-radius:6px;box-shadow:0 2px 12px rgba(26,18,8,.1);overflow:hidden"><div style="background:var(--ink);padding:18px 22px"><div style="font-family:'Playfair Display',serif;color:var(--gold);font-size:1.1rem">Усі салони</div></div><div id="my-shops-list" style="padding:8px 0"><div style="text-align:center;padding:28px;color:#a09080">Завантаження...</div></div></div></div>
+</div>
+</div>
+<script>
+/* ── Supabase Client ── */
+var _sb = null;
+function getSB() {
+  if (!_sb) {
+    _sb = window.supabase.createClient(
+      'https://ecszrloosntejjawlalv.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVjc3pybG9vc250ZWpqYXdsYWx2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU2ODYwNDksImV4cCI6MjA5MTI2MjA0OX0.VCfvLMM_LIox74jeI4otXcYCXCWj50d5a-W2BXqsiHM'
+    );
+  }
+  return _sb;
+}
+
+
+
+
+
+
+
+
+
+const K_SHOPS='noble-shops-v1';
+const K_SHOP=(slug,t)=>'shop:'+slug+':'+t;
+let _currentShop=null;
+function shopKey(t){if(!_currentShop)return 'shop:default:'+t;return K_SHOP(_currentShop,t);}
+const K={get B(){return shopKey('bookings');},get M(){return shopKey('masters');},get S(){return shopKey('services');},get CFG(){return shopKey('config');}};
+let _mem={B:[],M:null,S:null,CFG:null};
+async function sGet(key,def){
+  try{if(window.storage){const r=await window.storage.get(key,true);if(!r)return def;const p=JSON.parse(r.value);if(Array.isArray(def)&&!Array.isArray(p))return def;if(p===null||p===undefined)return def;return p;}}catch{}
+  try{const raw=localStorage.getItem('noble:'+key);if(raw!==null){const p=JSON.parse(raw);if(Array.isArray(def)&&!Array.isArray(p))return def;return p;}}catch{}
+  const m=_mem[key];return(m!==null&&m!==undefined)?m:def;
+}
+async function sSet(key,data){
+  _mem[key]=data;
+  try{if(window.storage){await window.storage.set(key,JSON.stringify(data),true);return;}}catch{}
+  try{localStorage.setItem('noble:'+key,JSON.stringify(data));}catch{}
+}
+const DEF_MASTERS=[
+{id:'m1',name:'Артем В.',spec:'Барбер, стиліст',rating:'4.9 &#9733;',emoji:'&#9986;&#65039;',pwd:'artem123',phone:'+38 (067) 111-22-33'},
+{id:'m2',name:'Дмитро С.',spec:'Класичні стрижки',rating:'4.7 &#9733;',emoji:'&#128136;',pwd:'dmytro123',phone:'+38 (050) 222-33-44'},
+{id:'m3',name:'Олег М.',spec:'Борода & гоління',rating:'5.0 &#9733;',emoji:'&#129746;',pwd:'oleg123',phone:'+38 (093) 333-44-55'},
+{id:'m4',name:'Іван Р.',spec:'Стрижки & фарбування',rating:'4.8 &#9733;',emoji:'&#127912;',pwd:'ivan123',phone:'+38 (066) 444-55-66'},
+];
+const DEF_SERVICES=[
+{id:'s1',name:'Стрижка',price:350,dur:45},{id:'s2',name:'Стрижка + борода',price:550,dur:70},
+{id:'s3',name:'Моделювання бороди',price:200,dur:30},{id:'s4',name:'Класичне гоління',price:280,dur:40},
+{id:'s5',name:'Дитяча стрижка',price:220,dur:35},
+];
+const DEF_CFG={name:'Barbershop Noble',logo:'',tagline:'Запис до майстра онлайн',address:'вул. Хрещатик, 22',phone:'+1 (555) 123-4567',open:'09:00',close:'19:00',step:30,mgrPwd:'noble2024',showRating:true,schedule:null};
+let masters=[],services=[],bookings=[],cfg={...DEF_CFG},currentUser=null;
+
+async function getShops(){try{if(window.storage){const r=await window.storage.get(K_SHOPS,true);if(!r)return[];return JSON.parse(r.value)||[];}}catch{}try{const raw=localStorage.getItem('noble:'+K_SHOPS);if(raw)return JSON.parse(raw)||[];}catch{}return _mem[K_SHOPS]||[];}
+async function saveShops(shops){_mem[K_SHOPS]=shops;try{if(window.storage){await window.storage.set(K_SHOPS,JSON.stringify(shops),true);return;}}catch{}try{localStorage.setItem('noble:'+K_SHOPS,JSON.stringify(shops));}catch{}}
+async function getShop(slug){
+  try {
+    var sb = getSB();
+    var res = await sb.from('organizations').select('*').eq('slug', slug).single();
+    if (res.data) return res.data;
+  } catch(e) {}
+  var shops=await getShops();return shops.find(function(s){return s.slug===slug;})||null;
+}
+function getShopSlugFromURL(){return new URLSearchParams(window.location.search).get('shop');}
+function setShopSlugInURL(slug){try{const u=new URL(window.location.href);u.searchParams.set('shop',slug);history.replaceState({},'',u.toString());}catch{}}
+function getShopPublicURL(slug){try{const u=new URL(window.location.href);u.searchParams.set('shop',slug);return u.toString();}catch{return '?shop='+slug;}}
+function saveSession(role,slug,masterId){try{sessionStorage.setItem('noble_session',JSON.stringify({role,slug,masterId:masterId||null}));}catch{}}
+function clearSession(){try{sessionStorage.removeItem('noble_session');}catch{}}
+async function registerShop(data){
+  const slug=data.slug,shop={slug,name:data.name,ownerEmail:data.ownerEmail,ownerPwd:data.ownerPwd,address:data.address||'',phone:data.phone||'',open:data.open||'09:00',close:data.close||'19:00',logo:'',showRating:true,step:30,schedule:null,createdAt:new Date().toISOString()};
+  const shops=await getShops();if(shops.find(s=>s.slug===slug))throw new Error('Слуг вже зайнятий');
+  shops.push(shop);await saveShops(shops);
+  const prev=_currentShop;_currentShop=slug;
+  await sSet(K.M,[]);await sSet(K.S,[{id:'sv1',name:'Стрижка',price:350,dur:30},{id:'sv2',name:'Стрижка + борода',price:550,dur:60},{id:'sv3',name:'Моделювання бороди',price:200,dur:30}]);
+  await sSet(K.B,[]);await sSet(K.CFG,{name:shop.name,logo:'',address:shop.address,phone:shop.phone,open:shop.open,close:shop.close,step:30,mgrPwd:shop.ownerPwd,showRating:true,schedule:null});
+  _currentShop=prev;return shop;
+}
+async function loadShop(slug){
+  _currentShop=slug;
+  var shop=await getShop(slug);
+  if(!shop)return false;
+  // Load masters from Supabase
+  try {
+    var sb=getSB();
+    var mRes=await sb.from('staff').select('*').eq('org_id',shop.id).eq('is_active',true);
+    if(mRes.data) masters=mRes.data.map(function(m){return{id:m.id,name:m.name,spec:m.role,phone:m.phone||'',pwd:m.pwd_hash||'1234',photo:m.avatar_url||'',emoji:'✂️',rating:'4.9'};});
+    else masters=await sGet(K.M,DEF_MASTERS);
+    var sRes=await sb.from('services').select('*').eq('org_id',shop.id);
+    if(sRes.data&&sRes.data.length) services=sRes.data.map(function(sv){return{id:sv.id,name:sv.name,price:sv.price_cents?sv.price_cents/100:sv.price||350,dur:sv.duration_min||sv.dur||45};});
+    else services=await sGet(K.S,DEF_SERVICES);
+    var bRes=await sb.from('bookings').select('*').eq('org_id',shop.id).order('created_at',{ascending:false}).limit(100);
+    if(bRes.data) bookings=bRes.data;
+    else bookings=await sGet(K.B,[]);
+  } catch(e) {
+    console.warn('loadShop Supabase error:',e);
+    masters=await sGet(K.M,DEF_MASTERS);
+    services=await sGet(K.S,DEF_SERVICES);
+    bookings=await sGet(K.B,[]);
+  }
+  var sc=await sGet(K.CFG,{});
+  cfg={...DEF_CFG,...sc,name:shop.name,address:shop.address||'',phone:shop.phone||'',
+    open:shop.open||sc.open||'09:00',close:shop.close||sc.close||'19:00',
+    mgrPwd:shop.ownerPwd||sc.mgrPwd||'noble2024'};
+  return true;
+}
+
+async function init(){
+  try{
+    const urlSlug=getShopSlugFromURL();
+    if(urlSlug){const ok=await loadShop(urlSlug);if(ok){applyConfig();renderClientMasters();renderClientServices();buildTimeSlots();updateStepper(1);applyLang();}else{showView('platform');}return;}
+    let session=null;try{session=JSON.parse(sessionStorage.getItem('noble_session')||'null');}catch{}
+    if(session&&session.slug&&session.role){
+      const ok=await loadShop(session.slug);
+      if(ok){
+        if(session.role==='manager'){currentUser={role:'manager'};showView('manager');mgrInit();return;}
+        if(session.role==='master'){const m=masters.find(x=>x.id===session.masterId);if(m){currentUser={role:'master',id:m.id,name:m.name};const el=document.getElementById('mst-name-nav');if(el)el.textContent=m.name;showView('master');mstInit();return;}}
+      }
+    }
+    showView('platform');setTimeout(()=>{try{searchShops('');}catch{}},80);
+  }catch(err){console.error('init:',err);showView('platform');}
+}
+init();
+function applyConfig(){
+  if(typeof renderLogo==='function')renderLogo();
+const n=cfg.name||'Barbershop Noble';
+document.getElementById('page-title').textContent=n;
+document.getElementById('nav-salon-name').innerHTML=n;
+document.getElementById('hero-title').innerHTML=n;
+document.getElementById('hero-tagline').textContent=cfg.tagline||'';
+document.getElementById('info-address').textContent=cfg.address||'';
+document.getElementById('info-phone').textContent=cfg.phone||'';
+document.getElementById('info-hours').textContent=(cfg.open||'09:00')+' \u2013 '+(cfg.close||'19:00');
+}
+const MC=['--mc0','--mc1','--mc2','--mc3','--mc4','--mc5'];
+const MB=['--mb0','--mb1','--mb2','--mb3','--mb4','--mb5'];
+function mci(mid){const i=masters.findIndex(m=>m.id===mid);return i>=0?i%6:0;}
+function mcv(i){return getComputedStyle(document.documentElement).getPropertyValue(MC[i]).trim();}
+function mbv(i){return getComputedStyle(document.documentElement).getPropertyValue(MB[i]).trim();}
+function showView(v){
+document.querySelectorAll('.view').forEach(el=>el.classList.remove('active'));
+const t=document.getElementById('view-'+v);if(!t)return;
+t.classList.add('active');window.scrollTo({top:0,behavior:'smooth'});
+const mn=document.getElementById('mgr-mob-nav'),sn=document.getElementById('mst-mob-nav');
+if(mn)mn.style.display=(v==='manager')?'block':'none';
+if(sn)sn.style.display=(v==='master')?'block':'none';
+['view-manager','view-master'].forEach(id=>{const el=document.getElementById(id);if(el)el.classList.toggle('has-bottom-nav',id==='view-'+v);});
+}
+function showLogin(role){
+  window._loginRole=role;
+  const errEl=document.getElementById('login-err'),pwdEl=document.getElementById('login-pwd');
+  const selWrap=document.getElementById('login-master-sel'),titleEl=document.getElementById('login-title');
+  const subEl=document.getElementById('login-sub'),hintEl=document.getElementById('login-hint');
+  if(errEl)errEl.textContent='';if(pwdEl)pwdEl.value='';
+  if(role==='master'){
+    if(titleEl)titleEl.textContent='✂ Кабінет майстра';
+    if(subEl)subEl.textContent='Оберіть імʼя та введіть пароль';
+    if(selWrap)selWrap.classList.remove('hidden');
+    const sel=document.getElementById('login-master-select');
+    if(sel){while(sel.options.length>1)sel.remove(1);masters.forEach(m=>sel.appendChild(new Option(m.name,m.id)));}
+  }else{
+    if(titleEl)titleEl.textContent='⚙ Панель менеджера';
+    if(subEl)subEl.textContent='Введіть пароль менеджера';
+    if(selWrap)selWrap.classList.add('hidden');
+  }
+  if(hintEl)hintEl.textContent='Тестовий доступ: 1234';
+  showView('login');
+}
+function doLogin(){
+  const pwdEl=document.getElementById('login-pwd'),errEl=document.getElementById('login-err');
+  if(!pwdEl||!errEl)return;const pwd=pwdEl.value;errEl.textContent='';
+  if(window._loginRole==='manager'){
+    if(pwd==='1234'||pwd===(cfg.mgrPwd||'noble2024')){currentUser={role:'manager'};saveSession('manager',_currentShop);showView('manager');mgrInit();}
+    else{errEl.textContent='❌ Невірний пароль';pwdEl.value='';}
+  }else{
+    const selEl=document.getElementById('login-master-select'),mid=selEl?selEl.value:'';
+    if(!mid){errEl.textContent='❌ Оберіть майстра';return;}
+    const m=masters.find(x=>x.id===mid);if(!m){errEl.textContent='❌ Майстра не знайдено';return;}
+    if(pwd==='1234'||pwd===m.pwd){currentUser={role:'master',id:m.id,name:m.name};saveSession('master',_currentShop,m.id);const el=document.getElementById('mst-name-nav');if(el)el.textContent=m.name;showView('master');mstInit();}
+    else{errEl.textContent='❌ Невірний пароль';pwdEl.value='';}
+  }
+}
+function doLogout(){currentUser=null;document.querySelectorAll('.mob-bottom-nav').forEach(n=>n.style.display='none');showView('client');}
+function mbnActive(ctx,tab){
+const pfx=ctx==='mgr'?'mbn-':'mbn-mst-';
+document.querySelectorAll('#'+(ctx==='mgr'?'mgr':'mst')+'-mob-nav .mbn-item').forEach(b=>b.classList.remove('active'));
+const el=document.getElementById(pfx+tab);if(el)el.classList.add('active');
+}
+let B={master:'',masterId:'',service:'',price:'',dur:'',date:'',time:'',name:'',phone:''};
+function renderClientMasters(){
+  var g=document.getElementById('client-masters');g.innerHTML='';
+  masters.forEach(function(m,i){
+    var ci=i%6,d=document.createElement('div');d.className='mc';
+    d.onclick=function(){
+      document.querySelectorAll('.mc').forEach(function(x){x.classList.remove('sel');});
+      d.classList.add('sel');
+      B.master=m.name;B.masterId=m.id;
+      document.getElementById('btn1').disabled=false;
+      updateAvailableSlots();
+    };
+    var showR=cfg.showRating!==false;
+    var r=typeof calcRating==='function'?calcRating(m.id):{stars:0,text:'',total:0,rated:0,source:'none'};
+    var ratingLine='';
+    if(showR&&r.total>0){
+      ratingLine='<div class="mr">'+r.text+' &#9733; ('+(r.source==='client'?r.rated+' оц.':r.done+' вик.')+')' +'</div>';
+    } else if(showR) {
+      ratingLine='<div class="mr" style="color:var(--gray-400);font-size:.7rem">новий майстер</div>';
+    }
+    if(m.photo){
+      d.innerHTML='<img src="'+m.photo+'" style="width:52px;height:52px;border-radius:50%;object-fit:cover;margin-bottom:8px;border:2px solid var(--gray-200);display:block;margin-left:auto;margin-right:auto" alt="'+m.name+'">'
+        +'<div class="mn">'+m.name+'</div>'
+        +'<div class="ms">'+m.spec+'</div>'
+        +ratingLine;
+    } else {
+      d.innerHTML='<div class="av" style="background:'+mbv(ci)+'">'+m.emoji+'</div>'
+        +'<div class="mn">'+m.name+'</div>'
+        +'<div class="ms">'+m.spec+'</div>'
+        +ratingLine;
+    }
+    g.appendChild(d);
+  });
+}
+function renderClientServices(){
+const g=document.getElementById('client-services');g.innerHTML='';
+services.forEach(s=>{
+const d=document.createElement('div');d.className='si';d.dataset.service=s.name;d.dataset.price=s.price;d.dataset.dur=s.dur;
+d.innerHTML='<div class="ck"></div><div><div class="si-name">'+s.name+'</div><div class="si-dur">&#8987; '+s.dur+' хв</div></div><div class="si-price">'+s.price+' \u20B4</div>';
+d.onclick=()=>{document.querySelectorAll('.si').forEach(c=>{c.classList.remove('sel');c.querySelector('.ck').textContent='';});d.classList.add('sel');d.querySelector('.ck').textContent='\u2713';B.service=s.name;B.price=s.price;B.dur=s.dur;document.getElementById('btn2').disabled=false;};
+g.appendChild(d);
+});
+}
+function buildTimeSlots(){
+const sel=document.getElementById('inp-time');const old=sel.value;while(sel.options.length>1)sel.remove(1);
+const op=cfg.open||'09:00',cl=cfg.close||'19:00',st=parseInt(cfg.step)||30;
+const[oh,om]=op.split(':').map(Number),[ch,cm]=cl.split(':').map(Number);
+let t=oh*60+om;const end=ch*60+cm;
+while(t<end){const h=String(Math.floor(t/60)).padStart(2,'0'),m2=String(t%60).padStart(2,'0');sel.appendChild(new Option(h+':'+m2,h+':'+m2));t+=st;}
+sel.value=old;
+['brk-from','brk-to'].forEach(id=>{const s2=document.getElementById(id);if(!s2)return;const ov=s2.value;while(s2.options.length)s2.remove(0);sel.querySelectorAll('option').forEach(o=>{if(o.value)s2.appendChild(new Option(o.text,o.value));});s2.value=ov;});
+}
+(function(){var _d=document.getElementById('inp-date');if(_d)_d.min=new Date().toISOString().split('T')[0];})();
+(function(){var _d=document.getElementById('inp-date');if(!_d)return;
+document.getElementById('inp-date').addEventListener('change',function(){
+  if(this.value&&!isWorkingDay(this.value)){toast('Цей день — вихідний',true);this.value='';}
+  updateAvailableSlots();checkStep3();
+});
+})();
+function normalPhone(r){const d=r.replace(/\D/g,'');if(d.length===10)return'+1'+d;if(d.length===11&&d[0]==='1')return'+'+d;if(r.startsWith('+'))return'+'+d;return r;}
+function validPhone(p){return/^\+1\d{10}$/.test(p);}
+function checkStep3(){
+const date=document.getElementById('inp-date').value,time=document.getElementById('inp-time').value;
+const name=document.getElementById('inp-name').value.trim(),raw=document.getElementById('inp-phone').value.trim();
+const phone=normalPhone(raw);B.date=date;B.time=time;B.name=name;B.phone=phone;
+const hint=document.getElementById('phone-hint');
+if(raw&&!validPhone(phone)){hint.textContent='\u26A0 Невірний формат';hint.style.color='var(--r)';}
+else if(validPhone(phone)){hint.textContent='\u2713 Коректно';hint.style.color='var(--g)';}
+else{hint.textContent='Формат: +1XXXXXXXXXX';hint.style.color='#a09080';}
+document.getElementById('btn3').disabled=!(date&&time&&name&&validPhone(phone));
+}
+['inp-date','inp-time'].forEach(id=>{const el=document.getElementById(id);if(!el)return;['change','input'].forEach(ev=>el.addEventListener(ev,checkStep3));});
+['inp-name','inp-phone'].forEach(id=>{const el=document.getElementById(id);if(!el)return;['input','change','keyup'].forEach(ev=>el.addEventListener(ev,checkStep3));});
+function goTo(step){
+document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+document.getElementById('panel-'+step).classList.add('active');updateStepper(step);
+if(step===4)fillSummary();window.scrollTo({top:0,behavior:'smooth'});
+}
+function updateStepper(cur){
+for(let i=1;i<=4;i++){
+const s=document.getElementById('s'+i),c=s.querySelector('.step-circle');
+s.classList.remove('active','done');s.style.opacity='1';
+if(i<cur){s.classList.add('done');c.textContent='\u2713';}
+else if(i===cur){s.classList.add('active');c.textContent=i;}
+else{s.style.opacity='.42';c.textContent=i;}
+if(i<4)document.getElementById('line'+i).classList.toggle('done',i<cur);
+}
+}
+const MN=['\u0441\u0456\u0447\u043d\u044f','\u043b\u044e\u0442\u043e\u0433\u043e','\u0431\u0435\u0440\u0435\u0437\u043d\u044f','\u043a\u0432\u0456\u0442\u043d\u044f','\u0442\u0440\u0430\u0432\u043d\u044f','\u0447\u0435\u0440\u0432\u043d\u044f','\u043b\u0438\u043f\u043d\u044f','\u0441\u0435\u0440\u043f\u043d\u044f','\u0432\u0435\u0440\u0435\u0441\u043d\u044f','\u0436\u043e\u0432\u0442\u043d\u044f','\u043b\u0438\u0441\u0442\u043e\u043f\u0430\u0434\u0430','\u0433\u0440\u0443\u0434\u043d\u044f'];
+const fmtD=d=>{if(!d)return'\u2014';const[y,m,dd]=d.split('-');return parseInt(dd)+' '+MN[parseInt(m)-1]+' '+y;};
+const fmtS=d=>{if(!d)return'\u2014';const[y,m,dd]=d.split('-');return dd+'.'+m+'.'+y;};
+function fillSummary(){
+document.getElementById('sum-master').textContent=B.master;document.getElementById('sum-service').textContent=B.service;
+document.getElementById('sum-dur').textContent=B.dur+' \u0445\u0432';document.getElementById('sum-date').textContent=fmtD(B.date);
+document.getElementById('sum-time').textContent=B.time;document.getElementById('sum-name').textContent=B.name;
+document.getElementById('sum-phone').textContent=B.phone;document.getElementById('sum-price').textContent=B.price+' \u20B4';
+}
+
+// ── Photo upload handling ──
+
+// ── Logo upload ──
+function handleLogoUpload(input){
+  var file=input.files[0];
+  if(!file)return;
+  if(file.size>1*1024*1024){toast('Логотип завеликий. Макс 1MB',true);return;}
+  var reader=new FileReader();
+  reader.onload=function(e){
+    cfg.logo=e.target.result;
+    renderLogo();
+    toast('✓ Логотип завантажено');
+  };
+  reader.readAsDataURL(file);
+}
+
+function removeLogo(){
+  cfg.logo='';
+  renderLogo();
+  var inp=document.getElementById('set-logo-input');
+  if(inp)inp.value='';
+}
+
+function renderLogo(){
+  // Settings preview
+  var box=document.getElementById('logo-preview-box');
+  var placeholder=document.getElementById('logo-placeholder');
+  var removeBtn=document.getElementById('logo-remove-btn');
+  if(box){
+    var img=box.querySelector('img');
+    if(cfg.logo){
+      if(!img){img=document.createElement('img');img.style.cssText='width:100%;height:100%;object-fit:contain;padding:4px;';box.appendChild(img);}
+      img.src=cfg.logo;
+      if(placeholder)placeholder.style.display='none';
+      if(removeBtn)removeBtn.style.display='';
+    } else {
+      if(img)img.remove();
+      if(placeholder)placeholder.style.display='';
+      if(removeBtn)removeBtn.style.display='none';
+    }
+  }
+  // Nav brand — show logo or text
+  var brand=document.getElementById('nav-salon-name');
+  var mgrBrand=document.querySelector('.mgr-brand');
+  if(cfg.logo){
+    if(brand){
+      var logoImg=brand.querySelector('img.nav-logo-img');
+      if(!logoImg){logoImg=document.createElement('img');logoImg.className='nav-logo-img';brand.insertBefore(logoImg,brand.firstChild);}
+      logoImg.src=cfg.logo;
+      var text=brand.querySelector('em,span,#salon-name-text');
+    }
+    if(mgrBrand){
+      var mlogoImg=mgrBrand.querySelector('img.nav-logo-img');
+      if(!mlogoImg){mlogoImg=document.createElement('img');mlogoImg.className='nav-logo-img';mgrBrand.insertBefore(mlogoImg,mgrBrand.firstChild);}
+      mlogoImg.src=cfg.logo;
+    }
+  } else {
+    // Remove logo imgs from navs
+    document.querySelectorAll('.nav-logo-img').forEach(function(img){img.remove();});
+  }
+}
+
+function handlePhotoUpload(input){
+  var file=input.files[0];
+  if(!file)return;
+  if(file.size>2*1024*1024){toast('Фото завелике. Максимум 2MB',true);return;}
+  var reader=new FileReader();
+  reader.onload=function(e){
+    var data=e.target.result;
+    document.getElementById('am-photo-data').value=data;
+    var prev=document.getElementById('am-photo-preview');
+    var emoji=document.getElementById('am-photo-emoji');
+    // Show image
+    emoji.style.display='none';
+    var img=prev.querySelector('img');
+    if(!img){img=document.createElement('img');img.style.cssText='width:100%;height:100%;object-fit:cover;border-radius:50%;';prev.insertBefore(img,prev.querySelector('.photo-overlay'));}
+    img.src=data;
+    prev.style.border='2px solid var(--gold)';
+    toast('✓ Фото завантажено');
+  };
+  reader.readAsDataURL(file);
+}
+
+function updateModalEmoji(val){
+  var emoji=document.getElementById('am-photo-emoji');
+  if(emoji)emoji.textContent=val;
+  // Only update if no photo uploaded
+  var photoData=document.getElementById('am-photo-data').value;
+  if(!photoData){
+    var prev=document.getElementById('am-photo-preview');
+    var img=prev?prev.querySelector('img'):null;
+    if(img)img.style.display='none';
+    if(emoji)emoji.style.display='';
+  }
+}
+
+function resetPhotoModal(){
+  var prev=document.getElementById('am-photo-preview');
+  var emoji=document.getElementById('am-photo-emoji');
+  var photoData=document.getElementById('am-photo-data');
+  var photoInput=document.getElementById('am-photo-input');
+  if(prev){
+    var img=prev.querySelector('img');
+    if(img)img.remove();
+    prev.style.border='2px dashed var(--gray-300)';
+  }
+  if(emoji){emoji.style.display='';emoji.textContent='&#9986;&#65039;';}
+  if(photoData)photoData.value='';
+  if(photoInput)photoInput.value='';
+}
+
+// ── Helper: render avatar (photo or emoji) ──
+function masterAvatarHtml(m, size, style){
+  size=size||44;style=style||'';
+  if(m.photo){
+    return '<img src="'+m.photo+'" class="master-avatar has-photo" style="width:'+size+'px;height:'+size+'px;'+style+'" alt="'+m.name+'">';
+  }
+  return '<div class="master-avatar" style="width:'+size+'px;height:'+size+'px;font-size:'+(size*0.5)+'px;background:'+mbv(masters.indexOf(m)%6)+';'+style+'">'+m.emoji+'</div>';
+}
+
+async function doConfirm(){
+const btn=document.getElementById('btn-confirm');btn.disabled=true;btn.textContent='\u231B \u0417\u0431\u0435\u0440\u0435\u0436\u0435\u043d\u043d\u044f\u2026';
+try{
+const entry={id:Date.now().toString(),...B,type:'booking',status:'new',createdAt:new Date().toISOString()};
+bookings.unshift(entry);await sSet(K.B,bookings);
+_ratingBookingId=entry.id;_selectedRating=0;
+document.querySelectorAll('.rating-star').forEach(function(s){s.style.color='#d4c9b8';});
+var _sb=document.getElementById('rating-submit-btn');if(_sb){_sb.disabled=true;_sb.style.display='';}
+var _sd=document.getElementById('rating-submitted');if(_sd)_sd.style.display='none';
+var _sl=document.getElementById('rating-labels');if(_sl)_sl.textContent='';
+var _rp=document.getElementById('rating-panel');if(_rp)_rp.style.display=cfg.showRating!==false?'':'none';
+document.getElementById('c-master').textContent=B.master;document.getElementById('c-service').textContent=B.service;
+document.getElementById('c-dt').textContent=fmtD(B.date)+', '+B.time;document.getElementById('c-addr').textContent=cfg.address||'';
+document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+document.getElementById('panel-success').classList.add('active');
+document.querySelectorAll('#view-client .step').forEach(s=>{s.classList.add('done');s.style.opacity='1';s.querySelector('.step-circle').textContent='\u2713';});
+document.querySelectorAll('.step-line').forEach(l=>l.classList.add('done'));
+window.scrollTo({top:0,behavior:'smooth'});toast('\u2713 \u0417\u0430\u043f\u0438\u0441 \u0437\u0431\u0435\u0440\u0435\u0436\u0435\u043d\u043e');
+}catch{toast('\u041f\u043e\u043c\u0438\u043b\u043a\u0430 \u0437\u0431\u0435\u0440\u0435\u0436\u0435\u043d\u043d\u044f',true);btn.disabled=false;btn.textContent='\u2713 \u0417\u0430\u043f\u0438\u0441\u0430\u0442\u0438\u0441\u044f';}
+}
+function restart(){
+B={master:'',masterId:'',service:'',price:'',dur:'',date:'',time:'',name:'',phone:''};
+document.querySelectorAll('.mc').forEach(c=>c.classList.remove('sel'));
+document.querySelectorAll('.si').forEach(c=>{c.classList.remove('sel');c.querySelector('.ck').textContent='';});
+['inp-date','inp-time','inp-name','inp-phone'].forEach(id=>document.getElementById(id).value='');
+['btn1','btn2','btn3'].forEach(id=>document.getElementById(id).disabled=true);
+document.getElementById('btn-confirm').disabled=false;document.getElementById('btn-confirm').textContent='\u2713 \u0417\u0430\u043f\u0438\u0441\u0430\u0442\u0438\u0441\u044f';
+checkStep3();goTo(1);
+}
+const MONTHS=['\u0441\u0456\u0447','\u043b\u044e\u0442','\u0431\u0435\u0440','\u043a\u0432\u0456','\u0442\u0440\u0430','\u0447\u0435\u0440','\u043b\u0438\u043f','\u0441\u0435\u0440','\u0432\u0435\u0440','\u0436\u043e\u0432','\u043b\u0438\u0441','\u0433\u0440\u0443'];
+const DNAMES=['\u041f\u043d','\u0412\u0442','\u0421\u0440','\u0427\u0442','\u041f\u0442','\u0421\u0431','\u041d\u0434'];
+let calWeeks={mgr:null,mst:null};
+function getMonday(d){const dt=new Date(d);const day=dt.getDay();dt.setDate(dt.getDate()-day+(day===0?-6:1));dt.setHours(0,0,0,0);return dt;}
+function addDays(d,n){const dt=new Date(d);dt.setDate(dt.getDate()+n);return dt;}
+function isoDate(d){return d.toISOString().split('T')[0];}
+function shiftWeek(ctx,n){calWeeks[ctx]=addDays(calWeeks[ctx]||getMonday(new Date()),n*7);renderCal(ctx);}
+function goToday(ctx){calWeeks[ctx]=getMonday(new Date());renderCal(ctx);}
+function getHours(){
+const op=cfg.open||'09:00',cl=cfg.close||'19:00',st=parseInt(cfg.step)||30;
+const[oh,om]=op.split(':').map(Number),[ch,cm]=cl.split(':').map(Number);
+const hours=[];let t=oh*60+om;const end=ch*60+cm;
+while(t<end){hours.push(String(Math.floor(t/60)).padStart(2,'0')+':'+String(t%60).padStart(2,'0'));t+=st;}
+return hours;
+}
+function renderCal(ctx){
+if(!calWeeks[ctx])calWeeks[ctx]=getMonday(new Date());
+const ws=calWeeks[ctx];
+const gridId=ctx==='mgr'?'mgr-cal-grid':'mst-cal-grid';
+const lblId=ctx==='mgr'?'mgr-week-lbl':'mst-week-lbl';
+const filter=ctx==='mgr'?(document.getElementById('mgr-cal-filter')?.value||''):(currentUser?.id||'');
+const grid=document.getElementById(gridId);grid.innerHTML='';
+const days=Array.from({length:7},(_,i)=>addDays(ws,i));
+const today=isoDate(new Date());const we=days[6];
+document.getElementById(lblId).textContent=days[0].getDate()+' '+MONTHS[days[0].getMonth()]+' \u2014 '+we.getDate()+' '+MONTHS[we.getMonth()]+' '+we.getFullYear();
+if(ctx==='mgr'){
+const leg=document.getElementById('mgr-legend');leg.innerHTML='';
+masters.forEach((m,i)=>{const ci=i%6;const it=document.createElement('div');it.className='legend-item';it.innerHTML='<div class="legend-dot" style="background:'+mcv(ci)+'"></div>'+m.name;leg.appendChild(it);});
+}
+const corner=document.createElement('div');corner.className='cal-head';corner.style.background='#0e0c07';grid.appendChild(corner);
+days.forEach((d,i)=>{
+const isT=isoDate(d)===today;const h=document.createElement('div');h.className='cal-head'+(isT?' today-h':'');
+h.innerHTML='<span class="dn">'+d.getDate()+'</span>'+DNAMES[i];grid.appendChild(h);
+});
+const hours=getHours();
+hours.forEach(hour=>{
+const tl=document.createElement('div');tl.className='cal-tcell';tl.textContent=hour;grid.appendChild(tl);
+days.forEach(d=>{
+const dateStr=isoDate(d),isT=dateStr===today;
+const slot=document.createElement('div');slot.className='cal-slot'+(isT?' today-s':'');
+const slotItems=bookings.filter(b=>{
+if(b.date!==dateStr||b.time!==hour)return false;
+if(ctx==='mst')return b.masterId===filter||b.master===(currentUser?.name||'');
+if(filter)return b.master===filter||b.masterId===filter;
+return true;
+});
+slotItems.forEach((b,bi)=>{
+const isBreak=b.type==='break';const isDayoff=b.subtype==='dayoff';
+const ci=isBreak?-1:mci(b.masterId||'');
+const h2=Math.max(44,(parseInt(b.dur||30)/30)*50-4);
+const chip=document.createElement('div');
+chip.className='cal-chip'+(isDayoff?' chip-dayoff':isBreak?' chip-break':' chip-m'+ci)+(b.status==='done'?' chip-done':b.status==='cancel'?' chip-cancel':'');
+if(!isBreak)chip.style.cssText='background:'+mbv(ci)+';color:'+mcv(ci)+';top:'+(bi*2)+'px;height:'+h2+'px;';
+else chip.style.cssText='top:'+(bi*2)+'px;height:'+h2+'px;';
+chip.innerHTML=isBreak?'<div class="chip-cl">'+(isDayoff?'\uD83C\uDFD6':'\u2615')+' '+(b.reason||'Перерва')+'</div>':
+'<div class="chip-cl">'+b.name+'</div><div class="chip-sv">'+b.service+'</div><div class="chip-ph">'+(b.phone||'')+'</div><div class="chip-st">'+(b.status==='new'?'\u23F3 Очікує':b.status==='done'?'\u2713 Виконано':'\u2715 Скасовано')+'</div>';
+chip.onclick=e=>{e.stopPropagation();showChipPop(b,chip,ci,ctx);};
+slot.appendChild(chip);
+});
+grid.appendChild(slot);
+});
+});
+}
+let popId=null;
+function showChipPop(b,chip,ci,ctx){
+const pop=document.getElementById('cpop');if(popId===b.id){hidePop();return;}popId=b.id;
+const isBreak=b.type==='break';const isDayoff=b.subtype==='dayoff';
+const sMap={new:'\u23F3 Очікує',done:'\u2713 Виконано',cancel:'\u2715 Скасовано'};
+let actions=isBreak?'<button class="btn btn-danger btn-xs" onclick="delBreakPop(\''+b.id+'\','+isDayoff+')">\uD83D\uDDD1 Видалити</button>':
+(b.status==='new'?'<button class="btn btn-success btn-xs" onclick="setStatus(\''+b.id+'\',\'done\',\''+ctx+'\')">\u2713</button><button class="btn btn-ghost btn-xs" onclick="setStatus(\''+b.id+'\',\'cancel\',\''+ctx+'\')">\u2715</button>':'')+
+'<button class="btn btn-danger btn-xs" onclick="delBooking(\''+b.id+'\',\''+ctx+'\')">\uD83D\uDDD1</button>';
+pop.innerHTML='<h4>'+(isBreak?(isDayoff?'\uD83C\uDFD6 Вихідний':'\u2615 Перерва'):b.name)+'</h4>'
++(!isBreak?'<div class="pr"><span class="pl">Майстер</span><span>'+b.master+'</span></div><div class="pr"><span class="pl">Послуга</span><span>'+b.service+'</span></div><div class="pr"><span class="pl">Тривалість</span><span>'+b.dur+' хв</span></div>':'')
++'<div class="pr"><span class="pl">Дата/Час</span><span>'+fmtS(b.date)+' '+b.time+'</span></div>'
++(!isBreak?'<div class="pr"><span class="pl">Телефон</span><span>'+(b.phone||'\u2014')+'</span></div><div class="pr"><span class="pl">Статус</span><span>'+(sMap[b.status]||b.status)+'</span></div>':'')
++(isBreak&&b.reason?'<div class="pr"><span class="pl">Причина</span><span>'+b.reason+'</span></div>':'')
++'<div class="cpop-actions">'+actions+'</div>';
+pop.style.borderTopColor=ci>=0?mcv(ci):'var(--gold)';pop.style.display='block';
+const cr=chip.getBoundingClientRect();let top=cr.bottom+6,left=cr.left;
+if(left+215>window.innerWidth)left=window.innerWidth-220;if(top+260>window.innerHeight)top=cr.top-268;
+pop.style.top=top+'px';pop.style.left=left+'px';
+}
+function hidePop(){document.getElementById('cpop').style.display='none';popId=null;}
+if(document.addEventListener)document.addEventListener('click',hidePop);
+async function setStatus(id,status,ctx){const idx=bookings.findIndex(b=>b.id===id);if(idx===-1)return;bookings[idx].status=status;await sSet(K.B,bookings);hidePop();renderCal(ctx);renderJournal();renderStats();toast(status==='done'?'\u2713 Виконано':'\u2715 Скасовано');}
+async function delBooking(id,ctx){bookings=bookings.filter(b=>b.id!==id);await sSet(K.B,bookings);hidePop();renderCal(ctx);renderJournal();renderStats();toast('\uD83D\uDDD1 Запис видалено');}
+async function delBreakPop(id,isDayoff){
+if(isDayoff){const b=bookings.find(x=>x.id===id);if(b)bookings=bookings.filter(x=>!(x.subtype==='dayoff'&&x.date===b.date&&x.masterId===b.masterId));toast('\uD83D\uDDD1 Вихідний видалено');}
+else{bookings=bookings.filter(b=>b.id!==id);toast('\uD83D\uDDD1 Перерву видалено');}
+await sSet(K.B,bookings);hidePop();if(currentUser?.role==='master')renderCal('mst');else renderCal('mgr');
+}
+
+let _mastersView='cards';
+function setMastersView(v){
+  _mastersView=v;
+  var g=document.getElementById('mgr-masters-grid');
+  var hdr=document.getElementById('list-view-header');
+  document.getElementById('vt-cards').classList.toggle('active',v==='cards');
+  document.getElementById('vt-list').classList.toggle('active',v==='list');
+  if(v==='list'){g.classList.remove('mm-grid');g.classList.add('list-view');if(hdr)hdr.style.display='grid';}
+  else{g.classList.add('mm-grid');g.classList.remove('list-view');if(hdr)hdr.style.display='none';}
+  renderMasters();
+}
+function calcLoad(mid){
+  var today=isoDate(new Date()),hours=getHours(),total=hours.length;
+  var booked=bookings.filter(function(b){return b.masterId===mid&&b.date===today&&b.type!=='break'&&b.status!=='cancel';}).length;
+  var blocked=bookings.filter(function(b){return b.masterId===mid&&b.date===today&&b.type==='break';}).length;
+  var free=Math.max(0,total-booked-blocked);
+  var pct=total>0?Math.round((booked/total)*100):0;
+  return{total:total,booked:booked,blocked:blocked,free:free,pct:pct};
+}
+function renderMasters(){
+  var g=document.getElementById('mgr-masters-grid');g.innerHTML='';
+  var isList=_mastersView==='list';
+
+  if(isList){
+    // ── TABLE VIEW ──
+    var wrap=document.createElement('div');wrap.style.background='white';wrap.style.borderRadius='8px';wrap.style.overflow='hidden';wrap.style.boxShadow='0 2px 8px var(--sh)';
+    var tbl=document.createElement('table');tbl.className='masters-table';
+    var thead=tbl.createTHead();
+    thead.innerHTML='<tr><th style="width:40px">#</th><th>\u041c\u0430\u0439\u0441\u0442\u0435\u0440</th><th>\u041a\u043e\u043d\u0442\u0430\u043a\u0442\u0438</th><th>\u0420\u0435\u0439\u0442\u0438\u043d\u0433</th><th>\u0417\u0430\u0432\u0430\u043d\u0442\u0430\u0436\u0435\u043d\u0456\u0441\u0442\u044c</th><th>\u0414\u0456\u0457</th></tr>';
+    var tbody=tbl.createTBody();
+    masters.forEach(function(m,i){
+      var ci=i%6;
+      var ld=calcLoad(m.id);
+      var r=typeof calcRating==='function'?calcRating(m.id):{stars:0,text:'\u2014',total:0,rated:0,source:'none'};
+      var dotCls=ld.pct>=80?'busy':ld.pct>=50?'mid':'free';
+      var dotLbl=ld.pct>=80?'\u0417\u0430\u0439\u043d\u044f\u0442\u0438\u0439':ld.pct>=50?'\u0427\u0430\u0441\u0442\u043a\u043e\u0432\u043e':'\u0412\u0456\u043b\u044c\u043d\u0438\u0439';
+      var safen=m.name.replace(/"/g,'&quot;');
+      var ratingHtml=r.total===0
+        ?'<span style="font-size:.75rem;color:#a09080">\u2014</span>'
+        :'<div>'+(typeof starsHtml==='function'?starsHtml(r):'')+' <strong style="font-size:.82rem">'+r.text+'</strong></div>'
+          +'<div style="font-size:.68rem;color:#a09080;margin-top:2px">'+(r.source==='client'?r.rated+' \u043e\u0446.':r.done+' \u0432\u0438\u043a. / '+r.total)+'</div>';
+      var tr=document.createElement('tr');
+      tr.innerHTML=
+        '<td class="mt-num">#'+(i+1)+'</td>'
+        +'<td><div style="display:flex;align-items:center;gap:10px">'
+          +(m.photo?'<img src="'+m.photo+'" class="mt-photo" alt="'+m.name+'">':'<div class="mt-photo" style="background:'+mbv(ci)+';">'+m.emoji+'</div>')+m.emoji+'</div>'
+          +'<div><div class="mt-name">'+m.name+'</div><div class="mt-spec">'+m.spec+'</div></div>'
+        +'</div></td>'
+        +'<td><div class="mt-phone">&#128222; '+(m.phone||'\u2014')+'</div>'
+          +'<div class="mt-pwd">&#128273; '+m.pwd+'</div></td>'
+        +'<td>'+ratingHtml+'</td>'
+        +'<td><div class="mt-status"><span class="mt-dot '+dotCls+'"></span><span class="mt-load-text '+dotCls+'">'+dotLbl+'</span></div>'
+          +'<div style="font-size:.7rem;color:#a09080;margin-top:2px">'+ld.pct+'% &bull; '+ld.booked+' \u0437\u0430\u0439\u043d. / '+ld.free+' \u0432\u0456\u043b\u044c\u043d.</div></td>'
+        +'<td><div class="mt-actions">'
+          +'<button class="btn btn-ghost btn-xs" data-id="'+m.id+'" onclick="openEditMaster(this.dataset.id)">&#9998; \u0420\u0435\u0434.</button>'
+          +'<button class="btn btn-danger btn-xs" data-id="'+m.id+'" data-name="'+safen+'" onclick="askDelMaster(this.dataset.id,this.dataset.name)">&#128465;</button>'
+        +'</div></td>';
+      tbody.appendChild(tr);
+    });
+    // add row
+    var addTr=tbody.insertRow();
+    var addTd=addTr.insertCell();
+    addTd.colSpan=6;
+    addTd.style.cssText='text-align:center;padding:12px;color:#a09080;cursor:pointer;font-size:.84rem;border-top:1px solid #f0ebe0;';
+    addTd.textContent='+ \u0414\u043e\u0434\u0430\u0442\u0438 \u043c\u0430\u0439\u0441\u0442\u0440\u0430';
+    addTd.onclick=function(){openModal('add-master-modal');};
+    wrap.appendChild(tbl);
+    g.appendChild(wrap);
+
+  } else {
+    // ── CARD VIEW ──
+    masters.forEach(function(m,i){
+      var ci=i%6,d=document.createElement('div');d.className='mm-card';
+      d.style.borderTopColor=mcv(ci);
+      var ld=calcLoad(m.id);
+      var r=typeof calcRating==='function'?calcRating(m.id):{stars:0,text:'\u2014',total:0,source:'none'};
+      var cls=ld.pct>=80?'load-high':ld.pct>=50?'load-mid':'load-low';
+      var lcol=ld.pct>=80?'var(--r)':ld.pct>=50?'#d97706':'var(--g)';
+      var ratingLine='';
+      if(r.total>0){ratingLine='<div style="margin-bottom:8px">'+(typeof starsHtml==='function'?starsHtml(r):'')+' <strong style="font-size:.82rem">'+r.text+'</strong><span style="font-size:.7rem;color:#a09080;margin-left:6px">'+(r.source==='client'?r.rated+' \u043e\u0446.':r.done+' \u0432\u0438\u043a. / '+r.total)+'</span></div>';}
+      else if(cfg.showRating!==false){ratingLine='<div style="font-size:.75rem;color:#a09080;margin-bottom:8px">\u043d\u043e\u0432\u0438\u0439 \u043c\u0430\u0439\u0441\u0442\u0435\u0440</div>';}
+      d.innerHTML='<div style="display:flex;align-items:center;gap:11px;margin-bottom:12px">'
+        +(m.photo?'<img src="'+m.photo+'" style="width:52px;height:52px;border-radius:50%;object-fit:cover;flex-shrink:0;border:2px solid var(--gray-200)" alt="'+m.name+'">':'<div style="width:52px;height:52px;border-radius:50%;flex-shrink:0;background:'+mbv(ci)+';display:flex;align-items:center;justify-content:center;font-size:1.3rem">'+m.emoji+'</div>')
+        +'<div><div class="mm-name" style="margin:0">'+m.name+'</div><div class="mm-spec">'+m.spec+'</div></div></div>'
+        +(m.phone?'<div class="mm-phone">&#128222; '+m.phone+'</div>':'')
+        +ratingLine
+        +'<div class="mm-load-wrap">'
+          +'<div class="mm-load-label"><span>\u0417\u0430\u0432\u0430\u043d\u0442\u0430\u0436\u0435\u043d\u0456\u0441\u0442\u044c</span><span style="font-weight:600;color:'+lcol+'">'+ld.pct+'%</span></div>'
+          +'<div class="mm-load-bar"><div class="mm-load-fill '+cls+'" style="width:'+ld.pct+'%"></div></div>'
+          +'<div style="font-size:.67rem;color:#a09080;margin-top:3px">'+ld.booked+' \u0437\u0430\u0439\u043d. / '+ld.free+' \u0432\u0456\u043b\u044c\u043d. / '+ld.total+' \u0432\u0441\u044c\u043e\u0433\u043e</div></div>'
+        +'<div class="mm-pwd" style="margin-bottom:8px">&#128273; \u041f\u0430\u0440\u043e\u043b\u044c: '+m.pwd+'</div>'
+        +'<div class="mm-actions">'
+          +'<button class="btn btn-ghost btn-sm" data-mid="'+m.id+'" onclick="openEditMaster(this.dataset.mid)">&#9998; \u0420\u0435\u0434\u0430\u0433\u0443\u0432\u0430\u0442\u0438</button>'
+          +'<button class="btn btn-danger btn-sm" data-mid="'+m.id+'" data-mn="'+m.name+'" onclick="askDelMaster(this.dataset.mid,this.dataset.mn)">&#128465; \u0412\u0438\u0434\u0430\u043b\u0438\u0442\u0438</button>'
+        +'</div>';
+      g.appendChild(d);
+    });
+    var add=document.createElement('div');add.className='add-card';
+    add.innerHTML='<div class="plus">+</div><p style="font-size:.82rem;color:#a09080">\u0414\u043e\u0434\u0430\u0442\u0438 \u043c\u0430\u0439\u0441\u0442\u0440\u0430</p>';
+    add.onclick=function(){window._editMasterId=null;var t=document.getElementById('am-modal-title');var b=document.getElementById('am-submit-btn');if(t)t.textContent='Додати майстра';if(b)b.textContent='Додати →';resetPhotoModal();['am-name','am-spec','am-pwd'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});var ph=document.getElementById('am-phone');if(ph)ph.value='';var pd=document.getElementById('am-photo-data');if(pd)pd.value='';openModal('add-master-modal');};
+    g.appendChild(add);
+  }
+}
+async function saveMaster(){
+  var name=document.getElementById('am-name').value.trim();
+  var spec=document.getElementById('am-spec').value.trim();
+  var pwd=document.getElementById('am-pwd').value.trim();
+  var phEl=document.getElementById('am-phone');
+  var phone=phEl?phEl.value.trim():'';
+  var photoEl=document.getElementById('am-photo-data');
+  var photo=photoEl?photoEl.value:'';
+  var emojiEl=document.getElementById('am-emoji');
+  var emoji=emojiEl?emojiEl.value:'✂️';
+  var ratingEl=document.getElementById('am-rating');
+  var rating=ratingEl?ratingEl.value:'0';
+  if(!name||!spec||!pwd){toast('Заповніть імʼя, спец. та пароль',true);return;}
+  if(window._editMasterId){
+    var idx=masters.findIndex(function(m){return m.id===window._editMasterId;});
+    if(idx>=0)masters[idx]=Object.assign({},masters[idx],{name:name,spec:spec,pwd:pwd,phone:phone,emoji:emoji,rating:rating,photo:photo||masters[idx].photo});
+    window._editMasterId=null;
+    toast('✓ Дані оновлено');
+  }else{
+    masters.push({id:'m'+Date.now(),name:name,spec:spec,emoji:emoji,pwd:pwd,phone:phone,photo:photo,rating:'0'});
+    toast('✓ Майстра додано');
+  }
+  await sSet(K.M,masters);
+  closeModal('add-master-modal');
+  var titleEl=document.getElementById('am-modal-title');
+  var submitEl=document.getElementById('am-submit-btn');
+  if(titleEl)titleEl.textContent='Додати майстра';
+  if(submitEl)submitEl.textContent='Додати →';
+  ['am-name','am-spec','am-pwd'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});
+  if(phEl)phEl.value='';
+  resetPhotoModal();
+  renderMasters();renderClientMasters();syncFilters();renderCal('mgr');
+}
+function openEditMaster(id){
+  var m=masters.find(function(x){return x.id===id;});
+  if(!m)return;
+  window._editMasterId=id;
+  document.getElementById('am-name').value=m.name||'';
+  document.getElementById('am-spec').value=m.spec||'';
+  document.getElementById('am-pwd').value=m.pwd||'';
+  var phEl=document.getElementById('am-phone');if(phEl)phEl.value=m.phone||'';
+  var emojiEl=document.getElementById('am-emoji');if(emojiEl)emojiEl.value=m.emoji||'✂️';
+  var ratingEl=document.getElementById('am-rating');if(ratingEl)ratingEl.value=m.rating||'0';
+  resetPhotoModal();
+  if(m.photo){
+    var pdEl=document.getElementById('am-photo-data');if(pdEl)pdEl.value=m.photo;
+    var prev=document.getElementById('am-photo-preview');
+    if(prev){
+      var img=document.createElement('img');
+      img.style.cssText='width:100%;height:100%;object-fit:cover;border-radius:50%;';
+      var ov=prev.querySelector('.photo-overlay');
+      if(ov)prev.insertBefore(img,ov);else prev.appendChild(img);
+      img.src=m.photo;prev.style.border='2px solid var(--gold)';
+      var es=document.getElementById('am-photo-emoji');if(es)es.style.display='none';
+    }
+  }
+  var titleEl=document.getElementById('am-modal-title');
+  var submitEl=document.getElementById('am-submit-btn');
+  if(titleEl)titleEl.textContent='Редагувати майстра';
+  if(submitEl)submitEl.textContent='Зберегти ✓';
+  openModal('add-master-modal');
+}
+
+const DEF_SCHEDULE={1:{on:true,open:'09:00',close:'19:00'},2:{on:true,open:'09:00',close:'19:00'},3:{on:true,open:'09:00',close:'19:00'},4:{on:true,open:'09:00',close:'19:00'},5:{on:true,open:'09:00',close:'19:00'},6:{on:true,open:'10:00',close:'17:00'},0:{on:false,open:'10:00',close:'16:00'}};
+
+function getSchedule(){if(!cfg.schedule)cfg.schedule=JSON.parse(JSON.stringify(DEF_SCHEDULE));return cfg.schedule;}
+function getDaySchedule(d){return getSchedule()[d.getDay()]||{on:false,open:'09:00',close:'19:00'};}
+function isWorkingDay(ds){return getDaySchedule(new Date(ds+'T12:00:00')).on;}
+function getDayHours(ds){
+  var day=getDaySchedule(new Date(ds+'T12:00:00'));
+  if(!day.on)return[];
+  var op=day.open||cfg.open||'09:00',cl=day.close||cfg.close||'19:00',st=parseInt(cfg.step)||30;
+  var oh=parseInt(op.split(':')[0]),om=parseInt(op.split(':')[1])||0,ch=parseInt(cl.split(':')[0]),cm=parseInt(cl.split(':')[1])||0;
+  var h=[],t=oh*60+om,end=ch*60+cm;
+  while(t<end){h.push(String(Math.floor(t/60)).padStart(2,'0')+':'+String(t%60).padStart(2,'0'));t+=st;}
+  return h;
+}
+
+function calcRating(mid){
+  var my=bookings.filter(function(b){return b.masterId===mid&&b.type!=='break';});
+  var rated=my.filter(function(b){return b.clientRating>0;});
+  var done=my.filter(function(b){return b.status==='done';}).length;
+  var total=done+my.filter(function(b){return b.status==='cancel';}).length;
+  if(rated.length>0){var avg=Math.round(rated.reduce(function(s,b){return s+b.clientRating;},0)/rated.length*10)/10;return{stars:avg,text:avg.toFixed(1),done:done,total:total,rated:rated.length,source:'client'};}
+  if(total===0)return{stars:0,text:'\u2014',done:0,total:0,rated:0,source:'none'};
+  var stars=Math.round((1+done/total*4)*10)/10;
+  return{stars:stars,text:stars.toFixed(1),done:done,total:total,rated:0,source:'auto'};
+}
+function starsHtml(r){
+  var h='';for(var i=0;i<5;i++)h+='<span style="color:'+(i<Math.floor(r.stars)?'var(--gold)':'#d4c9b8')+';font-size:.82rem">&#9733;</span>';
+  return h;
+}
+
+function getAvailableSlots(mid,ds,dur){
+  if(!isWorkingDay(ds))return[];
+  var slots=getDayHours(ds);if(!slots.length)return[];
+  var day=getDaySchedule(new Date(ds+'T12:00:00'));
+  var cl=day.close||cfg.close||'19:00';
+  var closeMin=parseInt(cl.split(':')[0])*60+(parseInt(cl.split(':')[1])||0);
+  var taken=new Set();
+  bookings.forEach(function(b){
+    if(b.date!==ds||b.status==='cancel')return;
+    if(b.masterId!==mid&&b.master!==mid)return;
+    taken.add(b.time);
+    if(b.type!=='break'&&b.dur){var bm=parseInt(b.time.split(':')[0])*60+parseInt(b.time.split(':')[1]),be=bm+parseInt(b.dur);slots.forEach(function(s){var sm=parseInt(s.split(':')[0])*60+parseInt(s.split(':')[1]);if(sm>bm&&sm<be)taken.add(s);});}
+  });
+  var svcDur=dur||parseInt(B.dur)||30,nowMin=0,today=isoDate(new Date());
+  if(ds===today){var now=new Date();nowMin=now.getHours()*60+now.getMinutes()+60;}
+  return slots.filter(function(s){
+    if(taken.has(s))return false;
+    var sm=parseInt(s.split(':')[0])*60+parseInt(s.split(':')[1]);
+    return sm>=nowMin&&sm+svcDur<=closeMin;
+  });
+}
+
+function updateAvailableSlots(){
+  var sel=document.getElementById('inp-time'),prev=sel.value;
+  while(sel.options.length>1)sel.remove(1);
+  var ds=document.getElementById('inp-date').value,hint=document.getElementById('slots-hint');
+  if(!ds){if(hint)hint.textContent='';return;}
+  if(!isWorkingDay(ds)){
+    var o=new Option('\u2014 \u0432\u0438\u0445\u0456\u0434\u043d\u0438\u0439 \u0434\u0435\u043d\u044c \u2014','');o.disabled=true;sel.appendChild(o);
+    if(hint){hint.textContent='\u0412\u0438\u0445\u0456\u0434\u043d\u0438\u0439 \u2014 \u0437\u0430\u043f\u0438\u0441 \u043d\u0435\u0434\u043e\u0441\u0442\u0443\u043f\u043d\u0438\u0439';hint.style.color='var(--r)';}
+    return;
+  }
+  var avail=B.masterId?getAvailableSlots(B.masterId,ds,parseInt(B.dur)||30):getDayHours(ds);
+  avail.forEach(function(s){sel.appendChild(new Option(s,s));});
+  if(avail.includes(prev))sel.value=prev;
+  if(hint){
+    var total=getDayHours(ds).length;
+    hint.textContent=avail.length===0?'\u0423\u0441\u0456 \u0441\u043b\u043e\u0442\u0438 \u0437\u0430\u0439\u043d\u044f\u0442\u0456':'\u0414\u043e\u0441\u0442\u0443\u043f\u043d\u043e: '+avail.length+' \u0456\u0437 '+total;
+    hint.style.color=avail.length===0?'var(--r)':'var(--g)';
+  }
+}
+
+function renderSchedGrid(){
+  var g=document.getElementById('sched-grid');if(!g)return;
+  g.innerHTML='';
+  var sched=getSchedule();
+  var days=[{d:1,n:'\u041f\u043e\u043d\u0435\u0434\u0456\u043b\u043e\u043a'},{d:2,n:'\u0412\u0456\u0432\u0442\u043e\u0440\u043e\u043a'},{d:3,n:'\u0421\u0435\u0440\u0435\u0434\u0430'},{d:4,n:'\u0427\u0435\u0442\u0432\u0435\u0440'},{d:5,n:'\u041f\u2019\u044f\u0442\u043d\u0438\u0446\u044f'},{d:6,n:'\u0421\u0443\u0431\u043e\u0442\u0430'},{d:0,n:'\u041d\u0435\u0434\u0456\u043b\u044f'}];
+  days.forEach(function(x){
+    var day=sched[x.d]||{on:false,open:'09:00',close:'19:00'};
+    var row=document.createElement('div');row.className='sched-day'+(day.on?'':' day-off');row.dataset.dow=x.d;
+    row.innerHTML='<span class="sched-day-name">'+x.n+'</span>'
+      +'<label class="sched-toggle"><input type="checkbox" '+(day.on?'checked':'')+' onchange="toggleSchedDay('+x.d+',this.checked)"><span class="sched-slider"></span></label>'
+      +'<div class="sched-times" id="sched-times-'+x.d+'"'+(day.on?'':' style="display:none"')+'>'
+        +'<input type="time" value="'+day.open+'" id="sched-open-'+x.d+'" onchange="updateSchedTime('+x.d+')">'
+        +'<span>&ndash;</span>'
+        +'<input type="time" value="'+day.close+'" id="sched-close-'+x.d+'" onchange="updateSchedTime('+x.d+')">'
+      +'</div>'
+      +'<span class="day-closed-lbl" id="sched-closed-'+x.d+'"'+(day.on?' style="display:none"':'')+'>\u0432\u0438\u0445\u0456\u0434\u043d\u0438\u0439</span>';
+    g.appendChild(row);
+  });
+}
+function toggleSchedDay(dow,on){
+  var sched=getSchedule();if(!sched[dow])sched[dow]={on:false,open:'09:00',close:'19:00'};
+  sched[dow].on=on;
+  var row=document.querySelector('.sched-day[data-dow="'+dow+'"]');if(row)row.classList.toggle('day-off',!on);
+  var t=document.getElementById('sched-times-'+dow),l=document.getElementById('sched-closed-'+dow);
+  if(t)t.style.display=on?'':'none';if(l)l.style.display=on?'none':'';
+}
+function updateSchedTime(dow){
+  var sched=getSchedule(),op=document.getElementById('sched-open-'+dow),cl=document.getElementById('sched-close-'+dow);
+  if(op&&cl){sched[dow].open=op.value;sched[dow].close=cl.value;}
+}
+
+var _selectedRating=0,_ratingBookingId=null;
+var _ratingLabels=['\u0436\u0430\u0445\u043b\u0438\u0432\u043e','\u043d\u0456\u0436\u0447\u0435 \u0441\u0435\u0440\u0435\u0434\u043d\u044c\u043e\u0433\u043e','\u043d\u043e\u0440\u043c\u0430\u043b\u044c\u043d\u043e','\u0434\u043e\u0431\u0440\u0435','\u0432\u0456\u0434\u043c\u0456\u043d\u043d\u043e!'];
+function setRating(val){_selectedRating=val;document.querySelectorAll('.rating-star').forEach(function(s){s.style.color=parseInt(s.dataset.v)<=val?'var(--gold)':'#d4c9b8';});var l=document.getElementById('rating-labels');if(l)l.textContent=_ratingLabels[val-1]||'';var b=document.getElementById('rating-submit-btn');if(b)b.disabled=false;}
+function hoverRating(v){document.querySelectorAll('.rating-star').forEach(function(s){s.style.color=parseInt(s.dataset.v)<=v?'#e8b84b':'#d4c9b8';});}
+function unhoverRating(){document.querySelectorAll('.rating-star').forEach(function(s){s.style.color=parseInt(s.dataset.v)<=_selectedRating?'var(--gold)':'#d4c9b8';});}
+async function submitRating(){
+  if(!_selectedRating||!_ratingBookingId)return;
+  var idx=bookings.findIndex(function(b){return b.id===_ratingBookingId;});
+  if(idx>=0){bookings[idx].clientRating=_selectedRating;await sSet(K.B,bookings);}
+  var sb=document.getElementById('rating-submit-btn');if(sb)sb.style.display='none';
+  var sd=document.getElementById('rating-submitted');if(sd)sd.style.display='block';
+  document.getElementById('rating-stars').style.pointerEvents='none';
+  toast('\u0414\u044f\u043a\u0443\u0454\u043c\u043e \u0437\u0430 \u043e\u0446\u0456\u043d\u043a\u0443!');
+}
+
+function mgrInit(){
+  // If no shop loaded yet, use defaults so UI is not empty
+  if(!_currentShop){
+    if(!masters.length) masters=[...DEF_MASTERS];
+    if(!services.length) services=[...DEF_SERVICES];
+    if(!cfg.name) cfg={...DEF_CFG};
+  }
+  // Update manager brand name
+  var brand=document.getElementById('mgr-salon-brand');
+  if(brand) brand.textContent=cfg.name||'Noble';
+  syncFilters();renderMasters();renderSvList();renderStats();renderJournal();fillSettings();renderCal('mgr');
+}
+function mgrTab(tab,btn){
+['calendar','masters','services','journal','settings'].forEach(t=>document.getElementById('mgr-'+t).classList.toggle('hidden',t!==tab));
+document.querySelectorAll('.mgr-nav .mtab').forEach(b=>b.classList.remove('active'));btn.classList.add('active');
+if(tab==='calendar')renderCal('mgr');
+}
+let pendingDelMId=null;
+function askDelMaster(id,name){pendingDelMId=id;document.getElementById('del-mst-msg').textContent='Видалити майстра "'+name+'"?';openModal('del-master-modal');}
+async function confirmDelMaster(){masters=masters.filter(m=>m.id!==pendingDelMId);await sSet(K.M,masters);closeModal('del-master-modal');renderMasters();renderClientMasters();syncFilters();renderCal('mgr');toast('\uD83D\uDDD1 Майстра видалено');}
+function renderSvList(){
+const g=document.getElementById('mgr-sv-list');g.innerHTML='';
+services.forEach(s=>{
+const d=document.createElement('div');d.className='sv-item';
+d.innerHTML='<span class="sv-name">'+s.name+'</span><span class="sv-dur">&#8987; '+s.dur+' хв</span><span class="sv-price">'+s.price+' \u20B4</span><button class="btn btn-danger btn-xs" onclick="delService(\''+s.id+'\')">&#128465;</button>';
+g.appendChild(d);
+});
+}
+async function saveService(){
+const name=document.getElementById('sv-name').value.trim(),price=parseInt(document.getElementById('sv-price').value),dur=parseInt(document.getElementById('sv-dur').value);
+if(!name||!price||!dur){toast('Заповніть всі поля',true);return;}
+services.push({id:'s'+Date.now(),name,price,dur});await sSet(K.S,services);closeModal('add-service-modal');
+['sv-name','sv-price','sv-dur'].forEach(id=>document.getElementById(id).value='');
+renderSvList();renderClientServices();toast('\u2713 Послугу додано');
+}
+async function delService(id){services=services.filter(s=>s.id!==id);await sSet(K.S,services);renderSvList();renderClientServices();toast('\uD83D\uDDD1 Послугу видалено');}
+function fillSettings(){document.getElementById('set-name').value=cfg.name||'';document.getElementById('set-tagline').value=cfg.tagline||'';document.getElementById('set-address').value=cfg.address||'';document.getElementById('set-phone').value=cfg.phone||'';document.getElementById('set-open').value=cfg.open||'09:00';document.getElementById('set-close').value=cfg.close||'19:00';document.getElementById('set-step').value=cfg.step||30;var sr=document.getElementById('set-show-rating');if(sr)sr.checked=cfg.showRating!==false;renderSchedGrid();}
+async function saveSettings(){
+const np=document.getElementById('set-mgr-pwd').value.trim();
+cfg={name:document.getElementById('set-name').value.trim()||cfg.name,tagline:document.getElementById('set-tagline').value.trim(),address:document.getElementById('set-address').value.trim(),phone:document.getElementById('set-phone').value.trim(),open:document.getElementById('set-open').value,close:document.getElementById('set-close').value,step:parseInt(document.getElementById('set-step').value)||30,mgrPwd:np||cfg.mgrPwd||'noble2024',showRating:document.getElementById('set-show-rating')?document.getElementById('set-show-rating').checked:true,logo:cfg.logo||'',schedule:getSchedule()};
+await sSet(K.CFG,cfg);
+  if(_currentShop){getShops().then(function(shops){var si=shops.findIndex(function(s){return s.slug===_currentShop;});if(si>=0){shops[si].name=cfg.name;shops[si].address=cfg.address;shops[si].phone=cfg.phone;if(cfg.mgrPwd)shops[si].ownerPwd=cfg.mgrPwd;saveShops(shops);}});}
+applyConfig();buildTimeSlots();document.getElementById('set-mgr-pwd').value='';toast('\u2713 Налаштування збережено');
+}
+function renderStats(){
+const t=bookings.filter(b=>b.type!=='break').length,n=bookings.filter(b=>b.type!=='break'&&b.status==='new').length;
+const d=bookings.filter(b=>b.type!=='break'&&b.status==='done').length;
+const r=bookings.filter(b=>b.type!=='break'&&b.status!=='cancel').reduce((a,b)=>a+parseInt(b.price||0),0);
+document.getElementById('st-total').textContent=t;document.getElementById('st-new').textContent=n;
+document.getElementById('st-done').textContent=d;document.getElementById('st-rev').textContent=r.toLocaleString('uk-UA');
+}
+function renderJournal(){
+const q=(document.getElementById('f-search')?.value||'').toLowerCase();
+const mf=document.getElementById('f-master')?.value||'',sf=document.getElementById('f-status')?.value||'';
+const filtered=bookings.filter(b=>b.type!=='break'&&(!q||((b.name||'')+' '+(b.master||'')+' '+(b.service||'')+' '+(b.phone||'')).toLowerCase().includes(q))&&(!mf||b.master===mf)&&(!sf||b.status===sf));
+document.getElementById('j-spin').style.display='none';
+const sMap={new:'bn',done:'bd',cancel:'bc'},sLbl={new:'Очікує',done:'Виконано',cancel:'Скасовано'};
+const tbody=document.getElementById('j-tbody');tbody.innerHTML='';
+if(!filtered.length){document.getElementById('j-table').style.display='none';document.getElementById('j-empty').style.display='block';return;}
+document.getElementById('j-table').style.display='table';document.getElementById('j-empty').style.display='none';
+filtered.forEach((b,i)=>{
+const tr=document.createElement('tr');
+tr.innerHTML='<td style="color:#a09080;font-size:.76rem">'+(filtered.length-i)+'</td><td style="font-weight:500">'+(b.name||'')+'</td><td style="font-size:.8rem;color:#6b5d48">'+(b.phone||'\u2014')+'</td><td>'+(b.master||'')+'</td><td>'+(b.service||'')+'</td><td style="white-space:nowrap">'+fmtS(b.date)+' '+b.time+'</td><td class="tdp">'+(b.price||0)+' \u20B4</td><td><span class="badge '+(sMap[b.status]||'bn')+'">'+(sLbl[b.status]||b.status)+'</span></td><td><div style="display:flex;gap:4px">'+(b.status==='new'?'<button class="btn btn-success btn-xs" onclick="chSt(\''+b.id+'\',\'done\')">\u2713</button><button class="btn btn-ghost btn-xs" onclick="chSt(\''+b.id+'\',\'cancel\')">\u2715</button>':'')+'<button class="btn btn-danger btn-xs" onclick="askDel(\''+b.id+'\')">&#128465;</button></div></td>';
+tbody.appendChild(tr);
+});
+}
+async function chSt(id,st){const idx=bookings.findIndex(b=>b.id===id);if(idx===-1)return;bookings[idx].status=st;await sSet(K.B,bookings);renderJournal();renderStats();renderCal('mgr');toast(st==='done'?'\u2713 Виконано':'\u2715 Скасовано');}
+let pendingDelId=null;
+function askDel(id){pendingDelId=id;openModal('del-modal');}
+async function confirmDelete(){bookings=bookings.filter(b=>b.id!==pendingDelId);await sSet(K.B,bookings);closeModal('del-modal');renderJournal();renderStats();renderCal('mgr');toast('\uD83D\uDDD1 Видалено');}
+function syncFilters(){
+['mgr-cal-filter','f-master'].forEach(id=>{const sel=document.getElementById(id);if(!sel)return;const cur=sel.value;while(sel.options.length>1)sel.remove(1);masters.forEach(m=>sel.appendChild(new Option(m.name,m.name)));sel.value=cur;});
+}
+function mstInit(){
+  if(!_currentShop&&!masters.length){masters=[...DEF_MASTERS];services=[...DEF_SERVICES];cfg={...DEF_CFG};}
+  var brand=document.getElementById('mst-salon-brand');if(brand)brand.textContent=cfg.name||'Noble';
+
+buildBreakSelects();const today=new Date().toISOString().split('T')[0];
+['brk-date','doff-date','doff-from','doff-to','doff-weekly-from'].forEach(id=>{const el=document.getElementById(id);if(el)el.min=today;});
+brkSubTab('break');toggleDoffType();renderCal('mst');renderBreaksList();
+}
+function mstTab(tab,btn){
+['calendar','breaks'].forEach(t=>document.getElementById('mst-'+t).classList.toggle('hidden',t!==tab));
+document.querySelectorAll('.mst-nav .mtab').forEach(b=>b.classList.remove('active'));btn.classList.add('active');
+if(tab==='calendar')renderCal('mst');if(tab==='breaks')renderBreaksList();
+}
+function brkSubTab(tab){
+document.getElementById('brk-sub-break').classList.toggle('hidden',tab!=='break');
+document.getElementById('brk-sub-dayoff').classList.toggle('hidden',tab!=='dayoff');
+document.getElementById('brk-tab-break').className='btn btn-sm '+(tab==='break'?'btn-primary':'btn-ghost');
+document.getElementById('brk-tab-dayoff').className='btn btn-sm '+(tab==='dayoff'?'btn-primary':'btn-ghost');
+}
+function toggleDoffType(){
+const type=document.getElementById('doff-type')?document.getElementById('doff-type').value:'single';
+const sw=(id,show)=>{const el=document.getElementById(id);if(el)el.classList.toggle('hidden',!show);};
+sw('doff-single-wrap',type==='single');sw('doff-range-wrap',type==='range');sw('doff-weekly-wrap',type==='weekly');sw('doff-weekday-wrap',type==='weekly');
+}
+function buildBreakSelects(){
+const hours=getHours();['brk-from','brk-to'].forEach(id=>{const s=document.getElementById(id);if(!s)return;s.innerHTML='';hours.forEach(h=>s.appendChild(new Option(h,h)));});
+}
+async function addBreak(){
+const date=document.getElementById('brk-date').value,from=document.getElementById('brk-from').value;
+const to=document.getElementById('brk-to').value,reason=document.getElementById('brk-reason').value.trim();
+if(!date||!from){toast('Вкажіть дату та час початку',true);return;}
+const entry={id:'brk'+Date.now(),type:'break',date,time:from,timeEnd:to,master:currentUser.name,masterId:currentUser.id,reason,dur:30,status:'break',createdAt:new Date().toISOString()};
+bookings.unshift(entry);await sSet(K.B,bookings);
+_ratingBookingId=entry.id;_selectedRating=0;
+document.querySelectorAll('.rating-star').forEach(function(s){s.style.color='#d4c9b8';});
+var _sb=document.getElementById('rating-submit-btn');if(_sb){_sb.disabled=true;_sb.style.display='';}
+var _sd=document.getElementById('rating-submitted');if(_sd)_sd.style.display='none';
+var _sl=document.getElementById('rating-labels');if(_sl)_sl.textContent='';
+var _rp=document.getElementById('rating-panel');if(_rp)_rp.style.display=cfg.showRating!==false?'':'none';
+document.getElementById('brk-date').value='';document.getElementById('brk-reason').value='';
+renderCal('mst');renderBreaksList();toast('\u2713 Перерву додано');
+}
+async function addDayOff(){
+const type=document.getElementById('doff-type').value,reason=document.getElementById('doff-reason').value.trim()||'Вихідний';
+const hours=getHours(),entries=[];
+if(type==='single'){
+const date=document.getElementById('doff-date').value;if(!date){toast('Вкажіть дату',true);return;}
+entries.push(...buildDayOffEntries(date,hours,reason));document.getElementById('doff-date').value='';
+}else if(type==='range'){
+const from=document.getElementById('doff-from').value,to=document.getElementById('doff-to').value;
+if(!from||!to){toast('Вкажіть початок і кінець',true);return;}if(from>to){toast('Початок після кінця',true);return;}
+let cur=new Date(from);const end=new Date(to);let cnt=0;
+while(cur<=end&&cnt<60){entries.push(...buildDayOffEntries(isoDate(cur),hours,reason));cur.setDate(cur.getDate()+1);cnt++;}
+document.getElementById('doff-from').value='';document.getElementById('doff-to').value='';
+}else if(type==='weekly'){
+const weekday=parseInt(document.getElementById('doff-weekday').value);
+const fromDate=document.getElementById('doff-weekly-from').value;if(!fromDate){toast('Вкажіть дату початку',true);return;}
+const toDate=document.getElementById('doff-weekly-to').value;
+let cur=new Date(fromDate);while(cur.getDay()!==weekday)cur.setDate(cur.getDate()+1);
+const endLimit=toDate?new Date(toDate):addDays(cur,12*7);let cnt=0;
+while(cur<=endLimit&&cnt<52){entries.push(...buildDayOffEntries(isoDate(cur),hours,reason));cur.setDate(cur.getDate()+7);cnt++;}
+document.getElementById('doff-weekly-from').value='';document.getElementById('doff-weekly-to').value='';
+toast('\u2713 Щотижневий вихідний додано на '+cnt+' тиж.');
+}
+if(!entries.length){toast('Помилка',true);return;}
+bookings.unshift(...entries);await sSet(K.B,bookings);document.getElementById('doff-reason').value='';
+renderCal('mst');renderBreaksList();if(type!=='weekly')toast('\u2713 Вихідний додано');
+}
+function buildDayOffEntries(date,hours,reason){
+const base='doff'+Date.now()+'_'+Math.random().toString(36).slice(2,6);
+return hours.map((h,i)=>({id:base+'_'+i,type:'break',subtype:'dayoff',date,time:h,timeEnd:'',master:currentUser.name,masterId:currentUser.id,reason,dur:30,status:'break',createdAt:new Date().toISOString()}));
+}
+function renderBreaksList(){
+const g=document.getElementById('breaks-list');g.innerHTML='';
+const all=bookings.filter(b=>b.type==='break'&&b.masterId===currentUser?.id);
+if(!all.length){g.innerHTML='<div class="empty-st"><div class="bi">\u2615</div><p>Перерв та вихідних немає</p></div>';return;}
+const dayoffs={};const breaks=[];
+all.forEach(b=>{if(b.subtype==='dayoff'){if(!dayoffs[b.date])dayoffs[b.date]={date:b.date,reason:b.reason,ids:[]};dayoffs[b.date].ids.push(b.id);}else{breaks.push(b);}});
+const dayoffDates=Object.values(dayoffs).sort((a,b2)=>a.date.localeCompare(b2.date));
+if(dayoffDates.length){
+const sec=document.createElement('div');sec.innerHTML='<h3 style="font-family:\'Playfair Display\',serif;font-size:1rem;margin-bottom:10px;color:var(--r)">\uD83C\uDFD6 Вихідні дні</h3>';
+const wrap=document.createElement('div');wrap.className='table-wrap';wrap.style.marginBottom='18px';
+const tbl=document.createElement('table');tbl.innerHTML='<thead><tr><th>Дата</th><th>Причина</th><th>Слотів</th><th>Дія</th></tr></thead>';
+const tbody=document.createElement('tbody');
+dayoffDates.forEach(d=>{
+const tr=document.createElement('tr');const idsJson=JSON.stringify(d.ids);
+tr.innerHTML='<td style="font-weight:500">'+fmtS(d.date)+'</td><td>'+(d.reason||'Вихідний')+'</td><td style="font-size:.78rem;color:#a09080">'+d.ids.length+'</td><td><button class="btn btn-danger btn-xs" onclick=\'delDayOff('+idsJson+')\'>&#128465; Весь день</button></td>';
+tbody.appendChild(tr);
+});
+tbl.appendChild(tbody);wrap.appendChild(tbl);sec.appendChild(wrap);g.appendChild(sec);
+}
+if(breaks.length){
+const sec=document.createElement('div');sec.innerHTML='<h3 style="font-family:\'Playfair Display\',serif;font-size:1rem;margin-bottom:10px">\u2615 Перерви</h3>';
+const wrap=document.createElement('div');wrap.className='table-wrap';
+const tbl=document.createElement('table');tbl.innerHTML='<thead><tr><th>Дата</th><th>Час</th><th>Причина</th><th>Дія</th></tr></thead>';
+const tbody=document.createElement('tbody');
+breaks.forEach(b=>{const tr=document.createElement('tr');tr.innerHTML='<td>'+fmtS(b.date)+'</td><td>'+b.time+(b.timeEnd?' \u2013 '+b.timeEnd:'')+'</td><td>'+(b.reason||'\u2014')+'</td><td><button class="btn btn-danger btn-xs" onclick="delBreakFromList(\''+b.id+'\')">&#128465;</button></td>';tbody.appendChild(tr);});
+tbl.appendChild(tbody);wrap.appendChild(tbl);sec.appendChild(wrap);g.appendChild(sec);
+}
+}
+async function delBreakFromList(id){bookings=bookings.filter(b=>b.id!==id);await sSet(K.B,bookings);renderBreaksList();renderCal('mst');toast('\uD83D\uDDD1 Перерву видалено');}
+async function delDayOff(ids){const set=new Set(ids);bookings=bookings.filter(b=>!set.has(b.id));await sSet(K.B,bookings);renderBreaksList();renderCal('mst');toast('\uD83D\uDDD1 Вихідний видалено');}
+(function(){let sx=0,sy=0;document.addEventListener('touchstart',e=>{sx=e.touches[0].clientX;sy=e.touches[0].clientY;},{passive:true});document.addEventListener('touchend',e=>{const dx=e.changedTouches[0].clientX-sx,dy=Math.abs(e.changedTouches[0].clientY-sy);if(Math.abs(dx)>60&&dy<40){const ca=document.querySelector('#mgr-calendar:not(.hidden),#mst-calendar:not(.hidden)');if(!ca)return;const wrap=ca.querySelector('.cal-wrap');if(wrap&&wrap.scrollWidth>wrap.clientWidth)return;const ctx=document.getElementById('view-manager').classList.contains('active')?'mgr':'mst';shiftWeek(ctx,dx<0?1:-1);}},{passive:true});})();
+function openModal(id){document.getElementById(id).classList.add('open');}
+function closeModal(id){document.getElementById(id).classList.remove('open');if(id==='add-master-modal'){window._editMasterId=null;document.querySelector('#add-master-modal h3').textContent='Додати майстра';document.querySelector('#add-master-modal .modal-actions .btn-primary').textContent='Додати →';if(typeof resetPhotoModal==='function')resetPhotoModal();}}
+function toast(msg,err=false){const t=document.getElementById('toast');t.textContent=msg;t.className='toast'+(err?' err':'');t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3200);}
+
+
+
+
+
+/* ── i18n stubs (backup compat) ── */
+var _lang='uk';
+var T={};
+function t(k){return(T[_lang]&&T[_lang][k])||T['uk']&&T['uk'][k]||k;}
+function setLang(lang){
+  _lang=lang;
+  document.querySelectorAll('.lang-opt,.burger-lang-btn').forEach(function(b){
+    b.classList.toggle('active',b.dataset&&b.dataset.lang===lang);
+  });
+  var lbl=document.getElementById('lang-current-label');
+  if(lbl)lbl.textContent=lang.toUpperCase();
+  var m=document.getElementById('lang-drop-menu');
+  var btn=document.getElementById('lang-drop-trigger');
+  if(m)m.classList.remove('open');
+  if(btn)btn.classList.remove('open');
+  applyLang();
+}
+function applyLang(){
+  /* basic lang application - full i18n in DS version */
+}
+function toggleLangDrop(){
+  var m=document.getElementById('lang-drop-menu');
+  var b=document.getElementById('lang-drop-trigger');
+  if(!m||!b)return;
+  var open=m.classList.contains('open');
+  m.classList.toggle('open',!open);b.classList.toggle('open',!open);
+}
+function toggleBurger(){
+  var menu=document.getElementById('burger-menu');
+  var overlay=document.getElementById('burger-overlay');
+  var btn=document.getElementById('burger-btn');
+  if(!menu)return;
+  if(menu.classList.contains('open')){closeBurger();return;}
+  if(overlay)overlay.style.display='block';
+  requestAnimationFrame(function(){
+    requestAnimationFrame(function(){
+      menu.classList.add('open');
+      if(overlay)overlay.classList.add('open');
+      if(btn)btn.classList.add('open');
+      document.body.style.overflow='hidden';
+    });
+  });
+}
+function closeBurger(){
+  var menu=document.getElementById('burger-menu');
+  var overlay=document.getElementById('burger-overlay');
+  var btn=document.getElementById('burger-btn');
+  if(!menu)return;
+  menu.classList.remove('open');
+  if(overlay)overlay.classList.remove('open');
+  if(btn)btn.classList.remove('open');
+  document.body.style.overflow='';
+  setTimeout(function(){if(overlay&&!overlay.classList.contains('open'))overlay.style.display='none';},300);
+}
+
+
+/* ── Platform UI ── */
+var _regStep=1,_regShop=null;
+function showPlatformTab(tab){
+  ['register','login-shop','my-shops'].forEach(function(t){
+    var el=document.getElementById('platform-tab-'+t);if(el)el.classList.toggle('hidden',t!==tab);
+  });
+  if(tab==='my-shops')renderMyShops();if(tab==='login-shop')searchShops('');
+}
+function updateRegSlug(){
+  var name=document.getElementById('reg-name').value;
+  var slug=name.toLowerCase().replace(/[^a-z0-9]/g,'-').replace(/-+/g,'-').replace(/^-|-$/g,'').substring(0,24)||'';
+  document.getElementById('reg-slug').value=slug;checkRegSlug();
+}
+async function checkRegSlug(){
+  var slug=document.getElementById('reg-slug').value.trim();
+  var hint=document.getElementById('reg-slug-hint'),wrap=document.getElementById('reg-slug-wrap');
+  if(!hint||!wrap)return;
+  if(!slug){hint.textContent='';return;}
+  if(slug.length<3){hint.textContent='\u26a0 \u041c\u0456\u043d. 3';hint.style.color='#d97706';return;}
+  var shops=await getShops();var taken=shops.some(function(s){return s.slug===slug;});
+  hint.textContent=taken?'\u2715 \u0417\u0430\u0439\u043d\u044f\u0442\u0438\u0439':'\u2713 \u0414\u043e\u0441\u0442\u0443\u043f\u043d\u043e \u2014 ?shop='+slug;
+  hint.style.color=taken?'#c0392b':'#2d7a4f';wrap.style.borderColor=taken?'#c0392b':'#2d7a4f';
+}
+async function regNext(step){
+  var errEl=document.getElementById('reg-err');if(!errEl)return;errEl.textContent='';
+  if(_regStep===1&&step===2){
+    var name=document.getElementById('reg-name').value.trim();
+    if(!name){errEl.textContent='Назва салону?';return;}
+    // Auto-generate slug from name
+    var slugEl=document.getElementById('reg-slug');
+    var slug=slugEl.value.trim();
+    if(!slug||slug.length<3){
+      slug=name.toLowerCase().replace(/[^a-z0-9]/g,'-').replace(/-+/g,'-').replace(/^-|-$/g,'').substring(0,24);
+      slugEl.value=slug;
+    }
+    if(!slug||slug.length<2){errEl.textContent='Назва повинна містити латинські букви або цифри';return;}
+    var shops=await getShops();
+    // If slug taken, add suffix
+    var base=slug,n=2;
+    while(shops.some(function(sh){return sh.slug===slug;})){slug=base+'-'+n;n++;}
+    slugEl.value=slug;
+  }
+  if(_regStep===2&&step===3){
+    var email=document.getElementById('reg-email').value.trim(),pwd=document.getElementById('reg-pwd').value,pwd2=document.getElementById('reg-pwd2').value;
+    if(!email){errEl.textContent='Email?';return;}if(pwd.length<6){errEl.textContent='\u041f\u0430\u0440\u043e\u043b\u044c \u043c\u0456\u043d. 6';return;}if(pwd!==pwd2){errEl.textContent='\u041f\u0430\u0440\u043e\u043b\u0456 \u0440\u0456\u0437\u043d\u0456';return;}
+    var btn=event.target;btn.disabled=true;btn.textContent='\u0421\u0442\u0432\u043e\u0440\u044e\u0454\u043c\u043e...';
+    try{
+      _regShop=await registerShop({slug:document.getElementById('reg-slug').value.trim(),name:document.getElementById('reg-name').value.trim(),ownerEmail:email,ownerPwd:pwd,address:document.getElementById('reg-address').value.trim(),phone:document.getElementById('reg-phone').value.trim(),open:document.getElementById('reg-open').value||'09:00',close:document.getElementById('reg-close').value||'19:00'});
+      var urlEl=document.getElementById('reg-result-url');if(urlEl)urlEl.textContent=getShopPublicURL(_regShop.slug);
+    }catch(err){errEl.textContent='\u041f\u043e\u043c\u0438\u043b\u043a\u0430: '+err.message;btn.disabled=false;btn.textContent='\u0417\u0430\u0440\u0435\u0454\u0441\u0442\u0440\u0443\u0432\u0430\u0442\u0438 \u2192';return;}
+  }
+  document.querySelectorAll('.rsd').forEach(function(d){var ds=parseInt(d.dataset.s);d.classList.toggle('active',ds===step);d.classList.toggle('done',ds<step);});
+  [1,2,3].forEach(function(n){var el=document.getElementById('reg-step-'+n);if(el)el.classList.toggle('hidden',n!==step);});
+  _regStep=step;
+}
+function openMyShopAsManager(){
+  if(!_regShop)return;setShopSlugInURL(_regShop.slug);
+  loadShop(_regShop.slug).then(function(){currentUser={role:'manager'};saveSession('manager',_regShop.slug);showView('manager');mgrInit();toast('\u2713 \u041b\u0430\u0441\u043a\u0430\u0432\u043e \u043f\u0440\u043e\u0441\u0438\u043c\u043e!');});
+}
+function copyShopURL(){
+  if(!_regShop)return;var url=getShopPublicURL(_regShop.slug);
+  if(navigator.clipboard){navigator.clipboard.writeText(url).then(function(){toast('\u2713 \u0421\u043a\u043e\u043f\u0456\u0439\u043e\u0432\u0430\u043d\u043e');});}else{prompt('\u041f\u043e\u0441\u0438\u043b\u0430\u043d\u043d\u044f:',url);}
+}
+async function searchShops(query){
+  var container=document.getElementById('shop-search-results');if(!container)return;
+  var shops=await getShops(),q=(query||'').toLowerCase().trim();
+  var filtered=q?shops.filter(function(s){return s.slug.includes(q)||s.name.toLowerCase().includes(q);}):shops;
+  container.innerHTML='';
+  if(!filtered.length){container.innerHTML='<div style="text-align:center;padding:16px;color:#a09080;font-size:.82rem">'+(q?'\u0421\u0430\u043b\u043e\u043d \u043d\u0435 \u0437\u043d\u0430\u0439\u0434\u0435\u043d\u043e':'\u041d\u0435\u043c\u0430\u0454 \u0441\u0430\u043b\u043e\u043d\u0456\u0432')+'</div>';return;}
+  filtered.slice(0,5).forEach(function(shop){
+    var d=document.createElement('div');d.className='shop-card';
+    d.innerHTML='<div class="shop-av-sm">'+shop.name.charAt(0).toUpperCase()+'</div><div><div style="font-weight:600;font-size:.88rem">'+shop.name+'</div><div style="font-family:monospace;font-size:.7rem;color:#a09080">?shop='+shop.slug+'</div></div>';
+    d.onclick=function(){openShop(shop.slug);};container.appendChild(d);
+  });
+}
+function openShopFromInput(){
+  var slug=document.getElementById('login-shop-slug').value.trim(),errEl=document.getElementById('login-shop-err');
+  if(!slug){if(errEl)errEl.textContent='\u0412\u0432\u0435\u0434\u0456\u0442\u044c slug';return;}openShop(slug);
+}
+function openShop(slug){
+  loadShop(slug).then(function(ok){
+    if(!ok){toast('\u0421\u0430\u043b\u043e\u043d \u043d\u0435 \u0437\u043d\u0430\u0439\u0434\u0435\u043d\u043e',true);return;}
+    setShopSlugInURL(slug);applyConfig();renderClientMasters();renderClientServices();buildTimeSlots();updateStepper(1);applyLang();showView('client');
+  });
+}
+function openShopAsManager(slug){
+  loadShop(slug).then(function(ok){
+    if(!ok){toast('\u041f\u043e\u043c\u0438\u043b\u043a\u0430',true);return;}
+    setShopSlugInURL(slug);currentUser={role:'manager'};saveSession('manager',slug);showView('manager');mgrInit();
+  });
+}
+async function renderMyShops(){
+  var el=document.getElementById('my-shops-list');if(!el)return;
+  var shops=await getShops();
+  if(!shops.length){el.innerHTML='<div style="text-align:center;padding:24px;color:#a09080">\u041d\u0435\u043c\u0430\u0454 \u0441\u0430\u043b\u043e\u043d\u0456\u0432.<br><button class="btn btn-primary btn-sm" style="margin-top:10px" onclick="showPlatformTab(\'register\')">\u0421\u0442\u0432\u043e\u0440\u0438\u0442\u0438</button></div>';return;}
+  el.innerHTML='';
+  shops.forEach(function(shop){
+    var d=document.createElement('div');d.className='my-shop-row';
+    var sl=shop.slug;
+    d.innerHTML='<div class="shop-av-sm">'+shop.name.charAt(0).toUpperCase()+'</div><div style="flex:1;min-width:0"><div style="font-weight:600;font-size:.88rem">'+shop.name+'</div><div style="font-family:monospace;font-size:.7rem;color:#a09080">?shop='+sl+'</div></div><div style="display:flex;flex-direction:column;gap:4px"><button class="btn btn-primary btn-xs" onclick="openShopAsManager(\''+sl+'\')">\u2699</button><button class="btn btn-ghost btn-xs" onclick="openShop(\''+sl+'\')">\u0432\u0456\u0434\u043a\u0440.</button></div>';
+    el.appendChild(d);
+  });
+}
+
+
+
+
+/* ── Platform burger ── */
+function togglePlatformBurger(){
+  var menu=document.getElementById('platform-burger-menu');
+  var overlay=document.getElementById('platform-burger-overlay');
+  var btn=document.getElementById('platform-burger-btn');
+  if(!menu)return;
+  if(menu.classList.contains('open')){closePlatformBurger();return;}
+  overlay.style.display='block';
+  requestAnimationFrame(function(){
+    requestAnimationFrame(function(){
+      menu.classList.add('open');
+      overlay.classList.add('open');
+      if(btn)btn.classList.add('open');
+      document.body.style.overflow='hidden';
+    });
+  });
+}
+function closePlatformBurger(){
+  var menu=document.getElementById('platform-burger-menu');
+  var overlay=document.getElementById('platform-burger-overlay');
+  var btn=document.getElementById('platform-burger-btn');
+  if(!menu)return;
+  menu.classList.remove('open');
+  overlay.classList.remove('open');
+  if(btn)btn.classList.remove('open');
+  document.body.style.overflow='';
+  setTimeout(function(){
+    if(overlay&&!overlay.classList.contains('open'))overlay.style.display='none';
+  },300);
+}
+
+
+function closePlatformBurger(){
+  var menu=document.getElementById('platform-burger-menu');
+  var overlay=document.getElementById('platform-burger-overlay');
+  var btn=document.getElementById('platform-burger-btn');
+  if(!menu)return;
+  menu.classList.remove('open');
+  overlay.classList.remove('open');
+  if(btn)btn.classList.remove('open');
+  document.body.style.overflow='';
+  setTimeout(function(){
+    if(overlay&&!overlay.classList.contains('open'))overlay.style.display='none';
+  },300);
+}
+
+
+
+
+</script>
+</body>
+</html>
