@@ -7,11 +7,12 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
 
-export async function generateMetadata({ params }: { params: { slug: string } }) {
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params
   const { data: org } = await supabase
     .from('organizations')
     .select('name, slug')
-    .eq('slug', params.slug)
+    .eq('slug', slug)
     .single()
 
   if (!org) return { title: 'Salon not found' }
@@ -22,11 +23,13 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   }
 }
 
-export default async function SalonPage({ params }: { params: { slug: string } }) {
+export default async function SalonPage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params
+
   const { data: org } = await supabase
     .from('organizations')
     .select('*')
-    .eq('slug', params.slug)
+    .eq('slug', slug)
     .single()
 
   if (!org) notFound()
