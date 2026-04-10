@@ -15,6 +15,8 @@ const PRICE_IDS: Record<string, string> = {
   business: process.env.STRIPE_BUSINESS_PRICE_ID!,
 }
 
+const APP_URL = 'https://www.noblelink.app'
+
 export async function POST(req: NextRequest) {
   const { org_id, plan } = await req.json()
 
@@ -53,8 +55,8 @@ export async function POST(req: NextRequest) {
       trial_period_days: 14,
       metadata: { org_id, plan_id: plan },
     },
-    success_url: `${process.env.NEXT_PUBLIC_APP_URL}/billing?success=1`,
-    cancel_url:  `${process.env.NEXT_PUBLIC_APP_URL}/billing?canceled=1`,
+    success_url: `${APP_URL}/billing?success=1`,
+    cancel_url:  `${APP_URL}/billing?canceled=1`,
     metadata: { org_id, plan_id: plan },
   })
 
