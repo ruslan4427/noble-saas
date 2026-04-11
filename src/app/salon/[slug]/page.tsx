@@ -17,9 +17,25 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
   if (!org) return { title: 'Salon not found' }
 
+  const title = `${org.name} — Online Booking`
+  const description = `Book an appointment at ${org.name} online. Choose your master, service and time. Instant confirmation.`
+  const url = `https://www.noblelink.app/salon/${org.slug}`
+
   return {
-    title: `${org.name} — Online Booking`,
-    description: `Book an appointment at ${org.name}`,
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      url,
+      siteName: 'Noble',
+      type: 'website',
+    },
+    twitter: {
+      card: 'summary',
+      title,
+      description,
+    },
   }
 }
 
