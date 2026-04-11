@@ -5,9 +5,7 @@ import { createClient } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 
 const STEPS = ['Salon name', 'Category', 'Timezone', 'First staff', 'Working hours', 'Preview']
-
 const CATEGORIES = ['Barbershop', 'Hair salon', 'Nail salon', 'Spa & wellness', 'Tattoo studio', 'Other']
-
 const TIMEZONES = [
   'America/New_York',
   'America/Chicago',
@@ -17,6 +15,18 @@ const TIMEZONES = [
   'America/Anchorage',
   'Pacific/Honolulu',
 ]
+
+const TZ_LABELS: Record<string, string> = {
+  'America/New_York': 'New York (ET)',
+  'America/Chicago': 'Chicago (CT)',
+  'America/Denver': 'Denver (MT)',
+  'America/Los_Angeles': 'Los Angeles (PT)',
+  'America/Phoenix': 'Phoenix (AZ)',
+  'America/Anchorage': 'Anchorage (AKT)',
+  'Pacific/Honolulu': 'Honolulu (HT)',
+}
+
+const APP_URL = 'https://www.noblelink.app'
 
 export default function Onboarding() {
   const [step, setStep] = useState(0)
@@ -100,24 +110,19 @@ export default function Onboarding() {
   return (
     <main className="min-h-screen bg-[#0F0A00] flex items-center justify-center px-4">
       <div className="w-full max-w-md">
-
-        {/* Header */}
         <div className="text-center mb-8">
           <div className="font-serif text-2xl text-[#C9A84C] mb-2">✂ Noble</div>
           <p className="text-white/50 text-sm">Set up your salon — step {step + 1} of {STEPS.length}</p>
         </div>
 
-        {/* Progress */}
         <div className="flex gap-1 mb-8">
           {STEPS.map((_, i) => (
             <div key={i} className={`flex-1 h-1 rounded-full transition-all ${i <= step ? 'bg-[#C9A84C]' : 'bg-white/10'}`} />
           ))}
         </div>
 
-        {/* Card */}
         <div className="bg-white/5 border border-white/10 rounded-xl p-6">
           <h2 className="text-lg font-semibold text-white mb-4">{STEPS[step]}</h2>
-
           {error && <div className="bg-red-500/10 border border-red-500/30 text-red-400 text-sm px-3 py-2 rounded mb-4">{error}</div>}
 
           {/* Step 0 — Salon name */}
@@ -132,7 +137,7 @@ export default function Onboarding() {
               <div>
                 <label className="text-sm text-white/60 mb-1 block">Your URL</label>
                 <div className="flex items-center bg-white/10 border border-white/20 rounded overflow-hidden">
-                  <span className="text-white/40 text-sm px-3 py-2 border-r border-white/20">noble.app/</span>
+                  <span className="text-white/40 text-sm px-3 py-2 border-r border-white/20">noblelink.app/salon/</span>
                   <input value={data.slug} onChange={e => update('slug', e.target.value)}
                     className="flex-1 bg-transparent px-3 py-2 text-white text-sm outline-none font-mono"
                     placeholder="my-salon" />
@@ -159,7 +164,7 @@ export default function Onboarding() {
               {TIMEZONES.map(tz => (
                 <button key={tz} onClick={() => update('timezone', tz)}
                   className={`w-full text-left px-3 py-3 rounded text-sm border transition ${data.timezone === tz ? 'border-[#C9A84C] bg-[#C9A84C]/10 text-[#C9A84C]' : 'border-white/20 text-white/60 hover:border-white/40'}`}>
-                  {tz.replace('America/', '').replace('Pacific/', 'Pacific/')}
+                  {TZ_LABELS[tz] ?? tz}
                 </button>
               ))}
             </div>
@@ -210,17 +215,16 @@ export default function Onboarding() {
             <div className="text-center py-4 space-y-3">
               <div className="text-4xl mb-2">✂</div>
               <div className="text-white font-semibold text-lg">{data.name}</div>
-              <div className="text-white/50 text-sm">{data.category} · {data.timezone}</div>
+              <div className="text-white/50 text-sm">{data.category} · {TZ_LABELS[data.timezone] ?? data.timezone}</div>
               <div className="text-white/50 text-sm">Hours: {data.open} – {data.close}</div>
               <div className="bg-[#C9A84C]/10 border border-[#C9A84C]/30 rounded px-3 py-2 text-[#C9A84C] text-sm font-mono">
-                noble.app/{data.slug}
+                noblelink.app/salon/{data.slug}
               </div>
               <p className="text-white/30 text-xs mt-2">Your 14-day free trial starts now.</p>
             </div>
           )}
         </div>
 
-        {/* Navigation */}
         <div className="flex gap-3 mt-4">
           {step > 0 && (
             <button onClick={() => setStep(s => s - 1)}
@@ -240,7 +244,6 @@ export default function Onboarding() {
             </button>
           )}
         </div>
-
       </div>
     </main>
   )
