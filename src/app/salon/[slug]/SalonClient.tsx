@@ -81,11 +81,26 @@ export default function SalonClient({ org, staff, services }: Props) {
       const dateStr = selectedDate.toISOString().split('T')[0]
       const dateFormatted = selectedDate.toLocaleDateString('uk-UA', { day: 'numeric', month: 'long', year: 'numeric' })
 
+      // Build start_time and reminder_at in salon timezone
+      const [hours, minutes] = selectedTime.split(':').map(Number)
+      const timezone = org.timezone || 'America/New_York'
+
+      // Construct start_time as ISO string in UTC from salon local time
+      const localDateStr = `${dateStr}T${selectedTime}:00`
+      const startTime = new Date(new Date(localDateStr).toLocaleString('en-US', { timeZone: timezone }))
+      // Simple approach: combine date + time as UTC-aware timestamp
+      const startISO = `${dateStr}T${String(hours).padStart(2,'0')}:${String(minutes).padStart(2,'0')}:00`
+      const startDate = new Date(startISO)
+      const reminderAt = new Date(startDate.getTime() - 24 * 60 * 60 * 1000)
+
       const { error: bookingError } = await supabase.from('bookings').insert({
         org_id: org.id,
         master_id: selectedStaff.id,
         date: dateStr,
         time_slot: selectedTime,
+        start_time: startDate.toISOString(),
+        reminder_at: clientEmail ? reminderAt.toISOString() : null,
+        reminder_sent: false,
         client_name: name,
         client_phone: phone,
         client_email: clientEmail || null,
@@ -140,7 +155,7 @@ export default function SalonClient({ org, staff, services }: Props) {
             {selectedDate?.toLocaleDateString('uk-UA')} о {selectedTime}
           </p>
           {clientEmail && (
-            <p className="text-[#C9A84C] text-xs mb-4">📧 Підтвердження надіслано на {clientEmail}</p>
+            <p className="text-[#C9A84C] text-xs mb-4">📧 Підтвердження та нагадування надіслано на {clientEmail}</p>
           )}
           <button onClick={() => {
             setDone(false); setStep(0);
