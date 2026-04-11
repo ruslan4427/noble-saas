@@ -60,6 +60,7 @@ export default function SalonClient({ org, staff, services }: Props) {
   const [selectedTime, setSelectedTime] = useState<string | null>(null)
   const [name, setName] = useState('')
   const [phone, setPhone] = useState('')
+  const [email, setEmail] = useState('')
   const [smsConsent, setSmsConsent] = useState(false)
   const [loading, setLoading] = useState(false)
   const [done, setDone] = useState(false)

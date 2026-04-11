@@ -1,0 +1,19 @@
+import { Resend } from 'resend'
+const resend = new Resend(process.env.RESEND_API_KEY)
+const FROM = 'Noble <notifications@noblelink.app>'
+
+export async function sendBookingConfirmation({to,clientName,salonName,masterName,serviceName,date,time,price}:{to:string;clientName:string;salonName:string;masterName:string;serviceName:string;date:string;time:string;price:number}){
+  return resend.emails.send({from:FROM,to,subject:`Booking confirmed — ${salonName}`,html:`<div style="font-family:Georgia,serif;max-width:480px;margin:0 auto;background:#f5f0e8;padding:32px;border-radius:12px"><h1 style="color:#C9A84C;text-align:center">✂ ${salonName}</h1><div style="background:white;border-radius:8px;padding:24px"><h2 style="color:#1a1208">Booking confirmed!</h2><p style="color:#8b7a65">Hi ${clientName}, your appointment is booked.</p><p><b>Master:</b> ${masterName}<br><b>Service:</b> ${serviceName}<br><b>Date:</b> ${date}<br><b>Time:</b> ${time}<br><b>Price:</b> $${price}</p></div><p style="color:#8b7a65;font-size:12px;text-align:center">Noble · noblelink.app</p></div>`})
+}
+
+export async function sendBookingNotification({to,salonName,clientName,clientPhone,masterName,serviceName,date,time,price}:{to:string;salonName:string;clientName:string;clientPhone:string;masterName:string;serviceName:string;date:string;time:string;price:number}){
+  return resend.emails.send({from:FROM,to,subject:`New booking — ${clientName}`,html:`<div style="font-family:Georgia,serif;max-width:480px;margin:0 auto;background:#0F0A00;padding:32px;border-radius:12px"><h1 style="color:#C9A84C;text-align:center">✂ ${salonName}</h1><div style="background:#1a1208;border-radius:8px;padding:24px;border:1px solid rgba(201,168,76,0.2)"><h2 style="color:white">New booking!</h2><p style="color:rgba(255,255,255,0.6)"><b style="color:white">Client:</b> ${clientName}<br><b style="color:white">Phone:</b> ${clientPhone}<br><b style="color:white">Master:</b> ${masterName}<br><b style="color:white">Service:</b> ${serviceName}<br><b style="color:white">Date:</b> ${date}<br><b style="color:white">Time:</b> ${time}<br><b style="color:#C9A84C">Price:</b> $${price}</p></div></div>`})
+}
+
+export async function sendTrialEnding({to,ownerName,salonName,daysLeft}:{to:string;ownerName:string;salonName:string;daysLeft:number}){
+  return resend.emails.send({from:FROM,to,subject:`${daysLeft} days left in your Noble trial`,html:`<div style="font-family:Georgia,serif;max-width:480px;margin:0 auto;background:#0F0A00;padding:32px;border-radius:12px"><h1 style="color:#C9A84C;text-align:center">✂ Noble</h1><div style="background:#1a1208;border-radius:8px;padding:24px;border:1px solid rgba(201,168,76,0.2)"><h2 style="color:white">${daysLeft} days left in your trial</h2><p style="color:rgba(255,255,255,0.6)">Hi ${ownerName}, your trial for <b style="color:white">${salonName}</b> expires soon.</p><a href="https://www.noblelink.app/billing" style="display:inline-block;background:#C9A84C;color:black;font-weight:bold;padding:12px 24px;border-radius:6px;text-decoration:none">Upgrade now</a></div></div>`})
+}
+
+export async function sendPaymentSuccess({to,ownerName,salonName,planName,amount}:{to:string;ownerName:string;salonName:string;planName:string;amount:number}){
+  return resend.emails.send({from:FROM,to,subject:`Payment confirmed — ${planName} plan`,html:`<div style="font-family:Georgia,serif;max-width:480px;margin:0 auto;background:#0F0A00;padding:32px;border-radius:12px"><h1 style="color:#C9A84C;text-align:center">✂ Noble</h1><div style="background:#1a1208;border-radius:8px;padding:24px;border:1px solid rgba(201,168,76,0.2)"><h2 style="color:white">Payment confirmed!</h2><p style="color:rgba(255,255,255,0.6)">Hi ${ownerName}, thank you for subscribing.<br><b style="color:white">Salon:</b> ${salonName}<br><b style="color:white">Plan:</b> ${planName}<br><b style="color:#C9A84C">Amount:</b> $${amount}/mo</p></div></div>`})
+}
