@@ -60,7 +60,7 @@ export default function SalonClient({ org, staff, services }: Props) {
   const [selectedTime, setSelectedTime] = useState<string | null>(null)
   const [name, setName] = useState('')
   const [phone, setPhone] = useState('')
-  const [email, setEmail] = useState('')
+  const [clientEmail, setClientEmail] = useState('')
   const [smsConsent, setSmsConsent] = useState(false)
   const [loading, setLoading] = useState(false)
   const [done, setDone] = useState(false)
@@ -79,6 +79,8 @@ export default function SalonClient({ org, staff, services }: Props) {
     setError('')
     try {
       const dateStr = selectedDate.toISOString().split('T')[0]
+      const dateFormatted = selectedDate.toLocaleDateString('uk-UA', { day: 'numeric', month: 'long', year: 'numeric' })
+
       const { error: bookingError } = await supabase.from('bookings').insert({
         org_id: org.id,
         master_id: selectedStaff.id,
@@ -86,11 +88,29 @@ export default function SalonClient({ org, staff, services }: Props) {
         time_slot: selectedTime,
         client_name: name,
         client_phone: phone,
+        client_email: clientEmail || null,
         service_name: selectedService.name,
         price_cents: selectedService.price_cents,
         status: 'confirmed',
       })
       if (bookingError) throw bookingError
+
+      // Send email notifications (fire and forget)
+      fetch('/api/email/booking', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          org_id: org.id,
+          client_name: name,
+          client_phone: phone,
+          client_email: clientEmail || null,
+          master_name: selectedStaff.name,
+          service_name: selectedService.name,
+          date: dateFormatted,
+          time: selectedTime,
+          price_cents: selectedService.price_cents,
+        }),
+      }).catch(err => console.warn('Email notification failed:', err))
 
       if (smsConsent) {
         await fetch('/api/sms/consent', {
@@ -116,10 +136,18 @@ export default function SalonClient({ org, staff, services }: Props) {
           <h2 className="text-2xl font-bold mb-2 text-[#1a1208]">Запис підтверджено!</h2>
           <p className="text-[#8b7a65] text-sm mb-1">{selectedStaff?.name}</p>
           <p className="text-[#8b7a65] text-sm mb-1">{selectedService?.name} · ${((selectedService?.price_cents || 0) / 100).toFixed(0)}</p>
-          <p className="text-[#8b7a65] text-sm mb-4">
+          <p className="text-[#8b7a65] text-sm mb-2">
             {selectedDate?.toLocaleDateString('uk-UA')} о {selectedTime}
           </p>
-          <button onClick={() => { setDone(false); setStep(0); setSelectedStaff(null); setSelectedService(null); setSelectedDate(null); setSelectedTime(null); setName(''); setPhone(''); }}
+          {clientEmail && (
+            <p className="text-[#C9A84C] text-xs mb-4">📧 Підтвердження надіслано на {clientEmail}</p>
+          )}
+          <button onClick={() => {
+            setDone(false); setStep(0);
+            setSelectedStaff(null); setSelectedService(null);
+            setSelectedDate(null); setSelectedTime(null);
+            setName(''); setPhone(''); setClientEmail('');
+          }}
             className="bg-[#C9A84C] text-black font-bold px-6 py-2 rounded-lg hover:bg-[#e8d08a] transition text-sm">
             Новий запис
           </button>
@@ -130,14 +158,12 @@ export default function SalonClient({ org, staff, services }: Props) {
 
   return (
     <main className="min-h-screen bg-[#f5f0e8]">
-      {/* Header */}
       <div className="bg-[#1a1208] text-white px-6 py-8 text-center">
         <h1 className="font-serif text-3xl font-bold mb-1">{org.name}</h1>
         {org.address && <p className="text-white/60 text-sm">{org.address}</p>}
         {org.phone && <p className="text-white/60 text-sm">{org.phone}</p>}
       </div>
 
-      {/* Stepper */}
       <div className="flex justify-center gap-2 px-6 py-4 bg-white border-b border-[#e8dfc9]">
         {STEPS.map((s, i) => (
           <div key={s} className="flex items-center gap-2">
@@ -152,7 +178,6 @@ export default function SalonClient({ org, staff, services }: Props) {
 
       <div className="max-w-lg mx-auto px-4 py-6">
 
-        {/* Step 0 — Staff */}
         {step === 0 && (
           <div>
             <h2 className="text-xl font-bold text-[#1a1208] mb-4">Оберіть майстра</h2>
@@ -173,7 +198,6 @@ export default function SalonClient({ org, staff, services }: Props) {
           </div>
         )}
 
-        {/* Step 1 — Service */}
         {step === 1 && (
           <div>
             <h2 className="text-xl font-bold text-[#1a1208] mb-4">Оберіть послугу</h2>
@@ -197,7 +221,6 @@ export default function SalonClient({ org, staff, services }: Props) {
           </div>
         )}
 
-        {/* Step 2 — Time */}
         {step === 2 && (
           <div>
             <h2 className="text-xl font-bold text-[#1a1208] mb-4">Оберіть час</h2>
@@ -231,7 +254,6 @@ export default function SalonClient({ org, staff, services }: Props) {
           </div>
         )}
 
-        {/* Step 3 — Confirm */}
         {step === 3 && (
           <div>
             <h2 className="text-xl font-bold text-[#1a1208] mb-4">Підтвердження</h2>
@@ -249,6 +271,9 @@ export default function SalonClient({ org, staff, services }: Props) {
               <input value={phone} onChange={e => setPhone(e.target.value)}
                 className="w-full border border-[#e8dfc9] rounded-lg px-3 py-2 text-sm outline-none focus:border-[#C9A84C]"
                 placeholder="+1 (XXX) XXX-XXXX" type="tel" />
+              <input value={clientEmail} onChange={e => setClientEmail(e.target.value)}
+                className="w-full border border-[#e8dfc9] rounded-lg px-3 py-2 text-sm outline-none focus:border-[#C9A84C]"
+                placeholder="Email для підтвердження (необов'язково)" type="email" />
               <label className="flex items-start gap-2 text-xs text-[#8b7a65] cursor-pointer">
                 <input type="checkbox" checked={smsConsent} onChange={e => setSmsConsent(e.target.checked)} className="mt-0.5" />
                 <span>Я погоджуюсь отримувати SMS-нагадування про запис. Відповідайте STOP для відмови.</span>
