@@ -152,7 +152,7 @@ export default function SalonClient({ org, staff, services }: Props) {
               setSelectedDate(null); setSelectedTime(null);
               setName(''); setPhone(''); setClientEmail('');
             }}
-            className="bg-[#1a1208] text-[#C9A84C] font-bold px-6 py-3 rounded-lg hover:bg-[#2d1f0d] transition min-h-[44px]">
+            className="bg-[#C9A84C] text-black font-bold px-6 py-3 rounded-lg hover:bg-[#e8d08a] transition min-h-[44px]">
             Новий запис
           </button>
         </div>
@@ -170,13 +170,13 @@ export default function SalonClient({ org, staff, services }: Props) {
         {org.phone && <p className="text-white/70 text-sm">{org.phone}</p>}
       </div>
 
-      {/* Stepper — WCAG aria-label + aria-current */}
+      {/* Stepper */}
       <nav aria-label="Кроки бронювання" className="bg-white border-b border-[#d4c9b8]">
         <ol className="flex justify-center gap-2 px-6 py-4" role="list">
           {STEPS.map((s, i) => (
             <li key={s} className="flex items-center gap-2">
               <div
-                className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition ${i <= step ? 'bg-[#1a1208] text-[#C9A84C]' : 'bg-[#e8dfc9] text-[#6b5744]'}`}
+                className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition ${i <= step ? 'bg-[#C9A84C] text-black' : 'bg-[#e8dfc9] text-[#6b5744]'}`}
                 aria-label={`Крок ${i + 1}: ${s}${i === step ? ' (поточний)' : i < step ? ' (завершено)' : ''}`}
                 aria-current={i === step ? 'step' : undefined}
               >
@@ -189,13 +189,13 @@ export default function SalonClient({ org, staff, services }: Props) {
         </ol>
       </nav>
 
-      {/* Summary bar — темний текст на бежевому фоні для контрасту */}
+      {/* Summary bar — весь текст темний для контрасту */}
       {(selectedStaff || selectedService || selectedTime) && (
         <div className="bg-[#e8dfc9] border-b border-[#c8bfb0] px-4 py-2" aria-label="Ваш вибір" role="status">
-          <div className="max-w-lg mx-auto flex flex-wrap gap-x-4 gap-y-1 text-xs text-[#4a3728]">
-            {selectedStaff && <span>✂ <strong className="text-[#1a1208]">{selectedStaff.name}</strong></span>}
-            {selectedService && <span>· <strong className="text-[#1a1208]">{selectedService.name}</strong> <span className="text-[#5c3d0e] font-semibold">${(selectedService.price_cents/100).toFixed(0)}</span></span>}
-            {selectedDate && selectedTime && <span>· <strong className="text-[#1a1208]">{selectedDate.toLocaleDateString('uk-UA', { day: 'numeric', month: 'short' })} о {selectedTime}</strong></span>}
+          <div className="max-w-lg mx-auto flex flex-wrap gap-x-4 gap-y-1 text-xs text-[#1a1208]">
+            {selectedStaff && <span>✂ <strong>{selectedStaff.name}</strong></span>}
+            {selectedService && <span>· <strong>{selectedService.name}</strong> <strong>${(selectedService.price_cents/100).toFixed(0)}</strong></span>}
+            {selectedDate && selectedTime && <span>· <strong>{selectedDate.toLocaleDateString('uk-UA', { day: 'numeric', month: 'short' })} о {selectedTime}</strong></span>}
           </div>
         </div>
       )}
@@ -216,8 +216,8 @@ export default function SalonClient({ org, staff, services }: Props) {
                     onClick={() => { setSelectedStaff(m); setStep(1) }}
                     aria-pressed={selectedStaff?.id === m.id}
                     aria-label={`Обрати майстра ${m.name}, ${m.role}`}
-                    className={`bg-white rounded-xl p-4 text-left border-2 transition hover:border-[#1a1208] min-h-[80px] ${selectedStaff?.id === m.id ? 'border-[#1a1208]' : 'border-transparent'}`}>
-                    <div className="w-12 h-12 rounded-full bg-[#1a1208] flex items-center justify-center text-xl mb-2 text-[#C9A84C]" aria-hidden="true">✂</div>
+                    className={`bg-white rounded-xl p-4 text-left border-2 transition hover:border-[#C9A84C] min-h-[80px] ${selectedStaff?.id === m.id ? 'border-[#C9A84C]' : 'border-transparent'}`}>
+                    <div className="w-12 h-12 rounded-full bg-[#C9A84C]/20 flex items-center justify-center text-xl mb-2 text-[#1a1208]" aria-hidden="true">✂</div>
                     <div className="font-semibold text-[#1a1208] text-sm">{m.name}</div>
                     <div className="text-[#4a3728] text-xs capitalize">{m.role}</div>
                   </button>
@@ -241,7 +241,7 @@ export default function SalonClient({ org, staff, services }: Props) {
                     onClick={() => { setSelectedService(s); setStep(2) }}
                     aria-pressed={selectedService?.id === s.id}
                     aria-label={`${s.name}, ${s.duration_min} хвилин, $${(s.price_cents/100).toFixed(0)}`}
-                    className={`w-full bg-white rounded-xl p-4 flex items-center justify-between border-2 transition hover:border-[#1a1208] min-h-[64px] ${selectedService?.id === s.id ? 'border-[#1a1208]' : 'border-transparent'}`}>
+                    className={`w-full bg-white rounded-xl p-4 flex items-center justify-between border-2 transition hover:border-[#C9A84C] min-h-[64px] ${selectedService?.id === s.id ? 'border-[#C9A84C]' : 'border-transparent'}`}>
                     <div className="text-left">
                       <div className="font-semibold text-[#1a1208]">{s.name}</div>
                       <div className="text-[#4a3728] text-sm">{s.duration_min} хв</div>
@@ -251,7 +251,7 @@ export default function SalonClient({ org, staff, services }: Props) {
                 ))}
               </div>
             )}
-            <button onClick={() => setStep(0)} className="mt-4 text-sm text-[#4a3728] hover:text-[#1a1208] underline-offset-2 hover:underline px-2 py-3 min-h-[44px]">← Назад</button>
+            <button onClick={() => setStep(0)} className="mt-4 text-sm text-[#4a3728] hover:text-[#1a1208] hover:underline underline-offset-2 px-2 py-3 min-h-[44px]">← Назад</button>
           </section>
         )}
 
@@ -268,9 +268,9 @@ export default function SalonClient({ org, staff, services }: Props) {
                   onClick={() => setSelectedDate(d)}
                   aria-pressed={selectedDate?.toDateString() === d.toDateString()}
                   aria-label={d.toLocaleDateString('uk-UA', { weekday: 'long', day: 'numeric', month: 'long' })}
-                  className={`flex-none flex flex-col items-center px-3 py-3 rounded-xl border-2 transition min-w-[52px] min-h-[56px] ${selectedDate?.toDateString() === d.toDateString() ? 'border-[#1a1208] bg-[#1a1208] text-white' : 'border-[#d4c9b8] bg-white text-[#1a1208]'}`}>
-                  <span className={`text-xs ${selectedDate?.toDateString() === d.toDateString() ? 'text-[#C9A84C]' : 'text-[#4a3728]'}`} aria-hidden="true">{d.toLocaleDateString('uk-UA', { weekday: 'short' })}</span>
-                  <span className="font-bold" aria-hidden="true">{d.getDate()}</span>
+                  className={`flex-none flex flex-col items-center px-3 py-3 rounded-xl border-2 transition min-w-[52px] min-h-[56px] ${selectedDate?.toDateString() === d.toDateString() ? 'border-[#C9A84C] bg-[#C9A84C]/10' : 'border-[#d4c9b8] bg-white'}`}>
+                  <span className={`text-xs ${selectedDate?.toDateString() === d.toDateString() ? 'text-[#1a1208]' : 'text-[#4a3728]'}`} aria-hidden="true">{d.toLocaleDateString('uk-UA', { weekday: 'short' })}</span>
+                  <span className="font-bold text-[#1a1208]" aria-hidden="true">{d.getDate()}</span>
                 </button>
               ))}
             </div>
@@ -284,7 +284,7 @@ export default function SalonClient({ org, staff, services }: Props) {
                     onClick={() => setSelectedTime(t)}
                     aria-pressed={selectedTime === t}
                     aria-label={`${t} — ${selectedTime === t ? 'обрано' : 'доступно'}`}
-                    className={`py-3 rounded-lg text-sm font-medium border transition min-h-[44px] ${selectedTime === t ? 'border-[#1a1208] bg-[#1a1208] text-white' : 'border-[#d4c9b8] bg-white text-[#1a1208] hover:border-[#1a1208]'}`}>
+                    className={`py-3 rounded-lg text-sm font-medium border transition min-h-[44px] ${selectedTime === t ? 'border-[#C9A84C] bg-[#C9A84C] text-black' : 'border-[#d4c9b8] bg-white text-[#1a1208] hover:border-[#C9A84C]'}`}>
                     {t}
                   </button>
                 ))}
@@ -292,9 +292,9 @@ export default function SalonClient({ org, staff, services }: Props) {
             )}
 
             <div className="flex gap-3 mt-4">
-              <button onClick={() => setStep(1)} className="text-sm text-[#4a3728] hover:text-[#1a1208] underline-offset-2 hover:underline px-2 py-3 min-h-[44px]">← Назад</button>
+              <button onClick={() => setStep(1)} className="text-sm text-[#4a3728] hover:text-[#1a1208] hover:underline underline-offset-2 px-2 py-3 min-h-[44px]">← Назад</button>
               {selectedDate && selectedTime && (
-                <button onClick={() => setStep(3)} className="ml-auto bg-[#1a1208] text-white font-bold px-6 py-3 rounded-lg hover:bg-[#2d1f0d] transition min-h-[44px]">
+                <button onClick={() => setStep(3)} className="ml-auto bg-[#C9A84C] text-black font-bold px-6 py-3 rounded-lg hover:bg-[#e8d08a] transition min-h-[44px]">
                   Далі →
                 </button>
               )}
@@ -307,7 +307,7 @@ export default function SalonClient({ org, staff, services }: Props) {
           <section aria-labelledby="step-confirm">
             <h2 id="step-confirm" className="text-xl font-bold text-[#1a1208] mb-4">Підтвердження</h2>
 
-            {/* Booking summary — темний текст для контрасту */}
+            {/* Booking summary */}
             <div className="bg-white rounded-xl border border-[#d4c9b8] p-4 mb-4 space-y-2 text-sm" aria-label="Деталі запису">
               <div className="flex justify-between">
                 <span className="text-[#4a3728] font-medium">Майстер</span>
@@ -348,7 +348,7 @@ export default function SalonClient({ org, staff, services }: Props) {
                   required
                   aria-required="true"
                   placeholder="Іван Іваненко"
-                  className="w-full border border-[#c8bfb0] rounded-lg px-3 py-3 text-sm text-[#1a1208] outline-none focus:border-[#1a1208] focus:ring-1 focus:ring-[#1a1208] bg-white placeholder-[#8b7a65] min-h-[44px]"
+                  className="w-full border border-[#c8bfb0] rounded-lg px-3 py-3 text-sm text-[#1a1208] outline-none focus:border-[#C9A84C] focus:ring-1 focus:ring-[#C9A84C] bg-white placeholder-[#8b7a65] min-h-[44px]"
                 />
               </div>
               <div>
@@ -365,7 +365,7 @@ export default function SalonClient({ org, staff, services }: Props) {
                   required
                   aria-required="true"
                   placeholder="+1 (555) 000-0000"
-                  className="w-full border border-[#c8bfb0] rounded-lg px-3 py-3 text-sm text-[#1a1208] outline-none focus:border-[#1a1208] focus:ring-1 focus:ring-[#1a1208] bg-white placeholder-[#8b7a65] min-h-[44px]"
+                  className="w-full border border-[#c8bfb0] rounded-lg px-3 py-3 text-sm text-[#1a1208] outline-none focus:border-[#C9A84C] focus:ring-1 focus:ring-[#C9A84C] bg-white placeholder-[#8b7a65] min-h-[44px]"
                 />
               </div>
               <div>
@@ -379,7 +379,7 @@ export default function SalonClient({ org, staff, services }: Props) {
                   onChange={e => setClientEmail(e.target.value)}
                   autoComplete="email"
                   placeholder="your@email.com"
-                  className="w-full border border-[#c8bfb0] rounded-lg px-3 py-3 text-sm text-[#1a1208] outline-none focus:border-[#1a1208] focus:ring-1 focus:ring-[#1a1208] bg-white placeholder-[#8b7a65] min-h-[44px]"
+                  className="w-full border border-[#c8bfb0] rounded-lg px-3 py-3 text-sm text-[#1a1208] outline-none focus:border-[#C9A84C] focus:ring-1 focus:ring-[#C9A84C] bg-white placeholder-[#8b7a65] min-h-[44px]"
                 />
               </div>
               <label className="flex items-start gap-3 cursor-pointer py-1">
@@ -387,7 +387,7 @@ export default function SalonClient({ org, staff, services }: Props) {
                   type="checkbox"
                   checked={smsConsent}
                   onChange={e => setSmsConsent(e.target.checked)}
-                  className="mt-0.5 w-4 h-4 accent-[#1a1208]"
+                  className="mt-0.5 w-4 h-4 accent-[#C9A84C]"
                   aria-describedby="sms-consent-desc"
                 />
                 <span id="sms-consent-desc" className="text-xs text-[#4a3728] leading-relaxed">
@@ -396,17 +396,16 @@ export default function SalonClient({ org, staff, services }: Props) {
               </label>
             </div>
 
-            {/* aria-live error */}
             <div role="alert" aria-live="assertive" aria-atomic="true">
               {error && <div className="text-red-700 text-sm mb-3 bg-red-50 border border-red-300 px-3 py-2 rounded-lg">{error}</div>}
             </div>
 
             <div className="flex gap-3 items-center">
-              <button onClick={() => setStep(2)} className="text-sm text-[#4a3728] hover:text-[#1a1208] underline-offset-2 hover:underline px-2 py-3 min-h-[44px]">← Назад</button>
+              <button onClick={() => setStep(2)} className="text-sm text-[#4a3728] hover:text-[#1a1208] hover:underline underline-offset-2 px-2 py-3 min-h-[44px]">← Назад</button>
               <button
                 onClick={handleConfirm}
                 disabled={loading}
-                className="ml-auto bg-[#1a1208] text-white font-bold px-6 py-3 rounded-lg hover:bg-[#2d1f0d] transition min-h-[44px] disabled:opacity-50">
+                className="ml-auto bg-[#C9A84C] text-black font-bold px-6 py-3 rounded-lg hover:bg-[#e8d08a] transition min-h-[44px] disabled:opacity-50">
                 {loading ? 'Надсилання...' : 'Підтвердити запис →'}
               </button>
             </div>
