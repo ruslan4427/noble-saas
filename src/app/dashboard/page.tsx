@@ -1,6 +1,6 @@
 'use client'
 export const dynamic = 'force-dynamic'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { createClient } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
@@ -32,12 +32,30 @@ interface Service {
   is_active: boolean
 }
 
+function Toast({ message, onClose }: { message: string; onClose: () => void }) {
+  useEffect(() => {
+    const t = setTimeout(onClose, 2500)
+    return () => clearTimeout(t)
+  }, [onClose])
+  return (
+    <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-[#C9A84C] text-black text-sm font-bold px-5 py-3 rounded-xl shadow-lg flex items-center gap-2 animate-fade-in">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+      {message}
+    </div>
+  )
+}
+
+function generateSlug(name: string): string {
+  return name.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '').slice(0, 32)
+}
+
 export default function Dashboard() {
   const [org, setOrg] = useState<Org | null>(null)
   const [staff, setStaff] = useState<Staff[]>([])
   const [services, setServices] = useState<Service[]>([])
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState('overview')
+  const [toast, setToast] = useState<string | null>(null)
   const router = useRouter()
   const supabase = createClient()
 
@@ -54,6 +72,12 @@ export default function Dashboard() {
   const [newServiceDuration, setNewServiceDuration] = useState('30')
   const [serviceSaving, setServiceSaving] = useState(false)
 
+  // Settings form
+  const [settingsName, setSettingsName] = useState('')
+  const [settingsSlug, setSettingsSlug] = useState('')
+  const [settingsSaving, setSettingsSaving] = useState(false)
+  const [settingsError, setSettingsError] = useState('')
+
   useEffect(() => {
     async function load() {
       const { data: { user } } = await supabase.auth.getUser()
@@ -67,6 +91,8 @@ export default function Dashboard() {
 
       if (!orgData) { router.push('/onboarding'); return }
       setOrg(orgData)
+      setSettingsName(orgData.name)
+      setSettingsSlug(orgData.slug)
 
       const [{ data: staffData }, { data: servicesData }] = await Promise.all([
         supabase.from('staff').select('*').eq('org_id', orgData.id).eq('is_active', true),
@@ -80,6 +106,17 @@ export default function Dashboard() {
     load()
   }, [])
 
+  const showToast = useCallback((msg: string) => setToast(msg), [])
+
+  async function handleCopy() {
+    try {
+      await navigator.clipboard.writeText(bookingUrl)
+      showToast('Link copied!')
+    } catch {
+      showToast('Copied!')
+    }
+  }
+
   async function handleAddStaff() {
     if (!newStaffName.trim() || !org) return
     setStaffSaving(true)
@@ -90,6 +127,7 @@ export default function Dashboard() {
     setNewStaffRole('barber')
     setShowAddStaff(false)
     setStaffSaving(false)
+    showToast('Staff member added!')
   }
 
   async function handleAddService() {
@@ -110,6 +148,27 @@ export default function Dashboard() {
     setNewServiceDuration('30')
     setShowAddService(false)
     setServiceSaving(false)
+    showToast('Service added!')
+  }
+
+  async function handleSaveSettings() {
+    if (!org || !settingsName.trim() || !settingsSlug.trim()) return
+    setSettingsSaving(true)
+    setSettingsError('')
+    const slug = generateSlug(settingsSlug)
+    const { error } = await supabase
+      .from('organizations')
+      .update({ name: settingsName.trim(), slug })
+      .eq('id', org.id)
+    if (error) {
+      setSettingsError(error.message.includes('unique') ? 'This URL is already taken. Try another.' : error.message)
+      setSettingsSaving(false)
+      return
+    }
+    setOrg(prev => prev ? { ...prev, name: settingsName.trim(), slug } : prev)
+    setSettingsSlug(slug)
+    setSettingsSaving(false)
+    showToast('Settings saved!')
   }
 
   async function handleLogout() {
@@ -136,6 +195,7 @@ export default function Dashboard() {
 
   return (
     <main className="min-h-screen bg-[#0F0A00] text-white">
+      {toast && <Toast message={toast} onClose={() => setToast(null)} />}
       <TrialBanner />
 
       <nav className="flex items-center justify-between px-6 py-4 border-b border-white/10 sticky top-0 bg-[#0F0A00]/95 backdrop-blur z-50">
@@ -183,19 +243,26 @@ export default function Dashboard() {
               ))}
             </div>
 
+            {/* Booking link block */}
             <div className="bg-white/5 border border-white/10 rounded-xl p-6">
-              <h3 className="font-semibold mb-3">Your booking page</h3>
+              <h3 className="font-semibold mb-1">Your booking page</h3>
+              <p className="text-white/40 text-xs mb-3">Share this link with clients so they can book online.</p>
               <div className="flex items-center gap-3">
-                <code className="bg-black/30 px-3 py-2 rounded text-[#C9A84C] text-sm flex-1 break-all">
+                <code className="bg-black/30 px-3 py-2 rounded text-[#C9A84C] text-sm flex-1 break-all select-all">
                   {bookingUrl}
                 </code>
                 <button
-                  onClick={() => navigator.clipboard?.writeText(bookingUrl)}
-                  className="border border-white/20 text-white/60 px-3 py-2 rounded text-sm hover:border-white/40 transition whitespace-nowrap">
-                  Copy
+                  onClick={handleCopy}
+                  aria-label="Copy booking link"
+                  className="bg-[#C9A84C] text-black text-sm font-bold px-4 py-2 rounded hover:bg-[#e8d08a] transition whitespace-nowrap min-h-[36px]">
+                  Copy link
                 </button>
-                <a href={bookingUrl} target="_blank" rel="noopener noreferrer"
-                  className="border border-white/20 text-white/60 px-3 py-2 rounded text-sm hover:border-white/40 transition whitespace-nowrap">
+                <a
+                  href={bookingUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Open booking page in new tab"
+                  className="border border-white/20 text-white/60 px-4 py-2 rounded text-sm hover:border-white/40 hover:text-white transition whitespace-nowrap min-h-[36px] flex items-center">
                   Open ↗
                 </a>
               </div>
@@ -350,20 +417,45 @@ export default function Dashboard() {
             <h2 className="font-semibold text-lg">Salon settings</h2>
             <div className="bg-white/5 border border-white/10 rounded-xl p-6 space-y-4">
               <div>
-                <label className="text-sm text-white/60 mb-1 block">Salon name</label>
-                <input defaultValue={org?.name}
-                  className="w-full bg-white/10 border border-white/20 rounded px-3 py-2 text-white text-sm outline-none focus:border-[#C9A84C]" />
+                <label htmlFor="settings-name" className="text-sm text-white/60 mb-1 block">Salon name</label>
+                <input
+                  id="settings-name"
+                  value={settingsName}
+                  onChange={e => {
+                    setSettingsName(e.target.value)
+                    setSettingsSlug(generateSlug(e.target.value))
+                  }}
+                  className="w-full bg-white/10 border border-white/20 rounded px-3 py-2 text-white text-sm outline-none focus:border-[#C9A84C]"
+                />
               </div>
               <div>
-                <label className="text-sm text-white/60 mb-1 block">Booking URL</label>
-                <div className="bg-black/30 px-3 py-2 rounded text-[#C9A84C] text-sm font-mono break-all">
-                  {bookingUrl}
+                <label htmlFor="settings-slug" className="text-sm text-white/60 mb-1 block">Booking URL</label>
+                <div className="flex items-center bg-white/10 border border-white/20 rounded overflow-hidden focus-within:border-[#C9A84C]">
+                  <span className="text-white/30 text-xs px-3 py-2 border-r border-white/10 whitespace-nowrap">noblelink.app/salon/</span>
+                  <input
+                    id="settings-slug"
+                    value={settingsSlug}
+                    onChange={e => setSettingsSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '-').replace(/-+/g, '-'))}
+                    className="flex-1 bg-transparent px-3 py-2 text-white text-sm outline-none font-mono"
+                  />
                 </div>
+                <p className="text-white/30 text-xs mt-1">Changing this will break existing links shared with clients.</p>
               </div>
-              <button className="bg-[#C9A84C] text-black font-bold px-4 py-2 rounded hover:bg-[#e8d08a] transition text-sm">
-                Save changes
+
+              {settingsError && (
+                <div className="text-red-400 text-sm bg-red-500/10 border border-red-500/20 rounded px-3 py-2">
+                  {settingsError}
+                </div>
+              )}
+
+              <button
+                onClick={handleSaveSettings}
+                disabled={settingsSaving || !settingsName.trim() || !settingsSlug.trim()}
+                className="bg-[#C9A84C] text-black font-bold px-4 py-2 rounded hover:bg-[#e8d08a] transition text-sm disabled:opacity-50">
+                {settingsSaving ? 'Saving...' : 'Save changes'}
               </button>
             </div>
+
             <div className="bg-white/5 border border-white/10 rounded-xl p-6">
               <h3 className="font-semibold mb-3">Subscription</h3>
               <p className="text-white/50 text-sm mb-4">
