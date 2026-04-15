@@ -45,9 +45,112 @@ function Toast({ message, onClose }: { message: string; onClose: () => void }) {
   )
 }
 
+// ── Onboarding Checklist ───────────────────────────────────────────────────
+interface ChecklistProps {
+  hasService: boolean
+  hasStaff: boolean
+  hasCopiedLink: boolean
+  onAddService: () => void
+  onAddStaff: () => void
+  onCopyLink: () => void
+}
+
+function OnboardingChecklist({ hasService, hasStaff, hasCopiedLink, onAddService, onAddStaff, onCopyLink }: ChecklistProps) {
+  const steps = [
+    {
+      id: 'service',
+      done: hasService,
+      label: 'Add your first service',
+      sub: 'e.g. Haircut · 30 min · $25',
+      action: onAddService,
+      cta: 'Add service',
+    },
+    {
+      id: 'staff',
+      done: hasStaff,
+      label: 'Add a staff member',
+      sub: 'Let clients choose their barber',
+      action: onAddStaff,
+      cta: 'Add staff',
+    },
+    {
+      id: 'link',
+      done: hasCopiedLink,
+      label: 'Share your booking link',
+      sub: 'Copy and send to your clients',
+      action: onCopyLink,
+      cta: 'Copy link',
+    },
+  ]
+
+  const doneCount = steps.filter(s => s.done).length
+  const allDone = doneCount === steps.length
+  const pct = Math.round((doneCount / steps.length) * 100)
+
+  // Hide once all steps done
+  if (allDone) return null
+
+  return (
+    <div className="bg-white/5 border border-white/10 rounded-xl p-6" role="region" aria-label="Getting started checklist">
+      {/* Header */}
+      <div className="flex items-start justify-between mb-4">
+        <div>
+          <h3 className="font-semibold text-white">Get started</h3>
+          <p className="text-white/40 text-xs mt-0.5">{doneCount} of {steps.length} steps completed</p>
+        </div>
+        <span className="text-[#C9A84C] text-sm font-bold">{pct}%</span>
+      </div>
+
+      {/* Progress bar */}
+      <div className="w-full h-1.5 bg-white/10 rounded-full mb-5 overflow-hidden" role="progressbar" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100} aria-label="Onboarding progress">
+        <div
+          className="h-full bg-[#C9A84C] rounded-full transition-all duration-500"
+          style={{ width: `${pct}%` }}
+        />
+      </div>
+
+      {/* Steps */}
+      <ol className="space-y-3" aria-label="Setup steps">
+        {steps.map((step, i) => (
+          <li key={step.id} className={`flex items-center gap-4 rounded-xl px-4 py-3 transition ${step.done ? 'opacity-50' : 'bg-white/5'}`}>
+
+            {/* Circle / checkmark */}
+            <div className={`w-7 h-7 rounded-full flex-none flex items-center justify-center border-2 transition ${step.done ? 'bg-[#C9A84C] border-[#C9A84C]' : 'border-white/20'}`} aria-hidden="true">
+              {step.done ? (
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="3"><polyline points="20 6 9 17 4 12"/></svg>
+              ) : (
+                <span className="text-white/30 text-xs font-bold">{i + 1}</span>
+              )}
+            </div>
+
+            {/* Text */}
+            <div className="flex-1 min-w-0">
+              <p className={`text-sm font-medium ${step.done ? 'line-through text-white/40' : 'text-white'}`}>{step.label}</p>
+              {!step.done && <p className="text-white/30 text-xs mt-0.5">{step.sub}</p>}
+            </div>
+
+            {/* CTA */}
+            {!step.done && (
+              <button
+                onClick={step.action}
+                className="flex-none text-xs font-bold text-black bg-[#C9A84C] hover:bg-[#e8d08a] transition px-3 py-1.5 rounded-lg whitespace-nowrap"
+                aria-label={step.cta}>
+                {step.cta} →
+              </button>
+            )}
+          </li>
+        ))}
+      </ol>
+    </div>
+  )
+}
+// ──────────────────────────────────────────────────────────────────────────
+
 function generateSlug(name: string): string {
   return name.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '').slice(0, 32)
 }
+
+const COPIED_LINK_KEY = 'noble_onboarding_copied_link'
 
 export default function Dashboard() {
   const [org, setOrg] = useState<Org | null>(null)
@@ -56,6 +159,7 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState('overview')
   const [toast, setToast] = useState<string | null>(null)
+  const [hasCopiedLink, setHasCopiedLink] = useState(false)
   const router = useRouter()
   const supabase = createClient()
 
@@ -79,6 +183,9 @@ export default function Dashboard() {
   const [settingsError, setSettingsError] = useState('')
 
   useEffect(() => {
+    // Persist copy-link step across sessions
+    setHasCopiedLink(!!localStorage.getItem(COPIED_LINK_KEY))
+
     async function load() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { router.push('/login'); return }
@@ -111,6 +218,8 @@ export default function Dashboard() {
   async function handleCopy() {
     try {
       await navigator.clipboard.writeText(bookingUrl)
+      localStorage.setItem(COPIED_LINK_KEY, '1')
+      setHasCopiedLink(true)
       showToast('Link copied!')
     } catch {
       showToast('Copied!')
@@ -185,6 +294,11 @@ export default function Dashboard() {
   const days = trialDaysLeft()
   const bookingUrl = `${APP_URL}/salon/${org?.slug}`
 
+  // Checklist derived state
+  const hasService = services.length > 0
+  const hasStaff = staff.length > 0
+  const checklistAllDone = hasService && hasStaff && hasCopiedLink
+
   if (loading) {
     return (
       <main className="min-h-screen bg-[#0F0A00] flex items-center justify-center">
@@ -229,6 +343,19 @@ export default function Dashboard() {
         {/* Overview */}
         {activeTab === 'overview' && (
           <div className="space-y-6">
+
+            {/* Onboarding checklist — visible until all 3 steps done */}
+            {!checklistAllDone && (
+              <OnboardingChecklist
+                hasService={hasService}
+                hasStaff={hasStaff}
+                hasCopiedLink={hasCopiedLink}
+                onAddService={() => { setActiveTab('services'); setShowAddService(true) }}
+                onAddStaff={() => { setActiveTab('staff'); setShowAddStaff(true) }}
+                onCopyLink={handleCopy}
+              />
+            )}
+
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {[
                 { label: 'Staff members', value: staff.length },
