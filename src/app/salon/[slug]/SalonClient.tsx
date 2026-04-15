@@ -25,6 +25,15 @@ interface Service {
   duration_min: number
 }
 
+interface DaySchedule {
+  day_of_week: number
+  is_day_off: boolean
+  work_start: string | null
+  work_end: string | null
+  break_start: string | null
+  break_end: string | null
+}
+
 interface Props {
   org: Org
   staff: Staff[]
@@ -41,12 +50,53 @@ function getDates() {
   return dates
 }
 
-function getTimeSlots() {
-  const slots = []
-  for (let h = 9; h < 19; h++) {
-    slots.push(`${String(h).padStart(2,'0')}:00`)
-    slots.push(`${String(h).padStart(2,'0')}:30`)
+// Generate slots respecting schedule + break + existing bookings
+function buildSlots(
+  date: Date,
+  schedule: DaySchedule | null,
+  bookedSlots: string[],
+  serviceDuration: number
+): { time: string; available: boolean }[] {
+  // If no schedule or day off → no slots
+  if (!schedule || schedule.is_day_off) return []
+
+  const workStart = schedule.work_start || '09:00'
+  const workEnd = schedule.work_end || '18:00'
+  const breakStart = schedule.break_start
+  const breakEnd = schedule.break_end
+
+  const [wsh, wsm] = workStart.split(':').map(Number)
+  const [weh, wem] = workEnd.split(':').map(Number)
+  const workStartMin = wsh * 60 + wsm
+  const workEndMin = weh * 60 + wem
+
+  const bsMin = breakStart ? (() => { const [h, m] = breakStart.split(':').map(Number); return h * 60 + m })() : null
+  const beMin = breakEnd ? (() => { const [h, m] = breakEnd.split(':').map(Number); return h * 60 + m })() : null
+
+  const slots: { time: string; available: boolean }[] = []
+  const now = new Date()
+  const isToday = date.toDateString() === now.toDateString()
+  const nowMin = now.getHours() * 60 + now.getMinutes()
+
+  for (let min = workStartMin; min + serviceDuration <= workEndMin; min += 30) {
+    const slotEnd = min + serviceDuration
+
+    // Skip if in break
+    if (bsMin !== null && beMin !== null) {
+      if (min < beMin && slotEnd > bsMin) continue
+    }
+
+    const h = String(Math.floor(min / 60)).padStart(2, '0')
+    const m = String(min % 60).padStart(2, '0')
+    const time = `${h}:${m}`
+
+    // Skip past slots for today
+    if (isToday && min <= nowMin) continue
+
+    const available = !bookedSlots.includes(time)
+    slots.push({ time, available })
   }
+
   return slots
 }
 
@@ -64,7 +114,7 @@ function LoadingState() {
       </div>
       <div className="max-w-lg mx-auto px-4 -mt-6">
         <div className="bg-white rounded-2xl p-5 shadow-sm space-y-3">
-          {[1,2,3].map(i => (
+          {[1, 2, 3].map(i => (
             <div key={i} className="flex items-center gap-3">
               <Skeleton className="w-12 h-12 rounded-full" />
               <div className="flex-1 space-y-2">
@@ -92,120 +142,168 @@ export default function SalonClient({ org, staff, services }: Props) {
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
   const [pageLoading, setPageLoading] = useState(true)
-  const supabase = createClient()
 
+  // Schedule state
+  const [scheduleMap, setScheduleMap] = useState<Record<string, DaySchedule[]>>({})
+  const [vacationMap, setVacationMap] = useState<Record<string, { date_from: string; date_to: string }[]>>({})
+  const [bookedSlotsMap, setBookedSlotsMap] = useState<Record<string, string[]>>({}) // key: staffId_dateStr
+  const [slotsLoading, setSlotsLoading] = useState(false)
+
+  const supabase = createClient()
   const dates = getDates()
-  const timeSlots = getTimeSlots()
 
   useEffect(() => {
     const t = setTimeout(() => setPageLoading(false), 300)
     return () => clearTimeout(t)
   }, [])
 
+  // Load schedule for selected staff
+  useEffect(() => {
+    if (!selectedStaff) return
+    const sid = selectedStaff.id
+    if (scheduleMap[sid]) return // already loaded
+
+    async function loadSchedule() {
+      const [{ data: sched }, { data: vac }] = await Promise.all([
+        supabase.from('staff_schedule').select('*').eq('staff_id', sid),
+        supabase.from('vacation_blocks').select('date_from,date_to').eq('staff_id', sid),
+      ])
+      setScheduleMap(prev => ({ ...prev, [sid]: sched || [] }))
+      setVacationMap(prev => ({ ...prev, [sid]: vac || [] }))
+    }
+    loadSchedule()
+  }, [selectedStaff])
+
+  // Load booked slots when date changes
+  useEffect(() => {
+    if (!selectedStaff || !selectedDate) return
+    const sid = selectedStaff.id
+    const dateStr = toDateStr(selectedDate)
+    const key = `${sid}_${dateStr}`
+    if (bookedSlotsMap[key] !== undefined) return
+
+    async function loadBooked() {
+      setSlotsLoading(true)
+      const { data } = await supabase
+        .from('bookings')
+        .select('time_slot')
+        .eq('master_id', sid)
+        .eq('date', dateStr)
+        .neq('status', 'cancelled')
+      const slots = (data || []).map((b: { time_slot: string }) => b.time_slot)
+      setBookedSlotsMap(prev => ({ ...prev, [key]: slots }))
+      setSlotsLoading(false)
+    }
+    loadBooked()
+  }, [selectedStaff, selectedDate])
+
+  function toDateStr(d: Date) {
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+  }
+
+  // Check if date is blocked by vacation
+  function isVacationDate(staffId: string, date: Date): boolean {
+    const vacs = vacationMap[staffId] || []
+    const dateStr = toDateStr(date)
+    return vacs.some(v => dateStr >= v.date_from && dateStr <= v.date_to)
+  }
+
+  // Get schedule for a specific day
+  function getScheduleForDate(staffId: string, date: Date): DaySchedule | null {
+    const sched = scheduleMap[staffId] || []
+    const dow = date.getDay()
+    return sched.find(s => s.day_of_week === dow) || null
+  }
+
+  // Get available slots for selected staff+date+service
+  function getAvailableSlots(): { time: string; available: boolean }[] {
+    if (!selectedStaff || !selectedDate || !selectedService) return []
+    const sid = selectedStaff.id
+    const dateStr = toDateStr(selectedDate)
+    const key = `${sid}_${dateStr}`
+    const booked = bookedSlotsMap[key] || []
+    const sched = getScheduleForDate(sid, selectedDate)
+    return buildSlots(selectedDate, sched, booked, selectedService.duration_min)
+  }
+
+  // Check if a date is fully unavailable (day off or vacation)
+  function isDateUnavailable(staffId: string, date: Date): boolean {
+    if (isVacationDate(staffId, date)) return true
+    const sched = getScheduleForDate(staffId, date)
+    if (!sched) return false // no schedule = default available
+    return sched.is_day_off
+  }
+
   const hasStaff = staff.length > 0
   const hasServices = services.length > 0
 
-  // If only 1 staff — skip staff step
   function handleBookCTA() {
     if (!hasStaff) return
-    if (staff.length === 1) {
-      setSelectedStaff(staff[0])
-      setStep('service')
-    } else {
-      setStep('staff')
-    }
+    if (staff.length === 1) { setSelectedStaff(staff[0]); setStep('service') }
+    else setStep('staff')
   }
 
-  function handleSelectStaff(m: Staff) {
-    setSelectedStaff(m)
-    setStep('service')
-  }
-
-  function handleSelectService(s: Service) {
-    setSelectedService(s)
-    setStep('time')
-  }
+  function handleSelectStaff(m: Staff) { setSelectedStaff(m); setStep('service') }
+  function handleSelectService(s: Service) { setSelectedService(s); setStep('time') }
 
   async function handleConfirm() {
     if (!selectedStaff || !selectedService || !selectedDate || !selectedTime || !name || !phone) {
       setError('Будь ласка, заповніть всі обов\'язкові поля')
       return
     }
-    setSubmitting(true)
-    setError('')
+    setSubmitting(true); setError('')
     try {
-      const dateStr = selectedDate.toISOString().split('T')[0]
+      const dateStr = toDateStr(selectedDate)
       const dateFormatted = selectedDate.toLocaleDateString('uk-UA', { day: 'numeric', month: 'long', year: 'numeric' })
       const [hours, minutes] = selectedTime.split(':').map(Number)
-      const startISO = `${dateStr}T${String(hours).padStart(2,'0')}:${String(minutes).padStart(2,'0')}:00`
+      const startISO = `${dateStr}T${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:00`
       const startDate = new Date(startISO)
       const reminderAt = new Date(startDate.getTime() - 2 * 60 * 60 * 1000)
 
       const { error: bookingError } = await supabase.from('bookings').insert({
-        org_id: org.id,
-        master_id: selectedStaff.id,
-        date: dateStr,
-        time_slot: selectedTime,
-        start_time: startDate.toISOString(),
+        org_id: org.id, master_id: selectedStaff.id, date: dateStr,
+        time_slot: selectedTime, start_time: startDate.toISOString(),
         reminder_at: clientEmail ? reminderAt.toISOString() : null,
-        reminder_sent: false,
-        client_name: name,
-        client_phone: phone,
-        client_email: clientEmail || null,
-        service_name: selectedService.name,
-        price_cents: selectedService.price_cents,
-        status: 'confirmed',
+        reminder_sent: false, client_name: name, client_phone: phone,
+        client_email: clientEmail || null, service_name: selectedService.name,
+        price_cents: selectedService.price_cents, status: 'confirmed',
       })
       if (bookingError) throw bookingError
 
       fetch('/api/email/booking', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          org_id: org.id,
-          client_name: name,
-          client_phone: phone,
-          client_email: clientEmail || null,
-          master_name: selectedStaff.name,
-          service_name: selectedService.name,
-          date: dateFormatted,
-          time: selectedTime,
-          price_cents: selectedService.price_cents,
+          org_id: org.id, client_name: name, client_phone: phone,
+          client_email: clientEmail || null, master_name: selectedStaff.name,
+          service_name: selectedService.name, date: dateFormatted,
+          time: selectedTime, price_cents: selectedService.price_cents,
         }),
       }).catch(() => {})
 
       if (smsConsent) {
         fetch('/api/sms/consent', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ org_id: org.id, client_phone: phone, client_name: name, consented: true }),
         }).catch(() => {})
       }
       setStep('done')
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Помилка. Спробуйте ще раз.')
-    } finally {
-      setSubmitting(false)
-    }
+    } finally { setSubmitting(false) }
   }
 
   function resetBooking() {
-    setStep('hero')
-    setSelectedStaff(null)
-    setSelectedService(null)
-    setSelectedDate(null)
-    setSelectedTime(null)
-    setName(''); setPhone(''); setClientEmail('')
-    setError('')
+    setStep('hero'); setSelectedStaff(null); setSelectedService(null)
+    setSelectedDate(null); setSelectedTime(null)
+    setName(''); setPhone(''); setClientEmail(''); setError('')
   }
 
   if (pageLoading) return <LoadingState />
 
-  // ── DONE ──────────────────────────────────────────────
+  // ── DONE ──────────────────────────────────────────────────────────────────
   if (step === 'done') {
     return (
       <main className="min-h-screen bg-[#f5f0e8] flex flex-col" lang="uk">
-        {/* Header */}
         <div className="bg-[#1a1208] px-6 py-5 text-center">
           <p className="font-serif text-[#C9A84C] text-lg font-bold">✂ {org.name}</p>
         </div>
@@ -217,38 +315,22 @@ export default function SalonClient({ org, staff, services }: Props) {
             <h1 className="text-xl font-bold text-[#1a1208] mb-1">Запис підтверджено!</h1>
             <p className="text-[#4a3728] text-sm mb-4">Чекаємо вас у салоні</p>
             <div className="bg-[#f5f0e8] rounded-xl p-4 text-sm text-left space-y-2 mb-6">
-              <div className="flex justify-between">
-                <span className="text-[#6b5744]">Майстер</span>
-                <span className="font-semibold text-[#1a1208]">{selectedStaff?.name}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-[#6b5744]">Послуга</span>
-                <span className="font-semibold text-[#1a1208]">{selectedService?.name}</span>
-              </div>
+              <div className="flex justify-between"><span className="text-[#6b5744]">Майстер</span><span className="font-semibold text-[#1a1208]">{selectedStaff?.name}</span></div>
+              <div className="flex justify-between"><span className="text-[#6b5744]">Послуга</span><span className="font-semibold text-[#1a1208]">{selectedService?.name}</span></div>
               <div className="h-px bg-[#e8dfc9]" />
-              <div className="flex justify-between">
-                <span className="text-[#6b5744]">Дата</span>
-                <span className="font-semibold text-[#1a1208]">{selectedDate?.toLocaleDateString('uk-UA', { day: 'numeric', month: 'long' })}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-[#6b5744]">Час</span>
-                <span className="font-bold text-[#1a1208]">{selectedTime}</span>
-              </div>
+              <div className="flex justify-between"><span className="text-[#6b5744]">Дата</span><span className="font-semibold text-[#1a1208]">{selectedDate?.toLocaleDateString('uk-UA', { day: 'numeric', month: 'long' })}</span></div>
+              <div className="flex justify-between"><span className="text-[#6b5744]">Час</span><span className="font-bold text-[#1a1208]">{selectedTime}</span></div>
             </div>
-            {clientEmail && (
-              <p className="text-[#6b5744] text-xs mb-4">📧 Підтвердження надіслано на {clientEmail}</p>
-            )}
-            <button onClick={resetBooking} className="w-full bg-[#1a1208] text-[#C9A84C] font-bold py-3 rounded-xl hover:bg-[#2d1f0d] transition min-h-[44px]">
-              Новий запис
-            </button>
+            {clientEmail && <p className="text-[#6b5744] text-xs mb-4">📧 Підтвердження надіслано на {clientEmail}</p>}
+            <button onClick={resetBooking} className="w-full bg-[#1a1208] text-[#C9A84C] font-bold py-3 rounded-xl hover:bg-[#2d1f0d] transition min-h-[44px]">Новий запис</button>
           </div>
         </div>
       </main>
     )
   }
 
-  // ── SHARED LAYOUT ─────────────────────────────────────
   const isHero = step === 'hero'
+  const availableSlots = step === 'time' ? getAvailableSlots() : []
 
   return (
     <main className="min-h-screen bg-[#f5f0e8] flex flex-col" lang="uk">
@@ -275,13 +357,9 @@ export default function SalonClient({ org, staff, services }: Props) {
               </a>
             )}
             {!hasStaff || !hasServices ? (
-              <div className="mt-6 bg-white/10 text-white/60 text-sm px-4 py-3 rounded-xl inline-block">
-                Салон ще налаштовується. Заходьте пізніше.
-              </div>
+              <div className="mt-6 bg-white/10 text-white/60 text-sm px-4 py-3 rounded-xl inline-block">Салон ще налаштовується. Заходьте пізніше.</div>
             ) : (
-              <button
-                onClick={handleBookCTA}
-                className="mt-6 bg-[#C9A84C] text-black font-bold px-8 py-4 rounded-xl hover:bg-[#e8d08a] transition text-base min-h-[52px] shadow-lg shadow-[#C9A84C]/20 active:scale-[0.98]">
+              <button onClick={handleBookCTA} className="mt-6 bg-[#C9A84C] text-black font-bold px-8 py-4 rounded-xl hover:bg-[#e8d08a] transition text-base min-h-[52px] shadow-lg shadow-[#C9A84C]/20 active:scale-[0.98]">
                 Записатись онлайн →
               </button>
             )}
@@ -297,7 +375,7 @@ export default function SalonClient({ org, staff, services }: Props) {
         )}
       </div>
 
-      {/* Services preview on hero */}
+      {/* Services/staff preview on hero */}
       {isHero && hasStaff && hasServices && (
         <div className="max-w-lg mx-auto w-full px-4 -mt-6 pb-8">
           <div className="bg-white rounded-2xl shadow-sm border border-[#e8dfc9] overflow-hidden">
@@ -306,34 +384,25 @@ export default function SalonClient({ org, staff, services }: Props) {
             </div>
             <div className="divide-y divide-[#f0e8dc]">
               {services.slice(0, 4).map(s => (
-                <button
-                  key={s.id}
-                  onClick={() => {
-                    if (staff.length === 1) setSelectedStaff(staff[0])
-                    setSelectedService(s)
-                    setStep(staff.length === 1 ? 'time' : 'staff')
-                  }}
+                <button key={s.id}
+                  onClick={() => { if (staff.length === 1) setSelectedStaff(staff[0]); setSelectedService(s); setStep(staff.length === 1 ? 'time' : 'staff') }}
                   className="w-full flex items-center justify-between px-4 py-3.5 hover:bg-[#faf7f2] transition text-left active:bg-[#f5f0e8]"
-                  aria-label={`Записатись на ${s.name}, ${s.duration_min} хв, $${(s.price_cents/100).toFixed(0)}`}>
+                  aria-label={`Записатись на ${s.name}, ${s.duration_min} хв, $${(s.price_cents / 100).toFixed(0)}`}>
                   <div>
                     <div className="font-semibold text-[#1a1208] text-sm">{s.name}</div>
                     <div className="text-[#6b5744] text-xs mt-0.5">{s.duration_min} хв</div>
                   </div>
                   <div className="flex items-center gap-3">
-                    <span className="font-bold text-[#1a1208] text-sm">${(s.price_cents/100).toFixed(0)}</span>
+                    <span className="font-bold text-[#1a1208] text-sm">${(s.price_cents / 100).toFixed(0)}</span>
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" strokeWidth="2.5" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
                   </div>
                 </button>
               ))}
               {services.length > 4 && (
-                <button onClick={handleBookCTA} className="w-full px-4 py-3 text-sm text-[#C9A84C] font-medium hover:bg-[#faf7f2] transition text-center">
-                  Ще {services.length - 4} послуг →
-                </button>
+                <button onClick={handleBookCTA} className="w-full px-4 py-3 text-sm text-[#C9A84C] font-medium hover:bg-[#faf7f2] transition text-center">Ще {services.length - 4} послуг →</button>
               )}
             </div>
           </div>
-
-          {/* Staff preview */}
           {staff.length > 0 && (
             <div className="mt-4 bg-white rounded-2xl shadow-sm border border-[#e8dfc9] overflow-hidden">
               <div className="px-4 pt-4 pb-2 border-b border-[#f0e8dc]">
@@ -355,33 +424,26 @@ export default function SalonClient({ org, staff, services }: Props) {
         </div>
       )}
 
-      {/* Empty state on hero */}
       {isHero && (!hasStaff || !hasServices) && (
         <div className="max-w-lg mx-auto w-full px-4 -mt-6 pb-8">
           <div className="bg-white rounded-2xl shadow-sm border border-[#e8dfc9] p-8 text-center">
             <div className="w-14 h-14 bg-[#f5f0e8] rounded-full flex items-center justify-center mx-auto mb-3">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" strokeWidth="1.5" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
             </div>
-            <p className="font-semibold text-[#1a1208] mb-1">
-              {!hasStaff ? 'Майстрів ще немає' : 'Послуг ще немає'}
-            </p>
+            <p className="font-semibold text-[#1a1208] mb-1">{!hasStaff ? 'Майстрів ще немає' : 'Послуг ще немає'}</p>
             <p className="text-[#6b5744] text-sm">Власник салону скоро додасть інформацію.</p>
           </div>
         </div>
       )}
 
-      {/* ── BOOKING FLOW ── */}
+      {/* Booking flow */}
       {!isHero && (
         <div className="flex-1 max-w-lg mx-auto w-full px-4 py-6">
 
-          {/* Progress bar */}
+          {/* Progress */}
           <div className="flex gap-1 mb-6" role="progressbar" aria-label="Прогрес бронювання">
             {(['staff', 'service', 'time', 'confirm'] as const).map((s, i) => (
-              <div key={s} className={`flex-1 h-1 rounded-full transition-all ${
-                step === s ? 'bg-[#C9A84C]' :
-                ['staff','service','time','confirm'].indexOf(step) > i ? 'bg-[#1a1208]' :
-                'bg-[#d4c9b8]'
-              }`} />
+              <div key={s} className={`flex-1 h-1 rounded-full transition-all ${step === s ? 'bg-[#C9A84C]' : ['staff', 'service', 'time', 'confirm'].indexOf(step) > i ? 'bg-[#1a1208]' : 'bg-[#d4c9b8]'}`} />
             ))}
           </div>
 
@@ -389,7 +451,7 @@ export default function SalonClient({ org, staff, services }: Props) {
           {(selectedStaff || selectedService || selectedTime) && (
             <div className="bg-white border border-[#e8dfc9] rounded-xl px-4 py-2.5 mb-4 flex flex-wrap gap-x-3 gap-y-1 text-xs text-[#1a1208]" role="status">
               {selectedStaff && <span className="font-medium">✂ {selectedStaff.name}</span>}
-              {selectedService && <span className="text-[#6b5744]">· {selectedService.name} <strong className="text-[#1a1208]">${(selectedService.price_cents/100).toFixed(0)}</strong></span>}
+              {selectedService && <span className="text-[#6b5744]">· {selectedService.name} <strong className="text-[#1a1208]">${(selectedService.price_cents / 100).toFixed(0)}</strong></span>}
               {selectedDate && selectedTime && <span className="text-[#6b5744]">· <strong className="text-[#1a1208]">{selectedDate.toLocaleDateString('uk-UA', { day: 'numeric', month: 'short' })} {selectedTime}</strong></span>}
             </div>
           )}
@@ -400,9 +462,7 @@ export default function SalonClient({ org, staff, services }: Props) {
               <h2 id="step-staff-title" className="text-lg font-bold text-[#1a1208] mb-4">Оберіть майстра</h2>
               <div className="space-y-2">
                 {staff.map(m => (
-                  <button
-                    key={m.id}
-                    onClick={() => handleSelectStaff(m)}
+                  <button key={m.id} onClick={() => handleSelectStaff(m)}
                     className="w-full bg-white rounded-xl px-4 py-3.5 flex items-center gap-3 border-2 border-transparent hover:border-[#C9A84C] transition active:scale-[0.99]"
                     aria-label={`Обрати ${m.name}, ${m.role}`}>
                     <div className="w-10 h-10 rounded-full bg-[#f5f0e8] flex items-center justify-center flex-none" aria-hidden="true">
@@ -423,30 +483,22 @@ export default function SalonClient({ org, staff, services }: Props) {
           {step === 'service' && (
             <section aria-labelledby="step-service-title">
               <h2 id="step-service-title" className="text-lg font-bold text-[#1a1208] mb-4">Оберіть послугу</h2>
-              {services.length === 0 ? (
-                <div className="bg-white rounded-xl p-6 text-center">
-                  <p className="text-[#6b5744] text-sm">Послуг ще немає. Власник салону скоро додасть.</p>
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  {services.map(s => (
-                    <button
-                      key={s.id}
-                      onClick={() => handleSelectService(s)}
-                      className="w-full bg-white rounded-xl px-4 py-3.5 flex items-center justify-between border-2 border-transparent hover:border-[#C9A84C] transition active:scale-[0.99]"
-                      aria-label={`${s.name}, ${s.duration_min} хв, $${(s.price_cents/100).toFixed(0)}`}>
-                      <div className="text-left">
-                        <div className="font-semibold text-[#1a1208] text-sm">{s.name}</div>
-                        <div className="text-[#6b5744] text-xs mt-0.5">{s.duration_min} хв</div>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <span className="font-bold text-[#1a1208]">${(s.price_cents/100).toFixed(0)}</span>
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" strokeWidth="2.5" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              )}
+              <div className="space-y-2">
+                {services.map(s => (
+                  <button key={s.id} onClick={() => handleSelectService(s)}
+                    className="w-full bg-white rounded-xl px-4 py-3.5 flex items-center justify-between border-2 border-transparent hover:border-[#C9A84C] transition active:scale-[0.99]"
+                    aria-label={`${s.name}, ${s.duration_min} хв, $${(s.price_cents / 100).toFixed(0)}`}>
+                    <div className="text-left">
+                      <div className="font-semibold text-[#1a1208] text-sm">{s.name}</div>
+                      <div className="text-[#6b5744] text-xs mt-0.5">{s.duration_min} хв</div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <span className="font-bold text-[#1a1208]">${(s.price_cents / 100).toFixed(0)}</span>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" strokeWidth="2.5" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
+                    </div>
+                  </button>
+                ))}
+              </div>
               {staff.length > 1 && (
                 <button onClick={() => setStep('staff')} className="mt-4 text-sm text-[#6b5744] hover:text-[#1a1208] hover:underline px-1 py-2 min-h-[44px]">← Назад</button>
               )}
@@ -458,19 +510,25 @@ export default function SalonClient({ org, staff, services }: Props) {
             <section aria-labelledby="step-time-title">
               <h2 id="step-time-title" className="text-lg font-bold text-[#1a1208] mb-4">Оберіть час</h2>
 
-              {/* Dates */}
+              {/* Date pills */}
               <div className="flex gap-2 overflow-x-auto pb-2 mb-4 -mx-4 px-4" role="group" aria-label="Дата">
                 {dates.map(d => {
                   const isSelected = selectedDate?.toDateString() === d.toDateString()
+                  const unavailable = selectedStaff ? isDateUnavailable(selectedStaff.id, d) : false
                   return (
-                    <button
-                      key={d.toISOString()}
-                      onClick={() => { setSelectedDate(d); setSelectedTime(null) }}
+                    <button key={d.toISOString()}
+                      onClick={() => { if (!unavailable) { setSelectedDate(d); setSelectedTime(null) } }}
+                      disabled={unavailable}
                       aria-pressed={isSelected}
-                      aria-label={d.toLocaleDateString('uk-UA', { weekday: 'long', day: 'numeric', month: 'long' })}
-                      className={`flex-none flex flex-col items-center px-3.5 py-2.5 rounded-xl border-2 transition min-w-[52px] min-h-[56px] active:scale-[0.97] ${isSelected ? 'border-[#C9A84C] bg-[#1a1208] text-white' : 'border-[#d4c9b8] bg-white text-[#1a1208]'}`}>
-                      <span className={`text-[10px] font-medium ${isSelected ? 'text-[#C9A84C]' : 'text-[#6b5744]'}`} aria-hidden="true">{d.toLocaleDateString('uk-UA', { weekday: 'short' })}</span>
+                      aria-label={`${d.toLocaleDateString('uk-UA', { weekday: 'long', day: 'numeric', month: 'long' })}${unavailable ? ' — недоступно' : ''}`}
+                      className={`flex-none flex flex-col items-center px-3.5 py-2.5 rounded-xl border-2 transition min-w-[52px] min-h-[56px] active:scale-[0.97]
+                        ${unavailable ? 'border-[#e8dfc9] bg-[#f0ebe0] opacity-40 cursor-not-allowed' :
+                          isSelected ? 'border-[#C9A84C] bg-[#1a1208] text-white' : 'border-[#d4c9b8] bg-white text-[#1a1208]'}`}>
+                      <span className={`text-[10px] font-medium ${isSelected ? 'text-[#C9A84C]' : unavailable ? 'text-[#8b7a65]' : 'text-[#6b5744]'}`} aria-hidden="true">
+                        {d.toLocaleDateString('uk-UA', { weekday: 'short' })}
+                      </span>
                       <span className="font-bold text-sm" aria-hidden="true">{d.getDate()}</span>
+                      {unavailable && <span className="text-[8px] text-[#8b7a65] mt-0.5" aria-hidden="true">вихідний</span>}
                     </button>
                   )
                 })}
@@ -478,18 +536,28 @@ export default function SalonClient({ org, staff, services }: Props) {
 
               {/* Time slots */}
               {!selectedDate ? (
+                <div className="bg-white rounded-xl p-5 text-center text-sm text-[#6b5744]">Оберіть дату, щоб побачити доступні слоти</div>
+              ) : slotsLoading ? (
+                <div className="bg-white rounded-xl p-5 text-center">
+                  <svg className="animate-spin w-5 h-5 text-[#C9A84C] mx-auto" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" strokeDasharray="30 70"/></svg>
+                </div>
+              ) : availableSlots.length === 0 ? (
                 <div className="bg-white rounded-xl p-5 text-center text-sm text-[#6b5744]">
-                  Оберіть дату, щоб побачити доступні слоти
+                  На цей день немає доступних слотів. Оберіть іншу дату.
                 </div>
               ) : (
                 <div className="grid grid-cols-4 gap-2" role="group" aria-label="Час">
-                  {timeSlots.map(t => (
-                    <button
-                      key={t}
-                      onClick={() => setSelectedTime(t)}
-                      aria-pressed={selectedTime === t}
-                      className={`py-3 rounded-lg text-sm font-medium border transition min-h-[44px] active:scale-[0.97] ${selectedTime === t ? 'border-[#C9A84C] bg-[#C9A84C] text-black' : 'border-[#d4c9b8] bg-white text-[#1a1208] hover:border-[#C9A84C]'}`}>
-                      {t}
+                  {availableSlots.map(({ time, available }) => (
+                    <button key={time}
+                      onClick={() => available && setSelectedTime(time)}
+                      disabled={!available}
+                      aria-pressed={selectedTime === time}
+                      aria-label={`${time}${!available ? ' — зайнято' : ''}`}
+                      className={`py-3 rounded-lg text-sm font-medium border transition min-h-[44px] active:scale-[0.97]
+                        ${!available ? 'border-[#e8dfc9] bg-[#f5f0e8] text-[#c8bfb0] line-through cursor-not-allowed' :
+                          selectedTime === time ? 'border-[#C9A84C] bg-[#C9A84C] text-black' :
+                          'border-[#d4c9b8] bg-white text-[#1a1208] hover:border-[#C9A84C]'}`}>
+                      {time}
                     </button>
                   ))}
                 </div>
@@ -498,9 +566,7 @@ export default function SalonClient({ org, staff, services }: Props) {
               <div className="flex gap-3 mt-5 items-center">
                 <button onClick={() => setStep('service')} className="text-sm text-[#6b5744] hover:text-[#1a1208] hover:underline px-1 py-2 min-h-[44px]">← Назад</button>
                 {selectedDate && selectedTime && (
-                  <button onClick={() => setStep('confirm')} className="ml-auto bg-[#C9A84C] text-black font-bold px-6 py-3 rounded-xl hover:bg-[#e8d08a] transition min-h-[44px] active:scale-[0.98]">
-                    Далі →
-                  </button>
+                  <button onClick={() => setStep('confirm')} className="ml-auto bg-[#C9A84C] text-black font-bold px-6 py-3 rounded-xl hover:bg-[#e8d08a] transition min-h-[44px] active:scale-[0.98]">Далі →</button>
                 )}
               </div>
             </section>
@@ -510,60 +576,40 @@ export default function SalonClient({ org, staff, services }: Props) {
           {step === 'confirm' && (
             <section aria-labelledby="step-confirm-title">
               <h2 id="step-confirm-title" className="text-lg font-bold text-[#1a1208] mb-4">Підтвердження</h2>
-
               <div className="bg-white rounded-xl border border-[#e8dfc9] p-4 mb-4 text-sm space-y-2.5" aria-label="Деталі запису">
                 <div className="flex justify-between"><span className="text-[#6b5744]">Майстер</span><span className="font-semibold text-[#1a1208]">{selectedStaff?.name}</span></div>
                 <div className="flex justify-between"><span className="text-[#6b5744]">Послуга</span><span className="font-semibold text-[#1a1208]">{selectedService?.name}</span></div>
-                <div className="flex justify-between"><span className="text-[#6b5744]">Вартість</span><span className="font-bold text-[#1a1208]">${((selectedService?.price_cents||0)/100).toFixed(0)}</span></div>
+                <div className="flex justify-between"><span className="text-[#6b5744]">Вартість</span><span className="font-bold text-[#1a1208]">${((selectedService?.price_cents || 0) / 100).toFixed(0)}</span></div>
                 <div className="h-px bg-[#f0e8dc]" />
                 <div className="flex justify-between"><span className="text-[#6b5744]">Дата</span><span className="font-semibold text-[#1a1208]">{selectedDate?.toLocaleDateString('uk-UA', { day: 'numeric', month: 'long' })}</span></div>
                 <div className="flex justify-between"><span className="text-[#6b5744]">Час</span><span className="font-bold text-[#C9A84C] text-base">{selectedTime}</span></div>
               </div>
-
               <div className="space-y-3 mb-4">
                 <div>
-                  <label htmlFor="client-name" className="block text-sm font-medium text-[#1a1208] mb-1.5">
-                    Ваше ім'я <span className="text-red-600" aria-hidden="true">*</span>
-                  </label>
-                  <input id="client-name" type="text" value={name} onChange={e => setName(e.target.value)}
-                    autoComplete="name" required aria-required="true" placeholder="Іван Іваненко"
-                    className="w-full border border-[#c8bfb0] rounded-xl px-4 py-3 text-sm text-[#1a1208] outline-none focus:border-[#C9A84C] focus:ring-2 focus:ring-[#C9A84C]/20 bg-white placeholder-[#a0907e] min-h-[48px]" />
+                  <label htmlFor="client-name" className="block text-sm font-medium text-[#1a1208] mb-1.5">Ваше ім'я <span className="text-red-600" aria-hidden="true">*</span></label>
+                  <input id="client-name" type="text" value={name} onChange={e => setName(e.target.value)} autoComplete="name" required aria-required="true" placeholder="Іван Іваненко" className="w-full border border-[#c8bfb0] rounded-xl px-4 py-3 text-sm text-[#1a1208] outline-none focus:border-[#C9A84C] focus:ring-2 focus:ring-[#C9A84C]/20 bg-white placeholder-[#a0907e] min-h-[48px]" />
                 </div>
                 <div>
-                  <label htmlFor="client-phone" className="block text-sm font-medium text-[#1a1208] mb-1.5">
-                    Телефон <span className="text-red-600" aria-hidden="true">*</span>
-                  </label>
-                  <input id="client-phone" type="tel" value={phone} onChange={e => setPhone(e.target.value)}
-                    autoComplete="tel" required aria-required="true" placeholder="+380 (XX) XXX-XXXX"
-                    className="w-full border border-[#c8bfb0] rounded-xl px-4 py-3 text-sm text-[#1a1208] outline-none focus:border-[#C9A84C] focus:ring-2 focus:ring-[#C9A84C]/20 bg-white placeholder-[#a0907e] min-h-[48px]" />
+                  <label htmlFor="client-phone" className="block text-sm font-medium text-[#1a1208] mb-1.5">Телефон <span className="text-red-600" aria-hidden="true">*</span></label>
+                  <input id="client-phone" type="tel" value={phone} onChange={e => setPhone(e.target.value)} autoComplete="tel" required aria-required="true" placeholder="+380 (XX) XXX-XXXX" className="w-full border border-[#c8bfb0] rounded-xl px-4 py-3 text-sm text-[#1a1208] outline-none focus:border-[#C9A84C] focus:ring-2 focus:ring-[#C9A84C]/20 bg-white placeholder-[#a0907e] min-h-[48px]" />
                 </div>
                 <div>
-                  <label htmlFor="client-email" className="block text-sm font-medium text-[#1a1208] mb-1.5">
-                    Email <span className="text-[#6b5744] font-normal text-xs">(для підтвердження)</span>
-                  </label>
-                  <input id="client-email" type="email" value={clientEmail} onChange={e => setClientEmail(e.target.value)}
-                    autoComplete="email" placeholder="your@email.com"
-                    className="w-full border border-[#c8bfb0] rounded-xl px-4 py-3 text-sm text-[#1a1208] outline-none focus:border-[#C9A84C] focus:ring-2 focus:ring-[#C9A84C]/20 bg-white placeholder-[#a0907e] min-h-[48px]" />
+                  <label htmlFor="client-email" className="block text-sm font-medium text-[#1a1208] mb-1.5">Email <span className="text-[#6b5744] font-normal text-xs">(для підтвердження)</span></label>
+                  <input id="client-email" type="email" value={clientEmail} onChange={e => setClientEmail(e.target.value)} autoComplete="email" placeholder="your@email.com" className="w-full border border-[#c8bfb0] rounded-xl px-4 py-3 text-sm text-[#1a1208] outline-none focus:border-[#C9A84C] focus:ring-2 focus:ring-[#C9A84C]/20 bg-white placeholder-[#a0907e] min-h-[48px]" />
                 </div>
                 <label className="flex items-start gap-3 py-1 cursor-pointer">
-                  <input type="checkbox" checked={smsConsent} onChange={e => setSmsConsent(e.target.checked)}
-                    className="mt-0.5 w-4 h-4 accent-[#C9A84C]" aria-describedby="sms-desc" />
-                  <span id="sms-desc" className="text-xs text-[#6b5744] leading-relaxed">
-                    Погоджуюсь на SMS-нагадування про запис. Відповідайте STOP для відмови.
-                  </span>
+                  <input type="checkbox" checked={smsConsent} onChange={e => setSmsConsent(e.target.checked)} className="mt-0.5 w-4 h-4 accent-[#C9A84C]" aria-describedby="sms-desc" />
+                  <span id="sms-desc" className="text-xs text-[#6b5744] leading-relaxed">Погоджуюсь на SMS-нагадування про запис. Відповідайте STOP для відмови.</span>
                 </label>
               </div>
-
               <div role="alert" aria-live="assertive" aria-atomic="true">
                 {error && <div className="text-red-700 text-sm mb-3 bg-red-50 border border-red-200 px-4 py-3 rounded-xl">{error}</div>}
               </div>
-
               <div className="space-y-2">
-                <button onClick={handleConfirm} disabled={submitting}
-                  className="w-full bg-[#C9A84C] text-black font-bold py-4 rounded-xl hover:bg-[#e8d08a] transition min-h-[52px] text-base disabled:opacity-50 active:scale-[0.98]">
+                <button onClick={handleConfirm} disabled={submitting} className="w-full bg-[#C9A84C] text-black font-bold py-4 rounded-xl hover:bg-[#e8d08a] transition min-h-[52px] text-base disabled:opacity-50 active:scale-[0.98]">
                   {submitting ? (
                     <span className="flex items-center justify-center gap-2">
-                      <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" strokeDasharray="30 70" /></svg>
+                      <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" strokeDasharray="30 70"/></svg>
                       Надсилання...
                     </span>
                   ) : 'Підтвердити запис →'}
