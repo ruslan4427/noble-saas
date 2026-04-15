@@ -40,6 +40,10 @@ interface Props {
   services: Service[]
 }
 
+// Default schedule fallback when no schedule configured for this staff
+const DEFAULT_WORK_START = '09:00'
+const DEFAULT_WORK_END = '19:00'
+
 function getDates() {
   const dates = []
   for (let i = 0; i < 14; i++) {
@@ -50,49 +54,60 @@ function getDates() {
   return dates
 }
 
-// Generate slots respecting schedule + break + existing bookings
+function toMinutes(time: string): number {
+  const [h, m] = time.split(':').map(Number)
+  return h * 60 + m
+}
+
+function toTimeStr(minutes: number): string {
+  return `${String(Math.floor(minutes / 60)).padStart(2, '0')}:${String(minutes % 60).padStart(2, '0')}`
+}
+
+// Generate available slots respecting:
+// 1. Working hours (work_start → work_end)
+// 2. Break time (break_start → break_end)
+// 3. Already booked slots
+// 4. Past time for today (with 30 min buffer so current slot is also excluded)
+// 5. Service duration must fit before work_end
 function buildSlots(
   date: Date,
   schedule: DaySchedule | null,
   bookedSlots: string[],
   serviceDuration: number
 ): { time: string; available: boolean }[] {
-  // If no schedule or day off → no slots
-  if (!schedule || schedule.is_day_off) return []
 
-  const workStart = schedule.work_start || '09:00'
-  const workEnd = schedule.work_end || '18:00'
-  const breakStart = schedule.break_start
-  const breakEnd = schedule.break_end
+  // Day off → no slots at all
+  if (schedule?.is_day_off) return []
 
-  const [wsh, wsm] = workStart.split(':').map(Number)
-  const [weh, wem] = workEnd.split(':').map(Number)
-  const workStartMin = wsh * 60 + wsm
-  const workEndMin = weh * 60 + wem
+  // Use schedule times or fallback to defaults
+  const workStartMin = toMinutes(schedule?.work_start || DEFAULT_WORK_START)
+  const workEndMin   = toMinutes(schedule?.work_end   || DEFAULT_WORK_END)
 
-  const bsMin = breakStart ? (() => { const [h, m] = breakStart.split(':').map(Number); return h * 60 + m })() : null
-  const beMin = breakEnd ? (() => { const [h, m] = breakEnd.split(':').map(Number); return h * 60 + m })() : null
+  const breakStartMin = schedule?.break_start ? toMinutes(schedule.break_start) : null
+  const breakEndMin   = schedule?.break_end   ? toMinutes(schedule.break_end)   : null
 
-  const slots: { time: string; available: boolean }[] = []
+  // Current time in minutes — for today filtering
   const now = new Date()
   const isToday = date.toDateString() === now.toDateString()
-  const nowMin = now.getHours() * 60 + now.getMinutes()
+  // Add 30-min buffer: slot at 13:30 is unavailable if it's already 13:30
+  const cutoffMin = isToday ? (now.getHours() * 60 + now.getMinutes()) : -1
 
+  const slots: { time: string; available: boolean }[] = []
+
+  // Step through every 30-min slot within working hours
   for (let min = workStartMin; min + serviceDuration <= workEndMin; min += 30) {
-    const slotEnd = min + serviceDuration
+    const slotEndMin = min + serviceDuration
 
-    // Skip if in break
-    if (bsMin !== null && beMin !== null) {
-      if (min < beMin && slotEnd > bsMin) continue
+    // 1. Skip past slots for today
+    if (isToday && min <= cutoffMin) continue
+
+    // 2. Skip if slot overlaps with break time
+    // Slot overlaps break if: slot starts before break ends AND slot ends after break starts
+    if (breakStartMin !== null && breakEndMin !== null) {
+      if (min < breakEndMin && slotEndMin > breakStartMin) continue
     }
 
-    const h = String(Math.floor(min / 60)).padStart(2, '0')
-    const m = String(min % 60).padStart(2, '0')
-    const time = `${h}:${m}`
-
-    // Skip past slots for today
-    if (isToday && min <= nowMin) continue
-
+    const time = toTimeStr(min)
     const available = !bookedSlots.includes(time)
     slots.push({ time, available })
   }
@@ -143,10 +158,10 @@ export default function SalonClient({ org, staff, services }: Props) {
   const [error, setError] = useState('')
   const [pageLoading, setPageLoading] = useState(true)
 
-  // Schedule state
+  // Schedule & availability state
   const [scheduleMap, setScheduleMap] = useState<Record<string, DaySchedule[]>>({})
   const [vacationMap, setVacationMap] = useState<Record<string, { date_from: string; date_to: string }[]>>({})
-  const [bookedSlotsMap, setBookedSlotsMap] = useState<Record<string, string[]>>({}) // key: staffId_dateStr
+  const [bookedSlotsMap, setBookedSlotsMap] = useState<Record<string, string[]>>({})
   const [slotsLoading, setSlotsLoading] = useState(false)
 
   const supabase = createClient()
@@ -157,11 +172,11 @@ export default function SalonClient({ org, staff, services }: Props) {
     return () => clearTimeout(t)
   }, [])
 
-  // Load schedule for selected staff
+  // Load schedule + vacations for staff member (once per staff)
   useEffect(() => {
     if (!selectedStaff) return
     const sid = selectedStaff.id
-    if (scheduleMap[sid]) return // already loaded
+    if (scheduleMap[sid] !== undefined) return
 
     async function loadSchedule() {
       const [{ data: sched }, { data: vac }] = await Promise.all([
@@ -174,7 +189,7 @@ export default function SalonClient({ org, staff, services }: Props) {
     loadSchedule()
   }, [selectedStaff])
 
-  // Load booked slots when date changes
+  // Load booked slots when staff + date changes (once per staff+date combo)
   useEffect(() => {
     if (!selectedStaff || !selectedDate) return
     const sid = selectedStaff.id
@@ -197,25 +212,29 @@ export default function SalonClient({ org, staff, services }: Props) {
     loadBooked()
   }, [selectedStaff, selectedDate])
 
-  function toDateStr(d: Date) {
+  function toDateStr(d: Date): string {
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
   }
 
-  // Check if date is blocked by vacation
   function isVacationDate(staffId: string, date: Date): boolean {
-    const vacs = vacationMap[staffId] || []
     const dateStr = toDateStr(date)
-    return vacs.some(v => dateStr >= v.date_from && dateStr <= v.date_to)
+    return (vacationMap[staffId] || []).some(v => dateStr >= v.date_from && dateStr <= v.date_to)
   }
 
-  // Get schedule for a specific day
   function getScheduleForDate(staffId: string, date: Date): DaySchedule | null {
     const sched = scheduleMap[staffId] || []
     const dow = date.getDay()
     return sched.find(s => s.day_of_week === dow) || null
   }
 
-  // Get available slots for selected staff+date+service
+  function isDateUnavailable(staffId: string, date: Date): boolean {
+    if (isVacationDate(staffId, date)) return true
+    const sched = getScheduleForDate(staffId, date)
+    // If schedule exists and day is off → unavailable
+    // If no schedule at all → assume working (show slots with defaults)
+    return sched !== null && sched.is_day_off
+  }
+
   function getAvailableSlots(): { time: string; available: boolean }[] {
     if (!selectedStaff || !selectedDate || !selectedService) return []
     const sid = selectedStaff.id
@@ -224,14 +243,6 @@ export default function SalonClient({ org, staff, services }: Props) {
     const booked = bookedSlotsMap[key] || []
     const sched = getScheduleForDate(sid, selectedDate)
     return buildSlots(selectedDate, sched, booked, selectedService.duration_min)
-  }
-
-  // Check if a date is fully unavailable (day off or vacation)
-  function isDateUnavailable(staffId: string, date: Date): boolean {
-    if (isVacationDate(staffId, date)) return true
-    const sched = getScheduleForDate(staffId, date)
-    if (!sched) return false // no schedule = default available
-    return sched.is_day_off
   }
 
   const hasStaff = staff.length > 0
@@ -331,6 +342,7 @@ export default function SalonClient({ org, staff, services }: Props) {
 
   const isHero = step === 'hero'
   const availableSlots = step === 'time' ? getAvailableSlots() : []
+  const availableCount = availableSlots.filter(s => s.available).length
 
   return (
     <main className="min-h-screen bg-[#f5f0e8] flex flex-col" lang="uk">
@@ -440,7 +452,7 @@ export default function SalonClient({ org, staff, services }: Props) {
       {!isHero && (
         <div className="flex-1 max-w-lg mx-auto w-full px-4 py-6">
 
-          {/* Progress */}
+          {/* Progress bar */}
           <div className="flex gap-1 mb-6" role="progressbar" aria-label="Прогрес бронювання">
             {(['staff', 'service', 'time', 'confirm'] as const).map((s, i) => (
               <div key={s} className={`flex-1 h-1 rounded-full transition-all ${step === s ? 'bg-[#C9A84C]' : ['staff', 'service', 'time', 'confirm'].indexOf(step) > i ? 'bg-[#1a1208]' : 'bg-[#d4c9b8]'}`} />
@@ -522,8 +534,11 @@ export default function SalonClient({ org, staff, services }: Props) {
                       aria-pressed={isSelected}
                       aria-label={`${d.toLocaleDateString('uk-UA', { weekday: 'long', day: 'numeric', month: 'long' })}${unavailable ? ' — недоступно' : ''}`}
                       className={`flex-none flex flex-col items-center px-3.5 py-2.5 rounded-xl border-2 transition min-w-[52px] min-h-[56px] active:scale-[0.97]
-                        ${unavailable ? 'border-[#e8dfc9] bg-[#f0ebe0] opacity-40 cursor-not-allowed' :
-                          isSelected ? 'border-[#C9A84C] bg-[#1a1208] text-white' : 'border-[#d4c9b8] bg-white text-[#1a1208]'}`}>
+                        ${unavailable
+                          ? 'border-[#e8dfc9] bg-[#f0ebe0] opacity-40 cursor-not-allowed'
+                          : isSelected
+                            ? 'border-[#C9A84C] bg-[#1a1208] text-white'
+                            : 'border-[#d4c9b8] bg-white text-[#1a1208]'}`}>
                       <span className={`text-[10px] font-medium ${isSelected ? 'text-[#C9A84C]' : unavailable ? 'text-[#8b7a65]' : 'text-[#6b5744]'}`} aria-hidden="true">
                         {d.toLocaleDateString('uk-UA', { weekday: 'short' })}
                       </span>
@@ -536,31 +551,44 @@ export default function SalonClient({ org, staff, services }: Props) {
 
               {/* Time slots */}
               {!selectedDate ? (
-                <div className="bg-white rounded-xl p-5 text-center text-sm text-[#6b5744]">Оберіть дату, щоб побачити доступні слоти</div>
+                <div className="bg-white rounded-xl p-5 text-center text-sm text-[#6b5744]">
+                  Оберіть дату, щоб побачити доступні слоти
+                </div>
               ) : slotsLoading ? (
                 <div className="bg-white rounded-xl p-5 text-center">
-                  <svg className="animate-spin w-5 h-5 text-[#C9A84C] mx-auto" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" strokeDasharray="30 70"/></svg>
+                  <svg className="animate-spin w-5 h-5 text-[#C9A84C] mx-auto" viewBox="0 0 24 24" fill="none" aria-label="Завантаження"><circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" strokeDasharray="30 70"/></svg>
                 </div>
               ) : availableSlots.length === 0 ? (
-                <div className="bg-white rounded-xl p-5 text-center text-sm text-[#6b5744]">
-                  На цей день немає доступних слотів. Оберіть іншу дату.
+                <div className="bg-white rounded-xl p-5 text-center space-y-1">
+                  <p className="text-sm font-medium text-[#1a1208]">Немає доступних слотів</p>
+                  <p className="text-xs text-[#6b5744]">Оберіть іншу дату або майстра</p>
                 </div>
               ) : (
-                <div className="grid grid-cols-4 gap-2" role="group" aria-label="Час">
-                  {availableSlots.map(({ time, available }) => (
-                    <button key={time}
-                      onClick={() => available && setSelectedTime(time)}
-                      disabled={!available}
-                      aria-pressed={selectedTime === time}
-                      aria-label={`${time}${!available ? ' — зайнято' : ''}`}
-                      className={`py-3 rounded-lg text-sm font-medium border transition min-h-[44px] active:scale-[0.97]
-                        ${!available ? 'border-[#e8dfc9] bg-[#f5f0e8] text-[#c8bfb0] line-through cursor-not-allowed' :
-                          selectedTime === time ? 'border-[#C9A84C] bg-[#C9A84C] text-black' :
-                          'border-[#d4c9b8] bg-white text-[#1a1208] hover:border-[#C9A84C]'}`}>
-                      {time}
-                    </button>
-                  ))}
-                </div>
+                <>
+                  {/* Slot count hint */}
+                  <p className="text-xs text-[#6b5744] mb-2">
+                    {availableCount > 0
+                      ? `${availableCount} доступних слотів`
+                      : 'Всі слоти зайняті — оберіть іншу дату'}
+                  </p>
+                  <div className="grid grid-cols-4 gap-2" role="group" aria-label="Доступний час">
+                    {availableSlots.map(({ time, available }) => (
+                      <button key={time}
+                        onClick={() => available && setSelectedTime(time)}
+                        disabled={!available}
+                        aria-pressed={selectedTime === time}
+                        aria-label={`${time}${!available ? ' — зайнято' : ''}`}
+                        className={`py-3 rounded-lg text-sm font-medium border transition min-h-[44px] active:scale-[0.97]
+                          ${!available
+                            ? 'border-[#e8dfc9] bg-[#f5f0e8] text-[#c8bfb0] line-through cursor-not-allowed'
+                            : selectedTime === time
+                              ? 'border-[#C9A84C] bg-[#C9A84C] text-black'
+                              : 'border-[#d4c9b8] bg-white text-[#1a1208] hover:border-[#C9A84C]'}`}>
+                        {time}
+                      </button>
+                    ))}
+                  </div>
+                </>
               )}
 
               <div className="flex gap-3 mt-5 items-center">

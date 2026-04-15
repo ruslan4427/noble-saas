@@ -7,6 +7,7 @@ import Link from 'next/link'
 import TrialBanner from '@/components/TrialBanner'
 import BookingCalendar from '@/components/BookingCalendar'
 import StaffSchedule from '@/components/StaffSchedule'
+import RecentBookings from '@/components/RecentBookings'
 
 const APP_URL = 'https://www.noblelink.app'
 
@@ -73,8 +74,6 @@ function generateSlug(name: string) {
 const COPIED_LINK_KEY = 'noble_onboarding_copied_link'
 const TABS = ['overview', 'calendar', 'staff', 'services', 'settings'] as const
 type Tab = typeof TABS[number]
-
-// Staff sub-tabs
 const STAFF_TABS = ['members', 'schedule'] as const
 type StaffTab = typeof STAFF_TABS[number]
 
@@ -155,7 +154,8 @@ export default function Dashboard() {
     const slug = generateSlug(settingsSlug)
     const { error } = await supabase.from('organizations').update({ name: settingsName.trim(), slug }).eq('id', org.id)
     if (error) { setSettingsError(error.message.includes('unique') ? 'This URL is already taken.' : error.message); setSettingsSaving(false); return }
-    setOrg(prev => prev ? { ...prev, name: settingsName.trim(), slug } : prev); setSettingsSlug(slug); setSettingsSaving(false)
+    setOrg(prev => prev ? { ...prev, name: settingsName.trim(), slug } : prev)
+    setSettingsSlug(slug); setSettingsSaving(false)
     showToast('Settings saved!')
   }
 
@@ -193,7 +193,8 @@ export default function Dashboard() {
       </nav>
 
       <div className="max-w-5xl mx-auto px-6 py-8">
-        {/* Main tabs */}
+
+        {/* Tabs */}
         <div className="flex gap-1 mb-8 bg-white/5 rounded-lg p-1 w-fit overflow-x-auto">
           {TABS.map(tab => (
             <button key={tab} onClick={() => setActiveTab(tab)}
@@ -203,7 +204,7 @@ export default function Dashboard() {
           ))}
         </div>
 
-        {/* Overview */}
+        {/* ── Overview ── */}
         {activeTab === 'overview' && (
           <div className="space-y-6">
             <OnboardingChecklist
@@ -212,15 +213,26 @@ export default function Dashboard() {
               onAddStaff={() => { setActiveTab('staff'); setShowAddStaff(true) }}
               onCopyLink={handleCopy}
             />
+
+            {/* Stats */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {[{ label: 'Staff members', value: staff.length }, { label: 'Services', value: services.length }, { label: 'Status', value: org?.sub_status }, { label: 'Trial days left', value: days ?? '—' }]
-                .map(stat => (
-                  <div key={stat.label} className="bg-white/5 border border-white/10 rounded-xl p-4">
-                    <div className="text-white/40 text-xs mb-1">{stat.label}</div>
-                    <div className="text-white font-semibold capitalize">{String(stat.value)}</div>
-                  </div>
-                ))}
+              {[
+                { label: 'Staff members', value: staff.length },
+                { label: 'Services', value: services.length },
+                { label: 'Status', value: org?.sub_status },
+                { label: 'Trial days left', value: days ?? '—' },
+              ].map(stat => (
+                <div key={stat.label} className="bg-white/5 border border-white/10 rounded-xl p-4">
+                  <div className="text-white/40 text-xs mb-1">{stat.label}</div>
+                  <div className="text-white font-semibold capitalize">{String(stat.value)}</div>
+                </div>
+              ))}
             </div>
+
+            {/* Bookings list */}
+            {org && <RecentBookings orgId={org.id} staff={staff} />}
+
+            {/* Booking link */}
             <div className="bg-white/5 border border-white/10 rounded-xl p-6">
               <h3 className="font-semibold mb-1">Your booking page</h3>
               <p className="text-white/40 text-xs mb-3">Share this link with clients so they can book online.</p>
@@ -230,6 +242,8 @@ export default function Dashboard() {
                 <a href={bookingUrl} target="_blank" rel="noopener noreferrer" className="border border-white/20 text-white/60 px-4 py-2 rounded text-sm hover:border-white/40 hover:text-white transition whitespace-nowrap min-h-[36px] flex items-center">Open ↗</a>
               </div>
             </div>
+
+            {/* Quick actions */}
             <div className="bg-white/5 border border-white/10 rounded-xl p-6">
               <h3 className="font-semibold mb-4">Quick actions</h3>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -238,18 +252,20 @@ export default function Dashboard() {
                   { label: '+ Add staff', action: () => { setActiveTab('staff'); setShowAddStaff(true) } },
                   { label: '+ Add service', action: () => { setActiveTab('services'); setShowAddService(true) } },
                   { label: '⚙ Settings', action: () => setActiveTab('settings') },
-                ].map(a => <button key={a.label} onClick={a.action} className="border border-white/20 text-white/70 px-4 py-3 rounded text-sm hover:border-white/40 hover:text-white transition">{a.label}</button>)}
+                ].map(a => (
+                  <button key={a.label} onClick={a.action} className="border border-white/20 text-white/70 px-4 py-3 rounded text-sm hover:border-white/40 hover:text-white transition">{a.label}</button>
+                ))}
               </div>
             </div>
           </div>
         )}
 
-        {/* Calendar */}
+        {/* ── Calendar ── */}
         {activeTab === 'calendar' && org && (
           <BookingCalendar orgId={org.id} orgTimezone={org.timezone || 'America/New_York'} staff={staff} />
         )}
 
-        {/* Staff — з sub-tabs Members | Schedule */}
+        {/* ── Staff ── */}
         {activeTab === 'staff' && (
           <div className="space-y-4">
             <div className="flex items-center justify-between">
@@ -258,18 +274,15 @@ export default function Dashboard() {
                 <button onClick={() => setShowAddStaff(true)} className="bg-[#C9A84C] text-black text-sm font-bold px-4 py-2 rounded hover:bg-[#e8d08a] transition">+ Add staff</button>
               )}
             </div>
-
-            {/* Sub-tabs */}
             <div className="flex gap-1 bg-white/5 rounded-lg p-1 w-fit">
               {STAFF_TABS.map(t => (
                 <button key={t} onClick={() => setStaffTab(t)}
-                  className={`px-4 py-1.5 rounded text-sm font-medium transition capitalize ${staffTab === t ? 'bg-white/10 text-white' : 'text-white/40 hover:text-white'}`}>
+                  className={`px-4 py-1.5 rounded text-sm font-medium transition ${staffTab === t ? 'bg-white/10 text-white' : 'text-white/40 hover:text-white'}`}>
                   {t === 'members' ? 'Members' : 'Schedule'}
                 </button>
               ))}
             </div>
 
-            {/* Members */}
             {staffTab === 'members' && (
               <>
                 {showAddStaff && (
@@ -295,7 +308,7 @@ export default function Dashboard() {
                       <div key={s.id} className="bg-white/5 border border-white/10 rounded-xl px-4 py-3 flex items-center justify-between">
                         <div><div className="font-medium">{s.name}</div><div className="text-white/40 text-xs capitalize">{s.role}</div></div>
                         <div className="flex items-center gap-2">
-                          <button onClick={() => { setStaffTab('schedule') }} className="text-xs text-white/40 hover:text-[#C9A84C] transition border border-white/10 hover:border-[#C9A84C]/30 px-2 py-1 rounded">Schedule</button>
+                          <button onClick={() => setStaffTab('schedule')} className="text-xs text-white/40 hover:text-[#C9A84C] transition border border-white/10 hover:border-[#C9A84C]/30 px-2 py-1 rounded">Schedule</button>
                           <span className="text-xs bg-green-500/10 border border-green-500/30 text-green-400 px-2 py-1 rounded">Active</span>
                         </div>
                       </div>
@@ -305,14 +318,13 @@ export default function Dashboard() {
               </>
             )}
 
-            {/* Schedule */}
             {staffTab === 'schedule' && org && (
               <StaffSchedule orgId={org.id} staff={staff} />
             )}
           </div>
         )}
 
-        {/* Services */}
+        {/* ── Services ── */}
         {activeTab === 'services' && (
           <div className="space-y-4">
             <div className="flex items-center justify-between">
@@ -356,7 +368,7 @@ export default function Dashboard() {
           </div>
         )}
 
-        {/* Settings */}
+        {/* ── Settings ── */}
         {activeTab === 'settings' && (
           <div className="space-y-4 max-w-md">
             <h2 className="font-semibold text-lg">Salon settings</h2>
