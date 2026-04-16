@@ -16,21 +16,15 @@ export async function POST(req: Request) {
     }
 
     const { data: booking } = await supabase
-      .from('bookings')
-      .select('*')
-      .eq('id', booking_id)
-      .single()
+      .from('bookings').select('*').eq('id', booking_id).single()
 
     if (!booking) {
       return NextResponse.json({ error: 'Booking not found' }, { status: 404 })
     }
 
-    // Consent check — column is client_phone
     const { data: consent } = await supabase
-      .from('sms_consent')
-      .select('consented')
-      .eq('client_phone', booking.client_phone)
-      .maybeSingle()
+      .from('sms_consent').select('consented')
+      .eq('client_phone', booking.client_phone).maybeSingle()
 
     if (!consent?.consented) {
       return NextResponse.json({ ok: false, reason: 'no_consent' })
@@ -53,12 +47,8 @@ export async function POST(req: Request) {
 
     let message: string
     switch (type) {
-      case 'confirmation':
-        message = smsConfirmation(params)
-        break
-      case 'cancellation':
-        message = smsCancellation(params)
-        break
+      case 'confirmation':  message = smsConfirmation(params); break
+      case 'cancellation':  message = smsCancellation(params); break
       case 'reschedule':
         if (!old_date || !old_time) {
           return NextResponse.json({ error: 'Missing old_date/old_time' }, { status: 400 })
