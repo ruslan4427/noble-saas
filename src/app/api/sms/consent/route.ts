@@ -12,19 +12,16 @@ export async function POST(req: Request) {
     if (!org_id || !client_phone) {
       return NextResponse.json({ error: 'Missing fields' }, { status: 400 })
     }
-
     const { error } = await supabase.from('sms_consent').upsert({
       org_id,
       client_phone,
       client_name: client_name || null,
       consented: !!consented,
     }, { onConflict: 'org_id,client_phone' })
-
     if (error) {
-      console.error('SMS consent upsert error:', error)
+      console.error('SMS consent error:', error)
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
-
     return NextResponse.json({ ok: true })
   } catch (err) {
     console.error('SMS consent error:', err)
