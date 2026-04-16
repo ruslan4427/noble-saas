@@ -1,0 +1,50 @@
+  async function handleConfirm() {
+    if (!selectedStaff || !selectedService || !selectedDate || !selectedTime || !name || !phone) {
+      setError('Будь ласка, заповніть всі обов\'язкові поля')
+      return
+    }
+    setSubmitting(true); setError('')
+    try {
+      const dateStr = toDateStr(selectedDate)
+      const dateFormatted = selectedDate.toLocaleDateString('uk-UA', { day: 'numeric', month: 'long', year: 'numeric' })
+      const [hours, minutes] = selectedTime.split(':').map(Number)
+      const startISO = `${dateStr}T${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:00`
+      const startDate = new Date(startISO)
+      const reminderAt = new Date(startDate.getTime() - 2 * 60 * 60 * 1000)
+
+      // STEP 1: Save SMS consent FIRST — before email/sms API calls
+      if (smsConsent && phone) {
+        await fetch('/api/sms/consent', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ org_id: org.id, client_phone: phone, client_name: name, consented: true }),
+        })
+      }
+
+      // STEP 2: Insert booking
+      const { data: newBooking, error: bookingError } = await supabase.from('bookings').insert({
+        org_id: org.id, master_id: selectedStaff.id, date: dateStr,
+        time_slot: selectedTime, start_time: startDate.toISOString(),
+        reminder_at: reminderAt.toISOString(),
+        reminder_sent: false, client_name: name, client_phone: phone,
+        client_email: clientEmail || null, service_name: selectedService.name,
+        price_cents: selectedService.price_cents, status: 'confirmed',
+      }).select('id').single()
+      if (bookingError) throw bookingError
+
+      // STEP 3: Send email + SMS (consent already in DB from step 1)
+      fetch('/api/email/booking', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          org_id: org.id, client_name: name, client_phone: phone,
+          client_email: clientEmail || null, master_name: selectedStaff.name,
+          service_name: selectedService.name, date: dateFormatted,
+          time: selectedTime, price_cents: selectedService.price_cents,
+          booking_id: newBooking?.id,
+        }),
+      }).catch(() => {})
+
+      setStep('done')
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Помилка. Спробуйте ще раз.')
+    } finally { setSubmitting(false) }
+  }
