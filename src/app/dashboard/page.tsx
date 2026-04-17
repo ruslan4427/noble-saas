@@ -15,6 +15,7 @@ const APP_URL = 'https://www.noblelink.app'
 interface Org {
   id: string; name: string; slug: string; plan_id: string
   sub_status: string; trial_ends_at: string | null; timezone?: string
+  owner_name?: string | null
 }
 interface Staff { id: string; name: string; role: string; is_active: boolean }
 interface Service { id: string; name: string; price_cents: number; duration_min: number; is_active: boolean }
@@ -25,6 +26,21 @@ function Toast({ message, onClose }: { message: string; onClose: () => void }) {
     <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-[#C9A84C] text-black text-sm font-bold px-5 py-3 rounded-xl shadow-lg flex items-center gap-2 animate-fade-in">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20 6 9 17 4 12"/></svg>
       {message}
+    </div>
+  )
+}
+
+function OwnerAvatar({ name }: { name?: string | null }) {
+  const initials = name ? name.trim().split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : 'M'
+  return (
+    <div className="flex items-center gap-2.5">
+      <div className="w-8 h-8 rounded-full bg-[#C9A84C] flex items-center justify-center flex-none">
+        <span className="text-black text-xs font-bold">{initials}</span>
+      </div>
+      <div className="hidden md:block">
+        <p className="text-white text-sm font-medium leading-none">{name || 'Manager'}</p>
+        <p className="text-[#C9A84C] text-[10px] mt-0.5">Manager</p>
+      </div>
     </div>
   )
 }
@@ -93,33 +109,26 @@ export default function Dashboard() {
   const router = useRouter()
   const supabase = createClient()
 
-  // Add staff
   const [showAddStaff, setShowAddStaff] = useState(false)
   const [newStaffName, setNewStaffName] = useState('')
   const [newStaffRole, setNewStaffRole] = useState('barber')
   const [staffSaving, setStaffSaving] = useState(false)
-
-  // Edit staff
   const [editingStaff, setEditingStaff] = useState<Staff | null>(null)
   const [editStaffName, setEditStaffName] = useState('')
   const [editStaffRole, setEditStaffRole] = useState('barber')
   const [deletingStaffId, setDeletingStaffId] = useState<string | null>(null)
 
-  // Add service
   const [showAddService, setShowAddService] = useState(false)
   const [newServiceName, setNewServiceName] = useState('')
   const [newServicePrice, setNewServicePrice] = useState('')
   const [newServiceDuration, setNewServiceDuration] = useState('30')
   const [serviceSaving, setServiceSaving] = useState(false)
-
-  // Edit service
   const [editingService, setEditingService] = useState<Service | null>(null)
   const [editServiceName, setEditServiceName] = useState('')
   const [editServicePrice, setEditServicePrice] = useState('')
   const [editServiceDuration, setEditServiceDuration] = useState('30')
   const [deletingServiceId, setDeletingServiceId] = useState<string | null>(null)
 
-  // Settings
   const [settingsName, setSettingsName] = useState('')
   const [settingsSlug, setSettingsSlug] = useState('')
   const [settingsSaving, setSettingsSaving] = useState(false)
@@ -149,7 +158,6 @@ export default function Dashboard() {
     catch { showToast('Copied!') }
   }
 
-  // ── Staff handlers ──────────────────────────────────────────────────────
   async function handleAddStaff() {
     if (!newStaffName.trim() || !org) return
     setStaffSaving(true)
@@ -159,30 +167,23 @@ export default function Dashboard() {
     showToast('Staff member added!')
   }
 
-  function openEditStaff(s: Staff) {
-    setEditingStaff(s); setEditStaffName(s.name); setEditStaffRole(s.role)
-    setShowAddStaff(false)
-  }
+  function openEditStaff(s: Staff) { setEditingStaff(s); setEditStaffName(s.name); setEditStaffRole(s.role); setShowAddStaff(false) }
 
   async function handleSaveStaff() {
     if (!editingStaff || !editStaffName.trim()) return
     setStaffSaving(true)
     await supabase.from('staff').update({ name: editStaffName.trim(), role: editStaffRole }).eq('id', editingStaff.id)
     setStaff(prev => prev.map(s => s.id === editingStaff.id ? { ...s, name: editStaffName.trim(), role: editStaffRole } : s))
-    setEditingStaff(null); setStaffSaving(false)
-    showToast('Staff member updated!')
+    setEditingStaff(null); setStaffSaving(false); showToast('Staff member updated!')
   }
 
   async function handleDeleteStaff(id: string) {
     if (!confirm('Remove this staff member? Their bookings will remain.')) return
     setDeletingStaffId(id)
     await supabase.from('staff').update({ is_active: false }).eq('id', id)
-    setStaff(prev => prev.filter(s => s.id !== id))
-    setDeletingStaffId(null)
-    showToast('Staff member removed.')
+    setStaff(prev => prev.filter(s => s.id !== id)); setDeletingStaffId(null); showToast('Staff member removed.')
   }
 
-  // ── Service handlers ────────────────────────────────────────────────────
   async function handleAddService() {
     if (!newServiceName.trim() || !newServicePrice || !org) return
     setServiceSaving(true)
@@ -196,8 +197,7 @@ export default function Dashboard() {
   function openEditService(s: Service) {
     setEditingService(s); setEditServiceName(s.name)
     setEditServicePrice(String((s.price_cents / 100).toFixed(0)))
-    setEditServiceDuration(String(s.duration_min))
-    setShowAddService(false)
+    setEditServiceDuration(String(s.duration_min)); setShowAddService(false)
   }
 
   async function handleSaveService() {
@@ -207,20 +207,16 @@ export default function Dashboard() {
     const duration_min = parseInt(editServiceDuration)
     await supabase.from('services').update({ name: editServiceName.trim(), price_cents, duration_min }).eq('id', editingService.id)
     setServices(prev => prev.map(s => s.id === editingService.id ? { ...s, name: editServiceName.trim(), price_cents, duration_min } : s))
-    setEditingService(null); setServiceSaving(false)
-    showToast('Service updated!')
+    setEditingService(null); setServiceSaving(false); showToast('Service updated!')
   }
 
   async function handleDeleteService(id: string) {
     if (!confirm('Remove this service?')) return
     setDeletingServiceId(id)
     await supabase.from('services').update({ is_active: false }).eq('id', id)
-    setServices(prev => prev.filter(s => s.id !== id))
-    setDeletingServiceId(null)
-    showToast('Service removed.')
+    setServices(prev => prev.filter(s => s.id !== id)); setDeletingServiceId(null); showToast('Service removed.')
   }
 
-  // ── Settings ────────────────────────────────────────────────────────────
   async function handleSaveSettings() {
     if (!org || !settingsName.trim() || !settingsSlug.trim()) return
     setSettingsSaving(true); setSettingsError('')
@@ -228,8 +224,7 @@ export default function Dashboard() {
     const { error } = await supabase.from('organizations').update({ name: settingsName.trim(), slug }).eq('id', org.id)
     if (error) { setSettingsError(error.message.includes('unique') ? 'This URL is already taken.' : error.message); setSettingsSaving(false); return }
     setOrg(prev => prev ? { ...prev, name: settingsName.trim(), slug } : prev)
-    setSettingsSlug(slug); setSettingsSaving(false)
-    showToast('Settings saved!')
+    setSettingsSlug(slug); setSettingsSaving(false); showToast('Settings saved!')
   }
 
   async function handleLogout() { await supabase.auth.signOut(); router.push('/') }
@@ -255,14 +250,15 @@ export default function Dashboard() {
       {toast && <Toast message={toast} onClose={() => setToast(null)} />}
       <TrialBanner />
 
-      <nav className="flex items-center justify-between px-6 py-4 border-b border-white/10 sticky top-0 bg-[#0F0A00]/95 backdrop-blur z-40">
+      <nav className="flex items-center justify-between px-6 py-3 border-b border-white/10 sticky top-0 bg-[#0F0A00]/95 backdrop-blur z-40">
         <div className="flex items-center gap-3">
           <span className="font-serif text-[#C9A84C] text-lg">✂ Noble</span>
           <span className="text-white/20">|</span>
-          <span className="text-white/70 text-sm font-medium">{org?.name}</span>
+          <span className="text-white/60 text-sm hidden sm:inline">{org?.name}</span>
         </div>
         <div className="flex items-center gap-4">
-          <span className="text-xs bg-[#C9A84C]/10 border border-[#C9A84C]/30 text-[#C9A84C] px-2 py-1 rounded capitalize">{org?.plan_id} plan</span>
+          <span className="text-xs bg-[#C9A84C]/10 border border-[#C9A84C]/30 text-[#C9A84C] px-2 py-1 rounded capitalize hidden sm:inline">{org?.plan_id} plan</span>
+          <OwnerAvatar name={org?.owner_name} />
           <button onClick={handleLogout} className="text-sm text-white/40 hover:text-white transition">Sign out</button>
         </div>
       </nav>
@@ -277,7 +273,6 @@ export default function Dashboard() {
           ))}
         </div>
 
-        {/* ── Overview ── */}
         {activeTab === 'overview' && (
           <div className="space-y-6">
             <OnboardingChecklist
@@ -325,7 +320,6 @@ export default function Dashboard() {
           </div>
         )}
 
-        {/* ── Calendar ── */}
         {activeTab === 'calendar' && org && (
           <div className="space-y-4">
             <div className="flex gap-1 bg-white/5 rounded-lg p-1 w-fit">
@@ -341,7 +335,6 @@ export default function Dashboard() {
           </div>
         )}
 
-        {/* ── Staff ── */}
         {activeTab === 'staff' && (
           <div className="space-y-4">
             <div className="flex items-center justify-between">
@@ -361,7 +354,6 @@ export default function Dashboard() {
 
             {staffTab === 'members' && (
               <>
-                {/* Add form */}
                 {showAddStaff && !editingStaff && (
                   <div className="bg-white/5 border border-[#C9A84C]/30 rounded-xl p-4 space-y-3">
                     <h3 className="text-sm font-semibold text-[#C9A84C]">New staff member</h3>
@@ -377,8 +369,6 @@ export default function Dashboard() {
                     </div>
                   </div>
                 )}
-
-                {/* Edit form */}
                 {editingStaff && (
                   <div className="bg-white/5 border border-[#C9A84C]/30 rounded-xl p-4 space-y-3">
                     <h3 className="text-sm font-semibold text-[#C9A84C]">Edit staff member</h3>
@@ -394,23 +384,17 @@ export default function Dashboard() {
                     </div>
                   </div>
                 )}
-
                 {staff.length === 0 ? (
                   <div className="bg-white/5 border border-white/10 rounded-xl p-8 text-center text-white/40">No staff members yet. Add your first barber!</div>
                 ) : (
                   <div className="space-y-2">
                     {staff.map(s => (
                       <div key={s.id} className={`bg-white/5 border rounded-xl px-4 py-3 flex items-center justify-between transition ${editingStaff?.id === s.id ? 'border-[#C9A84C]/40' : 'border-white/10'}`}>
-                        <div>
-                          <div className="font-medium">{s.name}</div>
-                          <div className="text-white/40 text-xs capitalize">{s.role}</div>
-                        </div>
+                        <div><div className="font-medium">{s.name}</div><div className="text-white/40 text-xs capitalize">{s.role}</div></div>
                         <div className="flex items-center gap-2">
                           <button onClick={() => setStaffTab('schedule')} className="text-xs text-white/40 hover:text-[#C9A84C] transition border border-white/10 hover:border-[#C9A84C]/30 px-2 py-1 rounded">Schedule</button>
                           <button onClick={() => openEditStaff(s)} className="text-xs text-white/40 hover:text-[#C9A84C] transition border border-white/10 hover:border-[#C9A84C]/30 px-2 py-1 rounded">Edit</button>
-                          <button onClick={() => handleDeleteStaff(s.id)} disabled={deletingStaffId === s.id} className="text-xs text-white/40 hover:text-red-400 transition border border-white/10 hover:border-red-400/30 px-2 py-1 rounded disabled:opacity-40">
-                            {deletingStaffId === s.id ? '...' : 'Remove'}
-                          </button>
+                          <button onClick={() => handleDeleteStaff(s.id)} disabled={deletingStaffId === s.id} className="text-xs text-white/40 hover:text-red-400 transition border border-white/10 hover:border-red-400/30 px-2 py-1 rounded disabled:opacity-40">{deletingStaffId === s.id ? '...' : 'Remove'}</button>
                         </div>
                       </div>
                     ))}
@@ -418,37 +402,23 @@ export default function Dashboard() {
                 )}
               </>
             )}
-
             {staffTab === 'schedule' && org && <StaffSchedule orgId={org.id} staff={staff} />}
           </div>
         )}
 
-        {/* ── Services ── */}
         {activeTab === 'services' && (
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <h2 className="font-semibold text-lg">Services</h2>
-              {!editingService && (
-                <button onClick={() => { setShowAddService(true); setEditingService(null) }} className="bg-[#C9A84C] text-black text-sm font-bold px-4 py-2 rounded hover:bg-[#e8d08a] transition">+ Add service</button>
-              )}
+              {!editingService && <button onClick={() => { setShowAddService(true); setEditingService(null) }} className="bg-[#C9A84C] text-black text-sm font-bold px-4 py-2 rounded hover:bg-[#e8d08a] transition">+ Add service</button>}
             </div>
-
-            {/* Add form */}
             {showAddService && !editingService && (
               <div className="bg-white/5 border border-[#C9A84C]/30 rounded-xl p-4 space-y-3">
                 <h3 className="text-sm font-semibold text-[#C9A84C]">New service</h3>
                 <input value={newServiceName} onChange={e => setNewServiceName(e.target.value)} className={inputCls} placeholder="Service name (e.g. Haircut)" />
                 <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="text-xs text-white/50 mb-1 block">Price ($)</label>
-                    <input value={newServicePrice} onChange={e => setNewServicePrice(e.target.value)} type="number" min="0" step="0.01" className={inputCls} placeholder="25" />
-                  </div>
-                  <div>
-                    <label className="text-xs text-white/50 mb-1 block">Duration (min)</label>
-                    <select value={newServiceDuration} onChange={e => setNewServiceDuration(e.target.value)} className={inputCls}>
-                      {[15, 30, 45, 60, 90, 120].map(m => <option key={m} value={m}>{m} min</option>)}
-                    </select>
-                  </div>
+                  <div><label className="text-xs text-white/50 mb-1 block">Price ($)</label><input value={newServicePrice} onChange={e => setNewServicePrice(e.target.value)} type="number" min="0" step="0.01" className={inputCls} placeholder="25" /></div>
+                  <div><label className="text-xs text-white/50 mb-1 block">Duration (min)</label><select value={newServiceDuration} onChange={e => setNewServiceDuration(e.target.value)} className={inputCls}>{[15,30,45,60,90,120].map(m=><option key={m} value={m}>{m} min</option>)}</select></div>
                 </div>
                 <div className="flex gap-2">
                   <button onClick={handleAddService} disabled={serviceSaving || !newServiceName.trim() || !newServicePrice} className="bg-[#C9A84C] text-black text-sm font-bold px-4 py-2 rounded hover:bg-[#e8d08a] transition disabled:opacity-40">{serviceSaving ? 'Saving...' : 'Add'}</button>
@@ -456,23 +426,13 @@ export default function Dashboard() {
                 </div>
               </div>
             )}
-
-            {/* Edit form */}
             {editingService && (
               <div className="bg-white/5 border border-[#C9A84C]/30 rounded-xl p-4 space-y-3">
                 <h3 className="text-sm font-semibold text-[#C9A84C]">Edit service</h3>
                 <input value={editServiceName} onChange={e => setEditServiceName(e.target.value)} className={inputCls} placeholder="Service name" />
                 <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="text-xs text-white/50 mb-1 block">Price ($)</label>
-                    <input value={editServicePrice} onChange={e => setEditServicePrice(e.target.value)} type="number" min="0" step="0.01" className={inputCls} placeholder="25" />
-                  </div>
-                  <div>
-                    <label className="text-xs text-white/50 mb-1 block">Duration (min)</label>
-                    <select value={editServiceDuration} onChange={e => setEditServiceDuration(e.target.value)} className={inputCls}>
-                      {[15, 30, 45, 60, 90, 120].map(m => <option key={m} value={m}>{m} min</option>)}
-                    </select>
-                  </div>
+                  <div><label className="text-xs text-white/50 mb-1 block">Price ($)</label><input value={editServicePrice} onChange={e => setEditServicePrice(e.target.value)} type="number" min="0" step="0.01" className={inputCls} placeholder="25" /></div>
+                  <div><label className="text-xs text-white/50 mb-1 block">Duration (min)</label><select value={editServiceDuration} onChange={e => setEditServiceDuration(e.target.value)} className={inputCls}>{[15,30,45,60,90,120].map(m=><option key={m} value={m}>{m} min</option>)}</select></div>
                 </div>
                 <div className="flex gap-2">
                   <button onClick={handleSaveService} disabled={serviceSaving || !editServiceName.trim() || !editServicePrice} className="bg-[#C9A84C] text-black text-sm font-bold px-4 py-2 rounded hover:bg-[#e8d08a] transition disabled:opacity-40">{serviceSaving ? 'Saving...' : 'Save changes'}</button>
@@ -480,23 +440,17 @@ export default function Dashboard() {
                 </div>
               </div>
             )}
-
             {services.length === 0 ? (
               <div className="bg-white/5 border border-white/10 rounded-xl p-8 text-center text-white/40">No services yet.</div>
             ) : (
               <div className="space-y-2">
                 {services.map(s => (
                   <div key={s.id} className={`bg-white/5 border rounded-xl px-4 py-3 flex items-center justify-between transition ${editingService?.id === s.id ? 'border-[#C9A84C]/40' : 'border-white/10'}`}>
-                    <div>
-                      <div className="font-medium">{s.name}</div>
-                      <div className="text-white/40 text-xs">{s.duration_min} min</div>
-                    </div>
+                    <div><div className="font-medium">{s.name}</div><div className="text-white/40 text-xs">{s.duration_min} min</div></div>
                     <div className="flex items-center gap-3">
                       <span className="text-[#C9A84C] font-semibold">${(s.price_cents / 100).toFixed(0)}</span>
                       <button onClick={() => openEditService(s)} className="text-xs text-white/40 hover:text-[#C9A84C] transition border border-white/10 hover:border-[#C9A84C]/30 px-2 py-1 rounded">Edit</button>
-                      <button onClick={() => handleDeleteService(s.id)} disabled={deletingServiceId === s.id} className="text-xs text-white/40 hover:text-red-400 transition border border-white/10 hover:border-red-400/30 px-2 py-1 rounded disabled:opacity-40">
-                        {deletingServiceId === s.id ? '...' : 'Remove'}
-                      </button>
+                      <button onClick={() => handleDeleteService(s.id)} disabled={deletingServiceId === s.id} className="text-xs text-white/40 hover:text-red-400 transition border border-white/10 hover:border-red-400/30 px-2 py-1 rounded disabled:opacity-40">{deletingServiceId === s.id ? '...' : 'Remove'}</button>
                     </div>
                   </div>
                 ))}
@@ -505,7 +459,6 @@ export default function Dashboard() {
           </div>
         )}
 
-        {/* ── Settings ── */}
         {activeTab === 'settings' && (
           <div className="space-y-4 max-w-md">
             <h2 className="font-semibold text-lg">Salon settings</h2>

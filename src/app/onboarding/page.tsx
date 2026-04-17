@@ -4,29 +4,18 @@ import { useState } from 'react'
 import { createClient } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 
-const STEPS = ['Salon name', 'Category', 'Timezone', 'First staff', 'Working hours', 'Preview']
+const STEPS = ['Salon name', 'Category', 'Timezone', 'Your profile', 'Working hours', 'Preview']
 const CATEGORIES = ['Barbershop', 'Hair salon', 'Nail salon', 'Spa & wellness', 'Tattoo studio', 'Other']
 const TIMEZONES = [
-  'America/New_York',
-  'America/Chicago',
-  'America/Denver',
-  'America/Los_Angeles',
-  'America/Phoenix',
-  'America/Anchorage',
-  'Pacific/Honolulu',
+  'America/New_York', 'America/Chicago', 'America/Denver',
+  'America/Los_Angeles', 'America/Phoenix', 'America/Anchorage', 'Pacific/Honolulu',
 ]
-
 const TZ_LABELS: Record<string, string> = {
-  'America/New_York': 'New York (ET)',
-  'America/Chicago': 'Chicago (CT)',
-  'America/Denver': 'Denver (MT)',
-  'America/Los_Angeles': 'Los Angeles (PT)',
-  'America/Phoenix': 'Phoenix (AZ)',
-  'America/Anchorage': 'Anchorage (AKT)',
+  'America/New_York': 'New York (ET)', 'America/Chicago': 'Chicago (CT)',
+  'America/Denver': 'Denver (MT)', 'America/Los_Angeles': 'Los Angeles (PT)',
+  'America/Phoenix': 'Phoenix (AZ)', 'America/Anchorage': 'Anchorage (AKT)',
   'Pacific/Honolulu': 'Honolulu (HT)',
 }
-
-const APP_URL = 'https://www.noblelink.app'
 
 export default function Onboarding() {
   const [step, setStep] = useState(0)
@@ -36,14 +25,10 @@ export default function Onboarding() {
   const supabase = createClient()
 
   const [data, setData] = useState({
-    name: '',
-    slug: '',
-    category: '',
+    name: '', slug: '', category: '',
     timezone: 'America/New_York',
-    staffName: '',
-    staffRole: 'barber',
-    open: '09:00',
-    close: '19:00',
+    ownerName: '',
+    open: '09:00', close: '19:00',
   })
 
   function update(field: string, value: string) {
@@ -55,40 +40,24 @@ export default function Onboarding() {
   }
 
   async function handleFinish() {
-    setLoading(true)
-    setError('')
+    setLoading(true); setError('')
     try {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { router.push('/login'); return }
 
       const { error: orgError } = await supabase.from('organizations').insert({
-        slug: data.slug,
-        name: data.name,
-        owner_id: user.id,
-        timezone: data.timezone,
-        business_category: data.category,
+        slug: data.slug, name: data.name, owner_id: user.id,
+        timezone: data.timezone, business_category: data.category,
+        owner_name: data.ownerName.trim() || null,
       })
       if (orgError) throw orgError
 
-      const { data: org } = await supabase
-        .from('organizations')
-        .select('id')
-        .eq('slug', data.slug)
-        .single()
+      const { data: org } = await supabase.from('organizations').select('id').eq('slug', data.slug).single()
 
-      if (org && data.staffName) {
-        await supabase.from('staff').insert({
-          org_id: org.id,
-          name: data.staffName,
-          role: data.staffRole,
-        })
+      if (org) {
         await supabase.from('onboarding_progress').update({
-          step_salon_name: true,
-          step_category: true,
-          step_timezone: true,
-          step_first_staff: true,
-          step_working_hours: true,
-          step_preview: true,
+          step_salon_name: true, step_category: true, step_timezone: true,
+          step_first_staff: true, step_working_hours: true, step_preview: true,
           completed_at: new Date().toISOString(),
         }).eq('org_id', org.id)
       }
@@ -103,7 +72,7 @@ export default function Onboarding() {
   const canNext = () => {
     if (step === 0) return data.name.length >= 2 && data.slug.length >= 2
     if (step === 1) return data.category !== ''
-    if (step === 3) return data.staffName.length >= 2
+    if (step === 3) return data.ownerName.length >= 2
     return true
   }
 
@@ -122,12 +91,12 @@ export default function Onboarding() {
         </div>
 
         <div className="bg-white/5 border border-white/10 rounded-xl p-6">
-          <h2 className="text-lg font-semibold text-white mb-4">{STEPS[step]}</h2>
+          <h2 className="text-lg font-semibold text-white mb-1">{STEPS[step]}</h2>
           {error && <div className="bg-red-500/10 border border-red-500/30 text-red-400 text-sm px-3 py-2 rounded mb-4">{error}</div>}
 
           {/* Step 0 — Salon name */}
           {step === 0 && (
-            <div className="space-y-4">
+            <div className="space-y-4 mt-4">
               <div>
                 <label className="text-sm text-white/60 mb-1 block">Salon name</label>
                 <input value={data.name} onChange={e => update('name', e.target.value)}
@@ -135,7 +104,7 @@ export default function Onboarding() {
                   placeholder="Noble Barbershop" />
               </div>
               <div>
-                <label className="text-sm text-white/60 mb-1 block">Your URL</label>
+                <label className="text-sm text-white/60 mb-1 block">Your booking URL</label>
                 <div className="flex items-center bg-white/10 border border-white/20 rounded overflow-hidden">
                   <span className="text-white/40 text-sm px-3 py-2 border-r border-white/20">noblelink.app/salon/</span>
                   <input value={data.slug} onChange={e => update('slug', e.target.value)}
@@ -148,7 +117,7 @@ export default function Onboarding() {
 
           {/* Step 1 — Category */}
           {step === 1 && (
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-2 gap-2 mt-4">
               {CATEGORIES.map(cat => (
                 <button key={cat} onClick={() => update('category', cat)}
                   className={`px-3 py-3 rounded text-sm border transition ${data.category === cat ? 'border-[#C9A84C] bg-[#C9A84C]/10 text-[#C9A84C]' : 'border-white/20 text-white/60 hover:border-white/40'}`}>
@@ -160,7 +129,7 @@ export default function Onboarding() {
 
           {/* Step 2 — Timezone */}
           {step === 2 && (
-            <div className="space-y-2">
+            <div className="space-y-2 mt-4">
               {TIMEZONES.map(tz => (
                 <button key={tz} onClick={() => update('timezone', tz)}
                   className={`w-full text-left px-3 py-3 rounded text-sm border transition ${data.timezone === tz ? 'border-[#C9A84C] bg-[#C9A84C]/10 text-[#C9A84C]' : 'border-white/20 text-white/60 hover:border-white/40'}`}>
@@ -170,30 +139,35 @@ export default function Onboarding() {
             </div>
           )}
 
-          {/* Step 3 — First staff */}
+          {/* Step 3 — Your profile */}
           {step === 3 && (
-            <div className="space-y-4">
-              <div>
-                <label className="text-sm text-white/60 mb-1 block">Staff name</label>
-                <input value={data.staffName} onChange={e => update('staffName', e.target.value)}
-                  className="w-full bg-white/10 border border-white/20 rounded px-3 py-2 text-white text-sm outline-none focus:border-[#C9A84C]"
-                  placeholder="John Smith" />
-              </div>
-              <div>
-                <label className="text-sm text-white/60 mb-1 block">Role</label>
-                <select value={data.staffRole} onChange={e => update('staffRole', e.target.value)}
-                  className="w-full bg-white/10 border border-white/20 rounded px-3 py-2 text-white text-sm outline-none focus:border-[#C9A84C]">
-                  <option value="barber">Barber</option>
-                  <option value="manager">Manager</option>
-                  <option value="owner">Owner</option>
-                </select>
+            <div className="mt-4">
+              <p className="text-white/40 text-sm mb-4">This is the manager account that controls the dashboard. Barbers are added separately after setup.</p>
+              <div className="space-y-4">
+                <div>
+                  <label className="text-sm text-white/60 mb-1 block">Your name</label>
+                  <input value={data.ownerName} onChange={e => update('ownerName', e.target.value)}
+                    className="w-full bg-white/10 border border-white/20 rounded px-3 py-2 text-white text-sm outline-none focus:border-[#C9A84C]"
+                    placeholder="John Smith" autoComplete="name" />
+                </div>
+                <div className="flex items-center gap-3 bg-[#C9A84C]/5 border border-[#C9A84C]/20 rounded-lg px-4 py-3">
+                  <div className="w-9 h-9 rounded-full bg-[#C9A84C] flex items-center justify-center flex-none">
+                    <span className="text-black text-sm font-bold">
+                      {data.ownerName.trim() ? data.ownerName.trim().split(' ').map(n => n[0]).join('').slice(0,2).toUpperCase() : '?'}
+                    </span>
+                  </div>
+                  <div>
+                    <p className="text-white text-sm font-medium">{data.ownerName.trim() || 'Your name'}</p>
+                    <p className="text-[#C9A84C] text-xs">Manager</p>
+                  </div>
+                </div>
               </div>
             </div>
           )}
 
           {/* Step 4 — Working hours */}
           {step === 4 && (
-            <div className="space-y-4">
+            <div className="space-y-4 mt-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="text-sm text-white/60 mb-1 block">Opens at</label>
@@ -206,13 +180,13 @@ export default function Onboarding() {
                     className="w-full bg-white/10 border border-white/20 rounded px-3 py-2 text-white text-sm outline-none focus:border-[#C9A84C]" />
                 </div>
               </div>
-              <p className="text-white/40 text-xs">You can customize days and hours later in settings.</p>
+              <p className="text-white/40 text-xs">You can customize per-staff schedules later in the dashboard.</p>
             </div>
           )}
 
           {/* Step 5 — Preview */}
           {step === 5 && (
-            <div className="text-center py-4 space-y-3">
+            <div className="text-center py-4 space-y-3 mt-2">
               <div className="text-4xl mb-2">✂</div>
               <div className="text-white font-semibold text-lg">{data.name}</div>
               <div className="text-white/50 text-sm">{data.category} · {TZ_LABELS[data.timezone] ?? data.timezone}</div>
@@ -220,6 +194,14 @@ export default function Onboarding() {
               <div className="bg-[#C9A84C]/10 border border-[#C9A84C]/30 rounded px-3 py-2 text-[#C9A84C] text-sm font-mono">
                 noblelink.app/salon/{data.slug}
               </div>
+              {data.ownerName && (
+                <div className="flex items-center justify-center gap-2 text-white/50 text-sm">
+                  <div className="w-6 h-6 rounded-full bg-[#C9A84C] flex items-center justify-center">
+                    <span className="text-black text-[10px] font-bold">{data.ownerName.trim().split(' ').map(n => n[0]).join('').slice(0,2).toUpperCase()}</span>
+                  </div>
+                  <span>{data.ownerName} · Manager</span>
+                </div>
+              )}
               <p className="text-white/30 text-xs mt-2">Your 14-day free trial starts now.</p>
             </div>
           )}
