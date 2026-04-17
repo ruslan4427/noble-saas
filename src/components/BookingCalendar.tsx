@@ -184,7 +184,7 @@ function WeekView({ weekStart, bookings, blocks, staffColorMap, staff, onBooking
         </div>
         <div>
           {HOURS.map(hour=>{
-            const hourLabel = (h) => { const p = h>=12?"PM":"AM"; const hh = h%12||12; return hh+":00 "+p; };
+            const hourLabel = (h: number): string => { const p = h>=12?"PM":"AM"; const hh = h%12||12; return hh+":00 "+p; };
             const label = toAmPm(`${String(hour).padStart(2,'0')}:00`)
             return (
               <div key={hour} className="grid grid-cols-[56px_repeat(7,1fr)]">
