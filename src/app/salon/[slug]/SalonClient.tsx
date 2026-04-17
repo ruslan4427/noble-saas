@@ -199,7 +199,7 @@ export default function SalonClient({ org, staff, services }: Props) {
     if (staff.length === 1) { setSelectedStaff(staff[0]); setStep('service') }
     else setStep('staff')
   }
-  function handleSelectStaff(m: Staff) { setSelectedStaff(m); setStep('service') }
+  function handleSelectStaff(m: Staff) { setSelectedStaff(m); setStep(selectedService ? "time" : "service") }
   function handleSelectService(s: Service) { setSelectedService(s); setStep('time') }
 
   async function handleConfirm() {
