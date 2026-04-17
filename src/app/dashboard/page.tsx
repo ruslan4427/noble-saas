@@ -9,6 +9,8 @@ import BookingCalendar from '@/components/BookingCalendar'
 import StaffSchedule from '@/components/StaffSchedule'
 import RecentBookings from '@/components/RecentBookings'
 import CalendarBlocks from '@/components/CalendarBlocks'
+import CalendarBlocks from '@/components/CalendarBlocks'
+import CalendarBlocks from '@/components/CalendarBlocks'
 
 const APP_URL = 'https://www.noblelink.app'
 
@@ -78,7 +80,11 @@ type Tab = typeof TABS[number]
 const STAFF_TABS = ['members', 'schedule'] as const
 const CALENDAR_TABS = ['bookings', 'blocks'] as const
 type CalendarTab = typeof CALENDAR_TABS[number]
+const CALENDAR_TABS = ['bookings', 'blocks'] as const
+type CalendarTab = typeof CALENDAR_TABS[number]
 type StaffTab = typeof STAFF_TABS[number]
+const CALENDAR_TABS = ['bookings', 'blocks'] as const
+type CalendarTab = typeof CALENDAR_TABS[number]
 
 export default function Dashboard() {
   const [org, setOrg] = useState<Org | null>(null)
@@ -87,6 +93,8 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState<Tab>('overview')
   const [staffTab, setStaffTab] = useState<StaffTab>('members')
+  const [calendarTab, setCalendarTab] = useState<CalendarTab>('bookings')
+  const [calendarTab, setCalendarTab] = useState<CalendarTab>('bookings')
   const [calendarTab, setCalendarTab] = useState<CalendarTab>('bookings')
   const [toast, setToast] = useState<string | null>(null)
   const [hasCopiedLink, setHasCopiedLink] = useState(false)
@@ -266,8 +274,45 @@ export default function Dashboard() {
 
         {/* ── Calendar ── */}
         {activeTab === 'calendar' && org && (
-          <BookingCalendar orgId={org.id} orgTimezone={org.timezone || 'America/New_York'} staff={staff} />
-        )}
+  <div className="space-y-4">
+    <div className="flex gap-1 bg-white/5 rounded-lg p-1 w-fit">
+      {CALENDAR_TABS.map(t => (
+        <button key={t} onClick={() => setCalendarTab(t)}
+          className={`px-4 py-1.5 rounded text-sm font-medium transition ${calendarTab === t ? 'bg-[#C9A84C] text-black' : 'text-white/40 hover:text-white'}`}>
+          {t === 'bookings' ? '📅 Bookings' : '🚫 Blocks'}
+        </button>
+      ))}
+    </div>
+    {calendarTab === 'bookings' && <BookingCalendar orgId={org.id} orgTimezone={org.timezone || 'America/New_York'} staff={staff} />}
+    {calendarTab === 'blocks' && <CalendarBlocks orgId={org.id} staff={staff} />}
+  </div>
+)}
+  <div className="space-y-4">
+    <div className="flex gap-1 bg-white/5 rounded-lg p-1 w-fit">
+      {CALENDAR_TABS.map(t => (
+        <button key={t} onClick={() => setCalendarTab(t)}
+          className={`px-4 py-1.5 rounded text-sm font-medium transition ${calendarTab === t ? 'bg-[#C9A84C] text-black' : 'text-white/40 hover:text-white'}`}>
+          {t === 'bookings' ? '📅 Bookings' : '🚫 Blocks'}
+        </button>
+      ))}
+    </div>
+    {calendarTab === 'bookings' && <BookingCalendar orgId={org.id} orgTimezone={org.timezone || 'America/New_York'} staff={staff} />}
+    {calendarTab === 'blocks' && <CalendarBlocks orgId={org.id} staff={staff} />}
+  </div>
+)}
+  <div className="space-y-4">
+    <div className="flex gap-1 bg-white/5 rounded-lg p-1 w-fit">
+      {CALENDAR_TABS.map(t => (
+        <button key={t} onClick={() => setCalendarTab(t)}
+          className={`px-4 py-1.5 rounded text-sm font-medium transition capitalize ${calendarTab === t ? 'bg-[#C9A84C] text-black' : 'text-white/40 hover:text-white'}`}>
+          {t === 'bookings' ? '📅 Bookings' : '🚫 Blocks'}
+        </button>
+      ))}
+    </div>
+    {calendarTab === 'bookings' && <BookingCalendar orgId={org.id} orgTimezone={org.timezone || 'America/New_York'} staff={staff} />}
+    {calendarTab === 'blocks' && <CalendarBlocks orgId={org.id} staff={staff} />}
+  </div>
+)}
 
         {/* ── Staff ── */}
         {activeTab === 'staff' && (
