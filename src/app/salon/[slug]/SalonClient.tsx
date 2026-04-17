@@ -82,7 +82,7 @@ function Skeleton({ className }: { className?: string }) {
 
 function LoadingState() {
   return (
-    <main className="min-h-screen bg-[#f5f0e8]" lang="uk">
+    <main className="min-h-screen bg-[#f5f0e8]">
       <div className="bg-[#1a1208] px-6 pt-12 pb-16 text-center">
         <Skeleton className="h-8 w-48 mx-auto mb-3 bg-white/10" />
         <Skeleton className="h-4 w-32 mx-auto bg-white/10" />
@@ -199,17 +199,17 @@ export default function SalonClient({ org, staff, services }: Props) {
     if (staff.length === 1) { setSelectedStaff(staff[0]); setStep('service') }
     else setStep('staff')
   }
-  function handleSelectStaff(m: Staff) { setSelectedStaff(m); setStep(selectedService ? "time" : "service") }
+  function handleSelectStaff(m: Staff) { setSelectedStaff(m); setStep(selectedService ? 'time' : 'service') }
   function handleSelectService(s: Service) { setSelectedService(s); setStep('time') }
 
   async function handleConfirm() {
     if (!selectedStaff || !selectedService || !selectedDate || !selectedTime || !name || !phone) {
-      setError('Будь ласка, заповніть всі обов\'язкові поля'); return
+      setError('Please fill in all required fields'); return
     }
     setSubmitting(true); setError('')
     try {
       const dateStr = toDateStr(selectedDate)
-      const dateFormatted = selectedDate.toLocaleDateString('uk-UA', { day: 'numeric', month: 'long', year: 'numeric' })
+      const dateFormatted = selectedDate.toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' })
       const [hours, minutes] = selectedTime.split(':').map(Number)
       const startISO = `${dateStr}T${String(hours).padStart(2,'0')}:${String(minutes).padStart(2,'0')}:00`
       const startDate = new Date(startISO)
@@ -239,7 +239,7 @@ export default function SalonClient({ org, staff, services }: Props) {
       }).catch(() => {})
       setStep('done')
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Помилка. Спробуйте ще раз.')
+      setError(e instanceof Error ? e.message : 'Something went wrong. Please try again.')
     } finally { setSubmitting(false) }
   }
 
@@ -253,7 +253,7 @@ export default function SalonClient({ org, staff, services }: Props) {
 
   if (step === 'done') {
     return (
-      <main className="min-h-screen bg-[#f5f0e8] flex flex-col" lang="uk">
+      <main className="min-h-screen bg-[#f5f0e8] flex flex-col">
         <div className="bg-[#1a1208] px-6 py-5 text-center">
           <p className="font-serif text-[#C9A84C] text-lg font-bold">✂ {org.name}</p>
         </div>
@@ -262,17 +262,17 @@ export default function SalonClient({ org, staff, services }: Props) {
             <div className="w-16 h-16 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-4">
               <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>
             </div>
-            <h1 className="text-xl font-bold text-[#1a1208] mb-1">Запис підтверджено!</h1>
-            <p className="text-[#4a3728] text-sm mb-4">Чекаємо вас у салоні</p>
+            <h1 className="text-xl font-bold text-[#1a1208] mb-1">Booking confirmed!</h1>
+            <p className="text-[#4a3728] text-sm mb-4">We look forward to seeing you</p>
             <div className="bg-[#f5f0e8] rounded-xl p-4 text-sm text-left space-y-2 mb-6">
-              <div className="flex justify-between"><span className="text-[#6b5744]">Майстер</span><span className="font-semibold text-[#1a1208]">{selectedStaff?.name}</span></div>
-              <div className="flex justify-between"><span className="text-[#6b5744]">Послуга</span><span className="font-semibold text-[#1a1208]">{selectedService?.name}</span></div>
+              <div className="flex justify-between"><span className="text-[#6b5744]">Barber</span><span className="font-semibold text-[#1a1208]">{selectedStaff?.name}</span></div>
+              <div className="flex justify-between"><span className="text-[#6b5744]">Service</span><span className="font-semibold text-[#1a1208]">{selectedService?.name}</span></div>
               <div className="h-px bg-[#e8dfc9]" />
-              <div className="flex justify-between"><span className="text-[#6b5744]">Дата</span><span className="font-semibold text-[#1a1208]">{selectedDate?.toLocaleDateString('uk-UA', { day: 'numeric', month: 'long' })}</span></div>
-              <div className="flex justify-between"><span className="text-[#6b5744]">Час</span><span className="font-bold text-[#1a1208]">{toAmPm(selectedTime ?? '')}</span></div>
+              <div className="flex justify-between"><span className="text-[#6b5744]">Date</span><span className="font-semibold text-[#1a1208]">{selectedDate?.toLocaleDateString('en-US', { day: 'numeric', month: 'long' })}</span></div>
+              <div className="flex justify-between"><span className="text-[#6b5744]">Time</span><span className="font-bold text-[#1a1208]">{toAmPm(selectedTime ?? '')}</span></div>
             </div>
-            {clientEmail && <p className="text-[#6b5744] text-xs mb-4">📧 Підтвердження надіслано на {clientEmail}</p>}
-            <button onClick={resetBooking} className="w-full bg-[#1a1208] text-[#C9A84C] font-bold py-3 rounded-xl hover:bg-[#2d1f0d] transition min-h-[44px]">Новий запис</button>
+            {clientEmail && <p className="text-[#6b5744] text-xs mb-4">📧 Confirmation sent to {clientEmail}</p>}
+            <button onClick={resetBooking} className="w-full bg-[#1a1208] text-[#C9A84C] font-bold py-3 rounded-xl hover:bg-[#2d1f0d] transition min-h-[44px]">Book again</button>
           </div>
         </div>
       </main>
@@ -284,19 +284,19 @@ export default function SalonClient({ org, staff, services }: Props) {
   const availableCount = availableSlots.filter(s => s.available).length
 
   return (
-    <main className="min-h-screen bg-[#f5f0e8] flex flex-col" lang="uk">
+    <main className="min-h-screen bg-[#f5f0e8] flex flex-col">
       <div className={`bg-[#1a1208] text-white text-center transition-all ${isHero ? 'px-6 pt-12 pb-20' : 'px-6 py-5'}`}>
         {isHero ? (
           <>
             <div className="inline-flex items-center gap-2 bg-white/10 text-[#C9A84C] text-xs font-medium px-3 py-1 rounded-full mb-4">
-              <span className="w-1.5 h-1.5 bg-[#C9A84C] rounded-full animate-pulse" />Онлайн запис
+              <span className="w-1.5 h-1.5 bg-[#C9A84C] rounded-full animate-pulse" />Online booking
             </div>
             <h1 className="font-serif text-3xl sm:text-4xl font-bold mb-2 leading-tight">{org.name}</h1>
             {org.address && <p className="text-white/60 text-sm mb-1 flex items-center justify-center gap-1"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>{org.address}</p>}
             {org.phone && <a href={`tel:${org.phone}`} className="text-white/60 text-sm hover:text-white transition flex items-center justify-center gap-1"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 9.91a16 16 0 0 0 6.1 6.1l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>{org.phone}</a>}
             {!hasStaff || !hasServices
-              ? <div className="mt-6 bg-white/10 text-white/60 text-sm px-4 py-3 rounded-xl inline-block">Салон ще налаштовується. Заходьте пізніше.</div>
-              : <button onClick={handleBookCTA} className="mt-6 bg-[#C9A84C] text-black font-bold px-8 py-4 rounded-xl hover:bg-[#e8d08a] transition text-base min-h-[52px] shadow-lg shadow-[#C9A84C]/20 active:scale-[0.98]">Записатись онлайн →</button>
+              ? <div className="mt-6 bg-white/10 text-white/60 text-sm px-4 py-3 rounded-xl inline-block">This salon is still getting set up. Check back soon.</div>
+              : <button onClick={handleBookCTA} className="mt-6 bg-[#C9A84C] text-black font-bold px-8 py-4 rounded-xl hover:bg-[#e8d08a] transition text-base min-h-[52px] shadow-lg shadow-[#C9A84C]/20 active:scale-[0.98]">Book online →</button>
             }
           </>
         ) : (
@@ -314,7 +314,7 @@ export default function SalonClient({ org, staff, services }: Props) {
         <div className="max-w-lg mx-auto w-full px-4 -mt-6 pb-8">
           <div className="bg-white rounded-2xl shadow-sm border border-[#e8dfc9] overflow-hidden">
             <div className="px-4 pt-4 pb-2 border-b border-[#f0e8dc]">
-              <p className="text-xs font-semibold text-[#6b5744] uppercase tracking-wide">Послуги</p>
+              <p className="text-xs font-semibold text-[#6b5744] uppercase tracking-wide">Services</p>
             </div>
             <div className="divide-y divide-[#f0e8dc]">
               {services.slice(0, 4).map(s => (
@@ -323,7 +323,7 @@ export default function SalonClient({ org, staff, services }: Props) {
                   className="w-full flex items-center justify-between px-4 py-3.5 hover:bg-[#faf7f2] transition text-left active:bg-[#f5f0e8]">
                   <div>
                     <div className="font-semibold text-[#1a1208] text-sm">{s.name}</div>
-                    <div className="text-[#6b5744] text-xs mt-0.5">{s.duration_min} хв</div>
+                    <div className="text-[#6b5744] text-xs mt-0.5">{s.duration_min} min</div>
                   </div>
                   <div className="flex items-center gap-3">
                     <span className="font-bold text-[#1a1208] text-sm">${(s.price_cents/100).toFixed(0)}</span>
@@ -332,13 +332,13 @@ export default function SalonClient({ org, staff, services }: Props) {
                 </button>
               ))}
               {services.length > 4 && (
-                <button onClick={handleBookCTA} className="w-full px-4 py-3 text-sm text-[#C9A84C] font-medium hover:bg-[#faf7f2] transition text-center">Ще {services.length - 4} послуг →</button>
+                <button onClick={handleBookCTA} className="w-full px-4 py-3 text-sm text-[#C9A84C] font-medium hover:bg-[#faf7f2] transition text-center">{services.length - 4} more services →</button>
               )}
             </div>
           </div>
           <div className="mt-4 bg-white rounded-2xl shadow-sm border border-[#e8dfc9] overflow-hidden">
             <div className="px-4 pt-4 pb-2 border-b border-[#f0e8dc]">
-              <p className="text-xs font-semibold text-[#6b5744] uppercase tracking-wide">Майстри</p>
+              <p className="text-xs font-semibold text-[#6b5744] uppercase tracking-wide">Our team</p>
             </div>
             <div className="flex gap-4 px-4 py-3 overflow-x-auto">
               {staff.map(m => (
@@ -358,8 +358,8 @@ export default function SalonClient({ org, staff, services }: Props) {
       {isHero && (!hasStaff || !hasServices) && (
         <div className="max-w-lg mx-auto w-full px-4 -mt-6 pb-8">
           <div className="bg-white rounded-2xl shadow-sm border border-[#e8dfc9] p-8 text-center">
-            <p className="font-semibold text-[#1a1208] mb-1">{!hasStaff ? 'Майстрів ще немає' : 'Послуг ще немає'}</p>
-            <p className="text-[#6b5744] text-sm">Власник салону скоро додасть інформацію.</p>
+            <p className="font-semibold text-[#1a1208] mb-1">{!hasStaff ? 'No staff added yet' : 'No services added yet'}</p>
+            <p className="text-[#6b5744] text-sm">The salon owner will add information soon.</p>
           </div>
         </div>
       )}
@@ -376,13 +376,13 @@ export default function SalonClient({ org, staff, services }: Props) {
             <div className="bg-white border border-[#e8dfc9] rounded-xl px-4 py-2.5 mb-4 flex flex-wrap gap-x-3 gap-y-1 text-xs text-[#1a1208]">
               {selectedStaff && <span className="font-medium">✂ {selectedStaff.name}</span>}
               {selectedService && <span className="text-[#6b5744]">· {selectedService.name} <strong className="text-[#1a1208]">${(selectedService.price_cents/100).toFixed(0)}</strong></span>}
-              {selectedDate && selectedTime && <span className="text-[#6b5744]">· <strong className="text-[#1a1208]">{selectedDate.toLocaleDateString('uk-UA',{day:'numeric',month:'short'})} {toAmPm(selectedTime)}</strong></span>}
+              {selectedDate && selectedTime && <span className="text-[#6b5744]">· <strong className="text-[#1a1208]">{selectedDate.toLocaleDateString('en-US',{day:'numeric',month:'short'})} {toAmPm(selectedTime)}</strong></span>}
             </div>
           )}
 
           {step === 'staff' && (
             <section>
-              <h2 className="text-lg font-bold text-[#1a1208] mb-4">Оберіть майстра</h2>
+              <h2 className="text-lg font-bold text-[#1a1208] mb-4">Choose your barber</h2>
               <div className="space-y-2">
                 {staff.map(m => (
                   <button key={m.id} onClick={() => handleSelectStaff(m)}
@@ -403,14 +403,14 @@ export default function SalonClient({ org, staff, services }: Props) {
 
           {step === 'service' && (
             <section>
-              <h2 className="text-lg font-bold text-[#1a1208] mb-4">Оберіть послугу</h2>
+              <h2 className="text-lg font-bold text-[#1a1208] mb-4">Choose a service</h2>
               <div className="space-y-2">
                 {services.map(s => (
                   <button key={s.id} onClick={() => handleSelectService(s)}
                     className="w-full bg-white rounded-xl px-4 py-3.5 flex items-center justify-between border-2 border-transparent hover:border-[#C9A84C] transition active:scale-[0.99]">
                     <div className="text-left">
                       <div className="font-semibold text-[#1a1208] text-sm">{s.name}</div>
-                      <div className="text-[#6b5744] text-xs mt-0.5">{s.duration_min} хв</div>
+                      <div className="text-[#6b5744] text-xs mt-0.5">{s.duration_min} min</div>
                     </div>
                     <div className="flex items-center gap-3">
                       <span className="font-bold text-[#1a1208]">${(s.price_cents/100).toFixed(0)}</span>
@@ -419,13 +419,13 @@ export default function SalonClient({ org, staff, services }: Props) {
                   </button>
                 ))}
               </div>
-              {staff.length > 1 && <button onClick={() => setStep('staff')} className="mt-4 text-sm text-[#6b5744] hover:text-[#1a1208] hover:underline px-1 py-2 min-h-[44px]">← Назад</button>}
+              {staff.length > 1 && <button onClick={() => setStep('staff')} className="mt-4 text-sm text-[#6b5744] hover:text-[#1a1208] hover:underline px-1 py-2 min-h-[44px]">← Back</button>}
             </section>
           )}
 
           {step === 'time' && (
             <section>
-              <h2 className="text-lg font-bold text-[#1a1208] mb-4">Оберіть час</h2>
+              <h2 className="text-lg font-bold text-[#1a1208] mb-4">Pick a time</h2>
               <div className="flex gap-2 overflow-x-auto pb-2 mb-4 -mx-4 px-4">
                 {dates.map(d => {
                   const isSelected = selectedDate?.toDateString() === d.toDateString()
@@ -435,28 +435,28 @@ export default function SalonClient({ org, staff, services }: Props) {
                       onClick={() => { if (!unavailable) { setSelectedDate(d); setSelectedTime(null) } }}
                       disabled={unavailable}
                       className={`flex-none flex flex-col items-center px-3.5 py-2.5 rounded-xl border-2 transition min-w-[52px] min-h-[56px] active:scale-[0.97] ${unavailable ? 'border-[#e8dfc9] bg-[#f0ebe0] opacity-40 cursor-not-allowed' : isSelected ? 'border-[#C9A84C] bg-[#1a1208] text-white' : 'border-[#d4c9b8] bg-white text-[#1a1208]'}`}>
-                      <span className={`text-[10px] font-medium ${isSelected ? 'text-[#C9A84C]' : 'text-[#6b5744]'}`}>{d.toLocaleDateString('uk-UA',{weekday:'short'})}</span>
+                      <span className={`text-[10px] font-medium ${isSelected ? 'text-[#C9A84C]' : 'text-[#6b5744]'}`}>{d.toLocaleDateString('en-US',{weekday:'short'})}</span>
                       <span className="font-bold text-sm">{d.getDate()}</span>
-                      {unavailable && <span className="text-[8px] text-[#8b7a65] mt-0.5">вихідний</span>}
+                      {unavailable && <span className="text-[8px] text-[#8b7a65] mt-0.5">off</span>}
                     </button>
                   )
                 })}
               </div>
 
               {!selectedDate ? (
-                <div className="bg-white rounded-xl p-5 text-center text-sm text-[#6b5744]">Оберіть дату, щоб побачити доступні слоти</div>
+                <div className="bg-white rounded-xl p-5 text-center text-sm text-[#6b5744]">Select a date to see available slots</div>
               ) : slotsLoading ? (
                 <div className="bg-white rounded-xl p-5 text-center">
                   <svg className="animate-spin w-5 h-5 text-[#C9A84C] mx-auto" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" strokeDasharray="30 70"/></svg>
                 </div>
               ) : availableSlots.length === 0 ? (
                 <div className="bg-white rounded-xl p-5 text-center space-y-1">
-                  <p className="text-sm font-medium text-[#1a1208]">Немає доступних слотів</p>
-                  <p className="text-xs text-[#6b5744]">Оберіть іншу дату або майстра</p>
+                  <p className="text-sm font-medium text-[#1a1208]">No available slots</p>
+                  <p className="text-xs text-[#6b5744]">Try a different date or barber</p>
                 </div>
               ) : (
                 <>
-                  <p className="text-xs text-[#6b5744] mb-2">{availableCount > 0 ? `${availableCount} доступних слотів` : 'Всі слоти зайняті — оберіть іншу дату'}</p>
+                  <p className="text-xs text-[#6b5744] mb-2">{availableCount > 0 ? `${availableCount} slots available` : 'All slots booked — try another date'}</p>
                   <div className="grid grid-cols-3 gap-2">
                     {availableSlots.map(({ time, available }) => (
                       <button key={time}
@@ -471,9 +471,9 @@ export default function SalonClient({ org, staff, services }: Props) {
               )}
 
               <div className="flex gap-3 mt-5 items-center">
-                <button onClick={() => setStep('service')} className="text-sm text-[#6b5744] hover:text-[#1a1208] hover:underline px-1 py-2 min-h-[44px]">← Назад</button>
+                <button onClick={() => setStep('service')} className="text-sm text-[#6b5744] hover:text-[#1a1208] hover:underline px-1 py-2 min-h-[44px]">← Back</button>
                 {selectedDate && selectedTime && (
-                  <button onClick={() => setStep('confirm')} className="ml-auto bg-[#C9A84C] text-black font-bold px-6 py-3 rounded-xl hover:bg-[#e8d08a] transition min-h-[44px] active:scale-[0.98]">Далі →</button>
+                  <button onClick={() => setStep('confirm')} className="ml-auto bg-[#C9A84C] text-black font-bold px-6 py-3 rounded-xl hover:bg-[#e8d08a] transition min-h-[44px] active:scale-[0.98]">Next →</button>
                 )}
               </div>
             </section>
@@ -481,31 +481,31 @@ export default function SalonClient({ org, staff, services }: Props) {
 
           {step === 'confirm' && (
             <section>
-              <h2 className="text-lg font-bold text-[#1a1208] mb-4">Підтвердження</h2>
+              <h2 className="text-lg font-bold text-[#1a1208] mb-4">Confirm booking</h2>
               <div className="bg-white rounded-xl border border-[#e8dfc9] p-4 mb-4 text-sm space-y-2.5">
-                <div className="flex justify-between"><span className="text-[#6b5744]">Майстер</span><span className="font-semibold text-[#1a1208]">{selectedStaff?.name}</span></div>
-                <div className="flex justify-between"><span className="text-[#6b5744]">Послуга</span><span className="font-semibold text-[#1a1208]">{selectedService?.name}</span></div>
-                <div className="flex justify-between"><span className="text-[#6b5744]">Вартість</span><span className="font-bold text-[#1a1208]">${((selectedService?.price_cents||0)/100).toFixed(0)}</span></div>
+                <div className="flex justify-between"><span className="text-[#6b5744]">Barber</span><span className="font-semibold text-[#1a1208]">{selectedStaff?.name}</span></div>
+                <div className="flex justify-between"><span className="text-[#6b5744]">Service</span><span className="font-semibold text-[#1a1208]">{selectedService?.name}</span></div>
+                <div className="flex justify-between"><span className="text-[#6b5744]">Price</span><span className="font-bold text-[#1a1208]">${((selectedService?.price_cents||0)/100).toFixed(0)}</span></div>
                 <div className="h-px bg-[#f0e8dc]" />
-                <div className="flex justify-between"><span className="text-[#6b5744]">Дата</span><span className="font-semibold text-[#1a1208]">{selectedDate?.toLocaleDateString('uk-UA',{day:'numeric',month:'long'})}</span></div>
-                <div className="flex justify-between"><span className="text-[#6b5744]">Час</span><span className="font-bold text-[#C9A84C] text-base">{toAmPm(selectedTime ?? '')}</span></div>
+                <div className="flex justify-between"><span className="text-[#6b5744]">Date</span><span className="font-semibold text-[#1a1208]">{selectedDate?.toLocaleDateString('en-US',{day:'numeric',month:'long'})}</span></div>
+                <div className="flex justify-between"><span className="text-[#6b5744]">Time</span><span className="font-bold text-[#C9A84C] text-base">{toAmPm(selectedTime ?? '')}</span></div>
               </div>
               <div className="space-y-3 mb-4">
                 <div>
-                  <label htmlFor="client-name" className="block text-sm font-medium text-[#1a1208] mb-1.5">Ваше ім'я <span className="text-red-600">*</span></label>
-                  <input id="client-name" type="text" value={name} onChange={e => setName(e.target.value)} autoComplete="name" required placeholder="Іван Іваненко" className="w-full border border-[#c8bfb0] rounded-xl px-4 py-3 text-sm text-[#1a1208] outline-none focus:border-[#C9A84C] focus:ring-2 focus:ring-[#C9A84C]/20 bg-white placeholder-[#a0907e] min-h-[48px]" />
+                  <label htmlFor="client-name" className="block text-sm font-medium text-[#1a1208] mb-1.5">Your name <span className="text-red-600">*</span></label>
+                  <input id="client-name" type="text" value={name} onChange={e => setName(e.target.value)} autoComplete="name" required placeholder="John Smith" className="w-full border border-[#c8bfb0] rounded-xl px-4 py-3 text-sm text-[#1a1208] outline-none focus:border-[#C9A84C] focus:ring-2 focus:ring-[#C9A84C]/20 bg-white placeholder-[#a0907e] min-h-[48px]" />
                 </div>
                 <div>
-                  <label htmlFor="client-phone" className="block text-sm font-medium text-[#1a1208] mb-1.5">Телефон <span className="text-red-600">*</span></label>
-                  <input id="client-phone" type="tel" value={phone} onChange={e => setPhone(e.target.value)} autoComplete="tel" required placeholder="+380 (XX) XXX-XXXX" className="w-full border border-[#c8bfb0] rounded-xl px-4 py-3 text-sm text-[#1a1208] outline-none focus:border-[#C9A84C] focus:ring-2 focus:ring-[#C9A84C]/20 bg-white placeholder-[#a0907e] min-h-[48px]" />
+                  <label htmlFor="client-phone" className="block text-sm font-medium text-[#1a1208] mb-1.5">Phone <span className="text-red-600">*</span></label>
+                  <input id="client-phone" type="tel" value={phone} onChange={e => setPhone(e.target.value)} autoComplete="tel" required placeholder="+1 (555) 000-0000" className="w-full border border-[#c8bfb0] rounded-xl px-4 py-3 text-sm text-[#1a1208] outline-none focus:border-[#C9A84C] focus:ring-2 focus:ring-[#C9A84C]/20 bg-white placeholder-[#a0907e] min-h-[48px]" />
                 </div>
                 <div>
-                  <label htmlFor="client-email" className="block text-sm font-medium text-[#1a1208] mb-1.5">Email <span className="text-[#6b5744] font-normal text-xs">(для підтвердження)</span></label>
+                  <label htmlFor="client-email" className="block text-sm font-medium text-[#1a1208] mb-1.5">Email <span className="text-[#6b5744] font-normal text-xs">(for confirmation)</span></label>
                   <input id="client-email" type="email" value={clientEmail} onChange={e => setClientEmail(e.target.value)} autoComplete="email" placeholder="your@email.com" className="w-full border border-[#c8bfb0] rounded-xl px-4 py-3 text-sm text-[#1a1208] outline-none focus:border-[#C9A84C] focus:ring-2 focus:ring-[#C9A84C]/20 bg-white placeholder-[#a0907e] min-h-[48px]" />
                 </div>
                 <label className="flex items-start gap-3 py-1 cursor-pointer">
                   <input type="checkbox" checked={smsConsent} onChange={e => setSmsConsent(e.target.checked)} className="mt-0.5 w-4 h-4 accent-[#C9A84C]" />
-                  <span className="text-xs text-[#6b5744] leading-relaxed">Погоджуюсь на SMS-нагадування про запис. Відповідайте STOP для відмови.</span>
+                  <span className="text-xs text-[#6b5744] leading-relaxed">I agree to receive SMS reminders about my appointment. Reply STOP to opt out.</span>
                 </label>
               </div>
               <div role="alert" aria-live="assertive">
@@ -513,9 +513,9 @@ export default function SalonClient({ org, staff, services }: Props) {
               </div>
               <div className="space-y-2">
                 <button onClick={handleConfirm} disabled={submitting} className="w-full bg-[#C9A84C] text-black font-bold py-4 rounded-xl hover:bg-[#e8d08a] transition min-h-[52px] text-base disabled:opacity-50 active:scale-[0.98]">
-                  {submitting ? <span className="flex items-center justify-center gap-2"><svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" strokeDasharray="30 70"/></svg>Надсилання...</span> : 'Підтвердити запис →'}
+                  {submitting ? <span className="flex items-center justify-center gap-2"><svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" strokeDasharray="30 70"/></svg>Booking...</span> : 'Confirm booking →'}
                 </button>
-                <button onClick={() => setStep('time')} className="w-full text-sm text-[#6b5744] hover:text-[#1a1208] py-2 min-h-[44px] hover:underline">← Назад</button>
+                <button onClick={() => setStep('time')} className="w-full text-sm text-[#6b5744] hover:text-[#1a1208] py-2 min-h-[44px] hover:underline">← Back</button>
               </div>
             </section>
           )}
