@@ -49,32 +49,27 @@ function formatDateFull(d: Date) { return d.toLocaleDateString('en-US',{weekday:
 
 const HOURS = Array.from({length:11},(_,i)=>i+9)
 
-// ── Check if hour is blocked ───────────────────────────────────────────────
 function isHourBlocked(dateStr: string, hour: number, staffId: string | null, blocks: CalendarBlock[]): CalendarBlock | null {
   const slotStart = new Date(`${dateStr}T${String(hour).padStart(2,'0')}:00:00`).getTime()
   const slotEnd = slotStart + 60 * 60 * 1000
   return blocks.find(b => {
     const bs = new Date(b.start_time).getTime()
     const be = new Date(b.end_time).getTime()
-    const timeOverlap = bs < slotEnd && be > slotStart
-    const staffMatch = b.staff_id === null || b.staff_id === staffId
-    return timeOverlap && staffMatch
+    return bs < slotEnd && be > slotStart && (b.staff_id === null || b.staff_id === staffId)
   }) || null
 }
 
-// ── Block overlay in calendar cell ────────────────────────────────────────
 function BlockOverlay({ block }: { block: CalendarBlock }) {
   return (
-    <div className="absolute inset-0 bg-red-500/10 border border-red-500/20 rounded flex items-center justify-center pointer-events-none z-0" aria-label={`Blocked: ${block.reason}`}>
+    <div className="absolute inset-0 bg-red-500/10 border border-red-500/20 rounded flex items-center justify-center pointer-events-none z-0">
       <div className="flex items-center gap-1 px-1">
-        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#f87171" strokeWidth="2.5" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#f87171" strokeWidth="2.5"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
         <p className="text-red-400/80 text-[9px] font-medium truncate">{block.reason}</p>
       </div>
     </div>
   )
 }
 
-// ── Reschedule Modal ───────────────────────────────────────────────────────
 function RescheduleModal({ confirm, staffList, onConfirm, onCancel, saving }: {
   confirm: RescheduleConfirm; staffList: Staff[]; onConfirm:()=>void; onCancel:()=>void; saving:boolean
 }) {
@@ -102,7 +97,6 @@ function RescheduleModal({ confirm, staffList, onConfirm, onCancel, saving }: {
   )
 }
 
-// ── Booking Modal ──────────────────────────────────────────────────────────
 function BookingModal({ booking, staffList, staffColorMap, onClose, onStatusChange }: {
   booking: Booking; staffList: Staff[]; staffColorMap: Map<string,typeof STAFF_COLORS[0]>
   onClose:()=>void; onStatusChange:(id:string,status:string)=>Promise<void>
@@ -134,7 +128,6 @@ function BookingModal({ booking, staffList, staffColorMap, onClose, onStatusChan
   )
 }
 
-// ── Booking Card ───────────────────────────────────────────────────────────
 function BookingCard({ booking, staffColor, onDragStart, onBookingClick, isDragging }: {
   booking:Booking; staffColor:typeof STAFF_COLORS[0]
   onDragStart:(b:Booking)=>void; onBookingClick:(b:Booking)=>void; isDragging:boolean
@@ -153,7 +146,6 @@ function BookingCard({ booking, staffColor, onDragStart, onBookingClick, isDragg
   )
 }
 
-// ── Drop Zone Cell with block support ─────────────────────────────────────
 function DropCell({ date, time, masterId, children, onDrop, isOver, isToday, block }: {
   date:string; time:string; masterId:string; children:React.ReactNode
   onDrop:(t:DropTarget)=>void; isOver:boolean; isToday:boolean; block:CalendarBlock|null
@@ -171,7 +163,6 @@ function DropCell({ date, time, masterId, children, onDrop, isOver, isToday, blo
   )
 }
 
-// ── Week View ──────────────────────────────────────────────────────────────
 function WeekView({ weekStart, bookings, blocks, staffColorMap, staff, onBookingClick, dragState, onDragStart, onDrop }: {
   weekStart:Date; bookings:Booking[]; blocks:CalendarBlock[]
   staffColorMap:Map<string,typeof STAFF_COLORS[0]>; staff:Staff[]
@@ -182,7 +173,7 @@ function WeekView({ weekStart, bookings, blocks, staffColorMap, staff, onBooking
   return (
     <div className="overflow-x-auto">
       <div className="min-w-[640px]">
-        <div className="grid grid-cols-[48px_repeat(7,1fr)] border-b border-white/10 mb-1">
+        <div className="grid grid-cols-[56px_repeat(7,1fr)] border-b border-white/10 mb-1">
           <div/>
           {days.map(d=>{const it=isSameDay(d,today);return(
             <div key={d.toISOString()} className="text-center pb-2 px-1">
@@ -192,28 +183,31 @@ function WeekView({ weekStart, bookings, blocks, staffColorMap, staff, onBooking
           )})}
         </div>
         <div>
-          {HOURS.map(hour=>(
-            <div key={hour} className="grid grid-cols-[48px_repeat(7,1fr)]">
-              <div className="text-white/20 text-xs pr-2 pt-0.5 text-right select-none">{`${String(hour).padStart(2,'0')}:00`}</div>
-              {days.map(d=>{
-                const dateStr=toDateStr(d); const timeStr=`${String(hour).padStart(2,'0')}:00`
-                const cell=bookings.filter(b=>b.date===dateStr&&parseInt(b.time_slot.split(':')[0])===hour)
-                const blk=isHourBlocked(dateStr, hour, dragState?.originMasterId||null, blocks)
-                return(
-                  <DropCell key={d.toISOString()} date={dateStr} time={timeStr} masterId={dragState?.originMasterId||(staff[0]?.id??'')} onDrop={onDrop} isOver={!!dragState} isToday={isSameDay(d,today)} block={blk}>
-                    {cell.map(b=><BookingCard key={b.id} booking={b} staffColor={staffColorMap.get(b.master_id)||STAFF_COLORS[0]} onDragStart={onDragStart} onBookingClick={onBookingClick} isDragging={dragState?.bookingId===b.id}/>)}
-                  </DropCell>
-                )
-              })}
-            </div>
-          ))}
+          {HOURS.map(hour=>{
+            const hourLabel = (h) => { const p = h>=12?"PM":"AM"; const hh = h%12||12; return hh+":00 "+p; };
+            const label = toAmPm(`${String(hour).padStart(2,'0')}:00`)
+            return (
+              <div key={hour} className="grid grid-cols-[56px_repeat(7,1fr)]">
+                <div className="text-white/20 text-[10px] pr-2 pt-0.5 text-right select-none leading-tight">{label}</div>
+                {days.map(d=>{
+                  const dateStr=toDateStr(d); const timeStr=`${String(hour).padStart(2,'0')}:00`
+                  const cell=bookings.filter(b=>b.date===dateStr&&parseInt(b.time_slot.split(':')[0])===hour)
+                  const blk=isHourBlocked(dateStr, hour, dragState?.originMasterId||null, blocks)
+                  return(
+                    <DropCell key={d.toISOString()} date={dateStr} time={timeStr} masterId={dragState?.originMasterId||(staff[0]?.id??'')} onDrop={onDrop} isOver={!!dragState} isToday={isSameDay(d,today)} block={blk}>
+                      {cell.map(b=><BookingCard key={b.id} booking={b} staffColor={staffColorMap.get(b.master_id)||STAFF_COLORS[0]} onDragStart={onDragStart} onBookingClick={onBookingClick} isDragging={dragState?.bookingId===b.id}/>)}
+                    </DropCell>
+                  )
+                })}
+              </div>
+            )
+          })}
         </div>
       </div>
     </div>
   )
 }
 
-// ── Day View ───────────────────────────────────────────────────────────────
 function DayView({ date, bookings, blocks, staffColorMap, staff, onBookingClick, dragState, onDragStart, onDrop }: {
   date:Date; bookings:Booking[]; blocks:CalendarBlock[]
   staffColorMap:Map<string,typeof STAFF_COLORS[0]>; staff:Staff[]
@@ -225,13 +219,13 @@ function DayView({ date, bookings, blocks, staffColorMap, staff, onBookingClick,
     <div>
       <div className="mb-3 text-white/50 text-sm font-medium">{formatDateFull(date)}</div>
       {HOURS.map(hour=>{
-        const timeStr=`${String(hour).padStart(2,'00')}:00`
+        const timeStr=`${String(hour).padStart(2,'0')}:00`
         const slotBookings=dayBookings.filter(b=>parseInt(b.time_slot.split(':')[0])===hour)
         const blk=isHourBlocked(dateStr, hour, null, blocks)
         return(
           <DropCell key={hour} date={dateStr} time={timeStr} masterId={dragState?.originMasterId||(staff[0]?.id??'')} onDrop={onDrop} isOver={!!dragState} isToday={false} block={blk}>
             <div className="flex gap-3 min-h-[52px]">
-              <div className="w-12 text-white/20 text-xs pt-1 text-right flex-none select-none">{timeStr}</div>
+              <div className="w-14 text-white/20 text-[10px] pt-1 text-right flex-none select-none leading-tight">{toAmPm(timeStr)}</div>
               <div className="flex-1 py-0.5 space-y-1">
                 {slotBookings.map(b=>{
                   const sc=staffColorMap.get(b.master_id)||STAFF_COLORS[0]; const s=STATUS_CONFIG[b.status]; const us=b.status!=='confirmed'&&b.status!=='pending'
@@ -256,7 +250,6 @@ function DayView({ date, bookings, blocks, staffColorMap, staff, onBookingClick,
   )
 }
 
-// ── Main ───────────────────────────────────────────────────────────────────
 export default function BookingCalendar({ orgId, orgTimezone, staff }: Props) {
   const [view, setView] = useState<'week'|'day'>('week')
   const [currentDate, setCurrentDate] = useState(() => new Date())
@@ -338,7 +331,6 @@ export default function BookingCalendar({ orgId, orgTimezone, staff }: Props) {
 
   return (
     <div className="space-y-4" onDragEnd={() => setDragState(null)}>
-      {/* Toolbar */}
       <div className="flex flex-wrap items-center gap-3 justify-between">
         <div className="flex items-center gap-2">
           <button onClick={() => setCurrentDate(new Date())} disabled={isToday||isCurrentWeek}
@@ -372,7 +364,6 @@ export default function BookingCalendar({ orgId, orgTimezone, staff }: Props) {
         </div>
       </div>
 
-      {/* Legend */}
       {staff.length > 0 && (
         <div className="flex flex-wrap gap-2">
           {staff.map((s,i) => {
@@ -399,7 +390,6 @@ export default function BookingCalendar({ orgId, orgTimezone, staff }: Props) {
 
       {bookings.length > 0 && <p className="text-white/20 text-xs">Drag to reschedule · Click to view & update status</p>}
 
-      {/* Calendar */}
       <div className="bg-white/5 border border-white/10 rounded-xl p-4 relative min-h-[400px]">
         {loading && <div className="absolute inset-0 flex items-center justify-center bg-[#0F0A00]/50 rounded-xl z-10"><svg className="animate-spin w-5 h-5 text-[#C9A84C]" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" strokeDasharray="30 70"/></svg></div>}
         {view==='week' && <WeekView weekStart={weekStart} bookings={bookings} blocks={blocks} staffColorMap={staffColorMap} staff={staff} onBookingClick={setSelectedBooking} dragState={dragState} onDragStart={handleDragStart} onDrop={handleDrop}/>}
