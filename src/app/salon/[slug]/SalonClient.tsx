@@ -34,7 +34,6 @@ function toTimeStr(minutes: number): string {
   return `${String(Math.floor(minutes / 60)).padStart(2, '0')}:${String(minutes % 60).padStart(2, '0')}`
 }
 
-// Check if a slot is blocked by any calendar block
 function isSlotBlocked(dateStr: string, slotMin: number, slotEndMin: number, staffId: string, blocks: CalendarBlock[]): boolean {
   return blocks.some(b => {
     const staffMatch = b.staff_id === null || b.staff_id === staffId
@@ -45,42 +44,31 @@ function isSlotBlocked(dateStr: string, slotMin: number, slotEndMin: number, sta
     const blockEndMin = blockEnd.getHours() * 60 + blockEnd.getMinutes()
     const blockDate = `${blockStart.getFullYear()}-${String(blockStart.getMonth()+1).padStart(2,'0')}-${String(blockStart.getDate()).padStart(2,'0')}`
     if (blockDate !== dateStr) return false
-    // Overlap: slot starts before block ends AND slot ends after block starts
     return slotMin < blockEndMin && slotEndMin > blockStartMin
   })
 }
 
 function buildSlots(
-  date: Date,
-  schedule: DaySchedule | null,
-  bookedSlots: string[],
-  serviceDuration: number,
-  blocks: CalendarBlock[],
-  staffId: string,
+  date: Date, schedule: DaySchedule | null, bookedSlots: string[],
+  serviceDuration: number, blocks: CalendarBlock[], staffId: string,
 ): { time: string; available: boolean }[] {
   if (schedule?.is_day_off) return []
-
   const workStartMin = toMinutes(schedule?.work_start || DEFAULT_WORK_START)
   const workEndMin   = toMinutes(schedule?.work_end   || DEFAULT_WORK_END)
   const breakStartMin = schedule?.break_start ? toMinutes(schedule.break_start) : null
   const breakEndMin   = schedule?.break_end   ? toMinutes(schedule.break_end)   : null
-
   const now = new Date()
   const isToday = date.toDateString() === now.toDateString()
   const cutoffMin = isToday ? (now.getHours() * 60 + now.getMinutes()) : -1
-
   const dateStr = `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`
   const slots: { time: string; available: boolean }[] = []
-
   for (let min = workStartMin; min + serviceDuration <= workEndMin; min += 30) {
     const slotEndMin = min + serviceDuration
     if (isToday && min <= cutoffMin) continue
     if (breakStartMin !== null && breakEndMin !== null) {
       if (min < breakEndMin && slotEndMin > breakStartMin) continue
     }
-    // Skip blocked slots
     if (isSlotBlocked(dateStr, min, slotEndMin, staffId, blocks)) continue
-
     const time = toTimeStr(min)
     const available = !bookedSlots.includes(time)
     slots.push({ time, available })
@@ -129,7 +117,6 @@ export default function SalonClient({ org, staff, services }: Props) {
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
   const [pageLoading, setPageLoading] = useState(true)
-
   const [scheduleMap, setScheduleMap] = useState<Record<string, DaySchedule[]>>({})
   const [vacationMap, setVacationMap] = useState<Record<string, { date_from: string; date_to: string }[]>>({})
   const [bookedSlotsMap, setBookedSlotsMap] = useState<Record<string, string[]>>({})
@@ -139,25 +126,17 @@ export default function SalonClient({ org, staff, services }: Props) {
   const supabase = createClient()
   const dates = getDates()
 
-  useEffect(() => {
-    const t = setTimeout(() => setPageLoading(false), 300)
-    return () => clearTimeout(t)
-  }, [])
+  useEffect(() => { const t = setTimeout(() => setPageLoading(false), 300); return () => clearTimeout(t) }, [])
 
-  // Load calendar blocks for org (once)
   useEffect(() => {
     async function loadBlocks() {
-      const { data } = await supabase
-        .from('calendar_blocks')
-        .select('staff_id, start_time, end_time')
-        .eq('org_id', org.id)
-        .gte('end_time', new Date().toISOString())
+      const { data } = await supabase.from('calendar_blocks').select('staff_id, start_time, end_time')
+        .eq('org_id', org.id).gte('end_time', new Date().toISOString())
       setBlocks(data || [])
     }
     loadBlocks()
   }, [org.id])
 
-  // Load schedule + vacations for staff
   useEffect(() => {
     if (!selectedStaff) return
     const sid = selectedStaff.id
@@ -173,7 +152,6 @@ export default function SalonClient({ org, staff, services }: Props) {
     loadSchedule()
   }, [selectedStaff])
 
-  // Load booked slots when staff + date changes
   useEffect(() => {
     if (!selectedStaff || !selectedDate) return
     const sid = selectedStaff.id
@@ -182,11 +160,9 @@ export default function SalonClient({ org, staff, services }: Props) {
     if (bookedSlotsMap[key] !== undefined) return
     async function loadBooked() {
       setSlotsLoading(true)
-      const { data } = await supabase
-        .from('bookings').select('time_slot')
+      const { data } = await supabase.from('bookings').select('time_slot')
         .eq('master_id', sid).eq('date', dateStr).neq('status', 'cancelled')
-      const slots = (data || []).map((b: { time_slot: string }) => b.time_slot)
-      setBookedSlotsMap(prev => ({ ...prev, [key]: slots }))
+      setBookedSlotsMap(prev => ({ ...prev, [key]: (data || []).map((b: { time_slot: string }) => b.time_slot) }))
       setSlotsLoading(false)
     }
     loadBooked()
@@ -195,32 +171,24 @@ export default function SalonClient({ org, staff, services }: Props) {
   function toDateStr(d: Date): string {
     return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`
   }
-
   function isVacationDate(staffId: string, date: Date): boolean {
     const dateStr = toDateStr(date)
     return (vacationMap[staffId] || []).some(v => dateStr >= v.date_from && dateStr <= v.date_to)
   }
-
   function getScheduleForDate(staffId: string, date: Date): DaySchedule | null {
     const sched = scheduleMap[staffId] || []
-    const dow = date.getDay()
-    return sched.find(s => s.day_of_week === dow) || null
+    return sched.find(s => s.day_of_week === date.getDay()) || null
   }
-
   function isDateUnavailable(staffId: string, date: Date): boolean {
     if (isVacationDate(staffId, date)) return true
     const sched = getScheduleForDate(staffId, date)
     return sched !== null && sched.is_day_off
   }
-
   function getAvailableSlots(): { time: string; available: boolean }[] {
     if (!selectedStaff || !selectedDate || !selectedService) return []
     const sid = selectedStaff.id
-    const dateStr = toDateStr(selectedDate)
-    const key = `${sid}_${dateStr}`
-    const booked = bookedSlotsMap[key] || []
-    const sched = getScheduleForDate(sid, selectedDate)
-    return buildSlots(selectedDate, sched, booked, selectedService.duration_min, blocks, sid)
+    const key = `${sid}_${toDateStr(selectedDate)}`
+    return buildSlots(selectedDate, getScheduleForDate(sid, selectedDate), bookedSlotsMap[key] || [], selectedService.duration_min, blocks, sid)
   }
 
   const hasStaff = staff.length > 0
@@ -231,7 +199,6 @@ export default function SalonClient({ org, staff, services }: Props) {
     if (staff.length === 1) { setSelectedStaff(staff[0]); setStep('service') }
     else setStep('staff')
   }
-
   function handleSelectStaff(m: Staff) { setSelectedStaff(m); setStep('service') }
   function handleSelectService(s: Service) { setSelectedService(s); setStep('time') }
 
@@ -247,38 +214,29 @@ export default function SalonClient({ org, staff, services }: Props) {
       const startISO = `${dateStr}T${String(hours).padStart(2,'0')}:${String(minutes).padStart(2,'0')}:00`
       const startDate = new Date(startISO)
       const reminderAt = new Date(startDate.getTime() - 2 * 60 * 60 * 1000)
-
-      // STEP 1: Save SMS consent FIRST
       if (smsConsent && phone) {
         await fetch('/api/sms/consent', {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ org_id: org.id, client_phone: phone, client_name: name, consented: true }),
         })
       }
-
-      // STEP 2: Insert booking
       const { data: newBooking, error: bookingError } = await supabase.from('bookings').insert({
         org_id: org.id, master_id: selectedStaff.id, date: dateStr,
         time_slot: selectedTime, start_time: startDate.toISOString(),
-        reminder_at: reminderAt.toISOString(),
-        reminder_sent: false, client_name: name, client_phone: phone,
-        client_email: clientEmail || null, service_name: selectedService.name,
-        price_cents: selectedService.price_cents, status: 'confirmed',
+        reminder_at: reminderAt.toISOString(), reminder_sent: false,
+        client_name: name, client_phone: phone, client_email: clientEmail || null,
+        service_name: selectedService.name, price_cents: selectedService.price_cents, status: 'confirmed',
       }).select('id').single()
       if (bookingError) throw bookingError
-
-      // STEP 3: Fire & forget email + SMS
       fetch('/api/email/booking', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           org_id: org.id, client_name: name, client_phone: phone,
           client_email: clientEmail || null, master_name: selectedStaff.name,
           service_name: selectedService.name, date: dateFormatted,
-          time: selectedTime, price_cents: selectedService.price_cents,
-          booking_id: newBooking?.id,
+          time: selectedTime, price_cents: selectedService.price_cents, booking_id: newBooking?.id,
         }),
       }).catch(() => {})
-
       setStep('done')
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Помилка. Спробуйте ще раз.')
@@ -300,7 +258,7 @@ export default function SalonClient({ org, staff, services }: Props) {
           <p className="font-serif text-[#C9A84C] text-lg font-bold">✂ {org.name}</p>
         </div>
         <div className="flex-1 flex items-center justify-center px-4 py-12">
-          <div className="bg-white rounded-2xl p-8 max-w-sm w-full text-center shadow-sm border border-[#e8dfc9]" role="status" aria-live="polite">
+          <div className="bg-white rounded-2xl p-8 max-w-sm w-full text-center shadow-sm border border-[#e8dfc9]">
             <div className="w-16 h-16 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-4">
               <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>
             </div>
@@ -311,7 +269,7 @@ export default function SalonClient({ org, staff, services }: Props) {
               <div className="flex justify-between"><span className="text-[#6b5744]">Послуга</span><span className="font-semibold text-[#1a1208]">{selectedService?.name}</span></div>
               <div className="h-px bg-[#e8dfc9]" />
               <div className="flex justify-between"><span className="text-[#6b5744]">Дата</span><span className="font-semibold text-[#1a1208]">{selectedDate?.toLocaleDateString('uk-UA', { day: 'numeric', month: 'long' })}</span></div>
-              <div className="flex justify-between"><span className="text-[#6b5744]">Час</span><span className="font-bold text-[#1a1208]">{selectedTime}</span></div>
+              <div className="flex justify-between"><span className="text-[#6b5744]">Час</span><span className="font-bold text-[#1a1208]">{toAmPm(selectedTime ?? '')}</span></div>
             </div>
             {clientEmail && <p className="text-[#6b5744] text-xs mb-4">📧 Підтвердження надіслано на {clientEmail}</p>}
             <button onClick={resetBooking} className="w-full bg-[#1a1208] text-[#C9A84C] font-bold py-3 rounded-xl hover:bg-[#2d1f0d] transition min-h-[44px]">Новий запис</button>
@@ -331,8 +289,7 @@ export default function SalonClient({ org, staff, services }: Props) {
         {isHero ? (
           <>
             <div className="inline-flex items-center gap-2 bg-white/10 text-[#C9A84C] text-xs font-medium px-3 py-1 rounded-full mb-4">
-              <span className="w-1.5 h-1.5 bg-[#C9A84C] rounded-full animate-pulse" />
-              Онлайн запис
+              <span className="w-1.5 h-1.5 bg-[#C9A84C] rounded-full animate-pulse" />Онлайн запис
             </div>
             <h1 className="font-serif text-3xl sm:text-4xl font-bold mb-2 leading-tight">{org.name}</h1>
             {org.address && <p className="text-white/60 text-sm mb-1 flex items-center justify-center gap-1"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>{org.address}</p>}
@@ -409,7 +366,7 @@ export default function SalonClient({ org, staff, services }: Props) {
 
       {!isHero && (
         <div className="flex-1 max-w-lg mx-auto w-full px-4 py-6">
-          <div className="flex gap-1 mb-6" role="progressbar">
+          <div className="flex gap-1 mb-6">
             {(['staff','service','time','confirm'] as const).map((s,i) => (
               <div key={s} className={`flex-1 h-1 rounded-full transition-all ${step===s?'bg-[#C9A84C]':['staff','service','time','confirm'].indexOf(step)>i?'bg-[#1a1208]':'bg-[#d4c9b8]'}`} />
             ))}
@@ -419,7 +376,7 @@ export default function SalonClient({ org, staff, services }: Props) {
             <div className="bg-white border border-[#e8dfc9] rounded-xl px-4 py-2.5 mb-4 flex flex-wrap gap-x-3 gap-y-1 text-xs text-[#1a1208]">
               {selectedStaff && <span className="font-medium">✂ {selectedStaff.name}</span>}
               {selectedService && <span className="text-[#6b5744]">· {selectedService.name} <strong className="text-[#1a1208]">${(selectedService.price_cents/100).toFixed(0)}</strong></span>}
-              {selectedDate && selectedTime && <span className="text-[#6b5744]">· <strong className="text-[#1a1208]">{selectedDate.toLocaleDateString('uk-UA',{day:'numeric',month:'short'})} {toAmPm(selectedTime ?? "")}</strong></span>}
+              {selectedDate && selectedTime && <span className="text-[#6b5744]">· <strong className="text-[#1a1208]">{selectedDate.toLocaleDateString('uk-UA',{day:'numeric',month:'short'})} {toAmPm(selectedTime)}</strong></span>}
             </div>
           )}
 
@@ -477,8 +434,7 @@ export default function SalonClient({ org, staff, services }: Props) {
                     <button key={d.toISOString()}
                       onClick={() => { if (!unavailable) { setSelectedDate(d); setSelectedTime(null) } }}
                       disabled={unavailable}
-                      className={`flex-none flex flex-col items-center px-3.5 py-2.5 rounded-xl border-2 transition min-w-[52px] min-h-[56px] active:scale-[0.97]
-                        ${unavailable ? 'border-[#e8dfc9] bg-[#f0ebe0] opacity-40 cursor-not-allowed' : isSelected ? 'border-[#C9A84C] bg-[#1a1208] text-white' : 'border-[#d4c9b8] bg-white text-[#1a1208]'}`}>
+                      className={`flex-none flex flex-col items-center px-3.5 py-2.5 rounded-xl border-2 transition min-w-[52px] min-h-[56px] active:scale-[0.97] ${unavailable ? 'border-[#e8dfc9] bg-[#f0ebe0] opacity-40 cursor-not-allowed' : isSelected ? 'border-[#C9A84C] bg-[#1a1208] text-white' : 'border-[#d4c9b8] bg-white text-[#1a1208]'}`}>
                       <span className={`text-[10px] font-medium ${isSelected ? 'text-[#C9A84C]' : 'text-[#6b5744]'}`}>{d.toLocaleDateString('uk-UA',{weekday:'short'})}</span>
                       <span className="font-bold text-sm">{d.getDate()}</span>
                       {unavailable && <span className="text-[8px] text-[#8b7a65] mt-0.5">вихідний</span>}
@@ -501,14 +457,13 @@ export default function SalonClient({ org, staff, services }: Props) {
               ) : (
                 <>
                   <p className="text-xs text-[#6b5744] mb-2">{availableCount > 0 ? `${availableCount} доступних слотів` : 'Всі слоти зайняті — оберіть іншу дату'}</p>
-                  <div className="grid grid-cols-4 gap-2">
+                  <div className="grid grid-cols-3 gap-2">
                     {availableSlots.map(({ time, available }) => (
                       <button key={time}
                         onClick={() => available && setSelectedTime(time)}
                         disabled={!available}
-                        className={`py-3 rounded-lg text-sm font-medium border transition min-h-[44px] active:scale-[0.97]
-                          ${!available ? 'border-[#e8dfc9] bg-[#f5f0e8] text-[#c8bfb0] line-through cursor-not-allowed' : selectedTime===time ? 'border-[#C9A84C] bg-[#C9A84C] text-black' : 'border-[#d4c9b8] bg-white text-[#1a1208] hover:border-[#C9A84C]'}`}>
-                        {time}
+                        className={`py-3 rounded-lg text-sm font-medium border transition min-h-[44px] active:scale-[0.97] ${!available ? 'border-[#e8dfc9] bg-[#f5f0e8] text-[#c8bfb0] line-through cursor-not-allowed' : selectedTime===time ? 'border-[#C9A84C] bg-[#C9A84C] text-black' : 'border-[#d4c9b8] bg-white text-[#1a1208] hover:border-[#C9A84C]'}`}>
+                        {toAmPm(time)}
                       </button>
                     ))}
                   </div>
@@ -533,7 +488,7 @@ export default function SalonClient({ org, staff, services }: Props) {
                 <div className="flex justify-between"><span className="text-[#6b5744]">Вартість</span><span className="font-bold text-[#1a1208]">${((selectedService?.price_cents||0)/100).toFixed(0)}</span></div>
                 <div className="h-px bg-[#f0e8dc]" />
                 <div className="flex justify-between"><span className="text-[#6b5744]">Дата</span><span className="font-semibold text-[#1a1208]">{selectedDate?.toLocaleDateString('uk-UA',{day:'numeric',month:'long'})}</span></div>
-                <div className="flex justify-between"><span className="text-[#6b5744]">Час</span><span className="font-bold text-[#C9A84C] text-base">{toAmPm(selectedTime ?? "")}</span></div>
+                <div className="flex justify-between"><span className="text-[#6b5744]">Час</span><span className="font-bold text-[#C9A84C] text-base">{toAmPm(selectedTime ?? '')}</span></div>
               </div>
               <div className="space-y-3 mb-4">
                 <div>
