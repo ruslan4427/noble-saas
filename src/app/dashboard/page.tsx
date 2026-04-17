@@ -9,8 +9,6 @@ import BookingCalendar from '@/components/BookingCalendar'
 import StaffSchedule from '@/components/StaffSchedule'
 import RecentBookings from '@/components/RecentBookings'
 import CalendarBlocks from '@/components/CalendarBlocks'
-import CalendarBlocks from '@/components/CalendarBlocks'
-import CalendarBlocks from '@/components/CalendarBlocks'
 
 const APP_URL = 'https://www.noblelink.app'
 
@@ -78,10 +76,6 @@ const COPIED_LINK_KEY = 'noble_onboarding_copied_link'
 const TABS = ['overview', 'calendar', 'staff', 'services', 'settings'] as const
 type Tab = typeof TABS[number]
 const STAFF_TABS = ['members', 'schedule'] as const
-const CALENDAR_TABS = ['bookings', 'blocks'] as const
-type CalendarTab = typeof CALENDAR_TABS[number]
-const CALENDAR_TABS = ['bookings', 'blocks'] as const
-type CalendarTab = typeof CALENDAR_TABS[number]
 type StaffTab = typeof STAFF_TABS[number]
 const CALENDAR_TABS = ['bookings', 'blocks'] as const
 type CalendarTab = typeof CALENDAR_TABS[number]
@@ -93,8 +87,6 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState<Tab>('overview')
   const [staffTab, setStaffTab] = useState<StaffTab>('members')
-  const [calendarTab, setCalendarTab] = useState<CalendarTab>('bookings')
-  const [calendarTab, setCalendarTab] = useState<CalendarTab>('bookings')
   const [calendarTab, setCalendarTab] = useState<CalendarTab>('bookings')
   const [toast, setToast] = useState<string | null>(null)
   const [hasCopiedLink, setHasCopiedLink] = useState(false)
@@ -225,8 +217,6 @@ export default function Dashboard() {
               onAddStaff={() => { setActiveTab('staff'); setShowAddStaff(true) }}
               onCopyLink={handleCopy}
             />
-
-            {/* Stats */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {[
                 { label: 'Staff members', value: staff.length },
@@ -240,11 +230,7 @@ export default function Dashboard() {
                 </div>
               ))}
             </div>
-
-            {/* Bookings list */}
             {org && <RecentBookings orgId={org.id} staff={staff} />}
-
-            {/* Booking link */}
             <div className="bg-white/5 border border-white/10 rounded-xl p-6">
               <h3 className="font-semibold mb-1">Your booking page</h3>
               <p className="text-white/40 text-xs mb-3">Share this link with clients so they can book online.</p>
@@ -254,8 +240,6 @@ export default function Dashboard() {
                 <a href={bookingUrl} target="_blank" rel="noopener noreferrer" className="border border-white/20 text-white/60 px-4 py-2 rounded text-sm hover:border-white/40 hover:text-white transition whitespace-nowrap min-h-[36px] flex items-center">Open ↗</a>
               </div>
             </div>
-
-            {/* Quick actions */}
             <div className="bg-white/5 border border-white/10 rounded-xl p-6">
               <h3 className="font-semibold mb-4">Quick actions</h3>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -274,45 +258,23 @@ export default function Dashboard() {
 
         {/* ── Calendar ── */}
         {activeTab === 'calendar' && org && (
-  <div className="space-y-4">
-    <div className="flex gap-1 bg-white/5 rounded-lg p-1 w-fit">
-      {CALENDAR_TABS.map(t => (
-        <button key={t} onClick={() => setCalendarTab(t)}
-          className={`px-4 py-1.5 rounded text-sm font-medium transition ${calendarTab === t ? 'bg-[#C9A84C] text-black' : 'text-white/40 hover:text-white'}`}>
-          {t === 'bookings' ? '📅 Bookings' : '🚫 Blocks'}
-        </button>
-      ))}
-    </div>
-    {calendarTab === 'bookings' && <BookingCalendar orgId={org.id} orgTimezone={org.timezone || 'America/New_York'} staff={staff} />}
-    {calendarTab === 'blocks' && <CalendarBlocks orgId={org.id} staff={staff} />}
-  </div>
-)}
-  <div className="space-y-4">
-    <div className="flex gap-1 bg-white/5 rounded-lg p-1 w-fit">
-      {CALENDAR_TABS.map(t => (
-        <button key={t} onClick={() => setCalendarTab(t)}
-          className={`px-4 py-1.5 rounded text-sm font-medium transition ${calendarTab === t ? 'bg-[#C9A84C] text-black' : 'text-white/40 hover:text-white'}`}>
-          {t === 'bookings' ? '📅 Bookings' : '🚫 Blocks'}
-        </button>
-      ))}
-    </div>
-    {calendarTab === 'bookings' && <BookingCalendar orgId={org.id} orgTimezone={org.timezone || 'America/New_York'} staff={staff} />}
-    {calendarTab === 'blocks' && <CalendarBlocks orgId={org.id} staff={staff} />}
-  </div>
-)}
-  <div className="space-y-4">
-    <div className="flex gap-1 bg-white/5 rounded-lg p-1 w-fit">
-      {CALENDAR_TABS.map(t => (
-        <button key={t} onClick={() => setCalendarTab(t)}
-          className={`px-4 py-1.5 rounded text-sm font-medium transition capitalize ${calendarTab === t ? 'bg-[#C9A84C] text-black' : 'text-white/40 hover:text-white'}`}>
-          {t === 'bookings' ? '📅 Bookings' : '🚫 Blocks'}
-        </button>
-      ))}
-    </div>
-    {calendarTab === 'bookings' && <BookingCalendar orgId={org.id} orgTimezone={org.timezone || 'America/New_York'} staff={staff} />}
-    {calendarTab === 'blocks' && <CalendarBlocks orgId={org.id} staff={staff} />}
-  </div>
-)}
+          <div className="space-y-4">
+            <div className="flex gap-1 bg-white/5 rounded-lg p-1 w-fit">
+              {CALENDAR_TABS.map(t => (
+                <button key={t} onClick={() => setCalendarTab(t)}
+                  className={`px-4 py-1.5 rounded text-sm font-medium transition ${calendarTab === t ? 'bg-[#C9A84C] text-black' : 'text-white/40 hover:text-white'}`}>
+                  {t === 'bookings' ? '📅 Bookings' : '🚫 Blocks'}
+                </button>
+              ))}
+            </div>
+            {calendarTab === 'bookings' && (
+              <BookingCalendar orgId={org.id} orgTimezone={org.timezone || 'America/New_York'} staff={staff} />
+            )}
+            {calendarTab === 'blocks' && (
+              <CalendarBlocks orgId={org.id} staff={staff} />
+            )}
+          </div>
+        )}
 
         {/* ── Staff ── */}
         {activeTab === 'staff' && (
@@ -331,7 +293,6 @@ export default function Dashboard() {
                 </button>
               ))}
             </div>
-
             {staffTab === 'members' && (
               <>
                 {showAddStaff && (
@@ -366,7 +327,6 @@ export default function Dashboard() {
                 )}
               </>
             )}
-
             {staffTab === 'schedule' && org && (
               <StaffSchedule orgId={org.id} staff={staff} />
             )}
