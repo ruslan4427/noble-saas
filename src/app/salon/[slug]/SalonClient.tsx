@@ -1,6 +1,7 @@
 'use client'
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase'
+import { toAmPm } from '@/lib/time'
 
 interface Org {
   id: string; name: string; slug: string
@@ -418,7 +419,7 @@ export default function SalonClient({ org, staff, services }: Props) {
             <div className="bg-white border border-[#e8dfc9] rounded-xl px-4 py-2.5 mb-4 flex flex-wrap gap-x-3 gap-y-1 text-xs text-[#1a1208]">
               {selectedStaff && <span className="font-medium">✂ {selectedStaff.name}</span>}
               {selectedService && <span className="text-[#6b5744]">· {selectedService.name} <strong className="text-[#1a1208]">${(selectedService.price_cents/100).toFixed(0)}</strong></span>}
-              {selectedDate && selectedTime && <span className="text-[#6b5744]">· <strong className="text-[#1a1208]">{selectedDate.toLocaleDateString('uk-UA',{day:'numeric',month:'short'})} {selectedTime}</strong></span>}
+              {selectedDate && selectedTime && <span className="text-[#6b5744]">· <strong className="text-[#1a1208]">{selectedDate.toLocaleDateString('uk-UA',{day:'numeric',month:'short'})} {toAmPm(selectedTime ?? "")}</strong></span>}
             </div>
           )}
 
@@ -532,7 +533,7 @@ export default function SalonClient({ org, staff, services }: Props) {
                 <div className="flex justify-between"><span className="text-[#6b5744]">Вартість</span><span className="font-bold text-[#1a1208]">${((selectedService?.price_cents||0)/100).toFixed(0)}</span></div>
                 <div className="h-px bg-[#f0e8dc]" />
                 <div className="flex justify-between"><span className="text-[#6b5744]">Дата</span><span className="font-semibold text-[#1a1208]">{selectedDate?.toLocaleDateString('uk-UA',{day:'numeric',month:'long'})}</span></div>
-                <div className="flex justify-between"><span className="text-[#6b5744]">Час</span><span className="font-bold text-[#C9A84C] text-base">{selectedTime}</span></div>
+                <div className="flex justify-between"><span className="text-[#6b5744]">Час</span><span className="font-bold text-[#C9A84C] text-base">{toAmPm(selectedTime ?? "")}</span></div>
               </div>
               <div className="space-y-3 mb-4">
                 <div>
