@@ -1,6 +1,7 @@
 'use client'
 import { useEffect, useState, useCallback } from 'react'
 import { createClient } from '@/lib/supabase'
+import { toAmPm } from '@/lib/time'
 
 interface Booking {
   id: string
@@ -87,7 +88,7 @@ function BookingRow({ booking, staffMap, onStatusChange }: {
         {/* Date badge */}
         <div className="flex-none text-center w-10">
           <p className="text-[#C9A84C] text-xs font-bold leading-none">{formatDate(booking.date)}</p>
-          <p className="text-white/40 text-xs mt-0.5">{booking.time_slot}</p>
+          <p className="text-white/40 text-xs mt-0.5">{toAmPm(booking.time_slot)}</p>
         </div>
         <div className="w-px h-8 bg-white/10 flex-none" aria-hidden="true" />
         <div className="flex-1 min-w-0">
@@ -120,7 +121,7 @@ function BookingRow({ booking, staffMap, onStatusChange }: {
             </div>
             <div>
               <p className="text-white/30">Date</p>
-              <p className="text-white/70">{new Date(booking.date + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'short', day: 'numeric', month: 'short' })} at {booking.time_slot}</p>
+              <p className="text-white/70">{new Date(booking.date + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'short', day: 'numeric', month: 'short' })} at {toAmPm(booking.time_slot)}</p>
             </div>
             <div>
               <p className="text-white/30">Service</p>
