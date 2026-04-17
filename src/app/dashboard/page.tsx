@@ -8,6 +8,7 @@ import TrialBanner from '@/components/TrialBanner'
 import BookingCalendar from '@/components/BookingCalendar'
 import StaffSchedule from '@/components/StaffSchedule'
 import RecentBookings from '@/components/RecentBookings'
+import CalendarBlocks from '@/components/CalendarBlocks'
 
 const APP_URL = 'https://www.noblelink.app'
 
@@ -75,6 +76,8 @@ const COPIED_LINK_KEY = 'noble_onboarding_copied_link'
 const TABS = ['overview', 'calendar', 'staff', 'services', 'settings'] as const
 type Tab = typeof TABS[number]
 const STAFF_TABS = ['members', 'schedule'] as const
+const CALENDAR_TABS = ['bookings', 'blocks'] as const
+type CalendarTab = typeof CALENDAR_TABS[number]
 type StaffTab = typeof STAFF_TABS[number]
 
 export default function Dashboard() {
@@ -84,6 +87,7 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState<Tab>('overview')
   const [staffTab, setStaffTab] = useState<StaffTab>('members')
+  const [calendarTab, setCalendarTab] = useState<CalendarTab>('bookings')
   const [toast, setToast] = useState<string | null>(null)
   const [hasCopiedLink, setHasCopiedLink] = useState(false)
   const router = useRouter()
