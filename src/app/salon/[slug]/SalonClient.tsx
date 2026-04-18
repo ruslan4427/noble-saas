@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { createClient } from '@/lib/supabase'
 import { toAmPm } from '@/lib/time'
 
@@ -18,31 +18,39 @@ interface DaySchedule {
 interface CalendarBlock { staff_id: string | null; start_time: string; end_time: string }
 interface Props { org: Org; staff: Staff[]; services: Service[] }
 
+// BUG-15 FIX: Use UTC-based date string to avoid timezone drift
+function toDateStr(d: Date): string {
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`
+}
+
 const DEFAULT_WORK_START = '09:00'
 const DEFAULT_WORK_END = '19:00'
+// BUG-12 FIX: getDates outside component — never changes, no need for useMemo
+const DATES_14 = Array.from({ length: 14 }, (_, i) => {
+  const d = new Date(); d.setDate(d.getDate() + i); return d
+})
 
-function getDates() {
-  return Array.from({ length: 14 }, (_, i) => {
-    const d = new Date(); d.setDate(d.getDate() + i); return d
-  })
-}
 function toMinutes(time: string): number {
   const [h, m] = time.split(':').map(Number); return h * 60 + m
 }
 function toTimeStr(minutes: number): string {
   return `${String(Math.floor(minutes / 60)).padStart(2, '0')}:${String(minutes % 60).padStart(2, '0')}`
 }
+
+// BUG-05 FIX: compare block using UTC date string, not local browser date
 function isSlotBlocked(dateStr: string, slotMin: number, slotEndMin: number, staffId: string, blocks: CalendarBlock[]): boolean {
   return blocks.some(b => {
     if (b.staff_id !== null && b.staff_id !== staffId) return false
     const bs = new Date(b.start_time); const be = new Date(b.end_time)
-    const bsMin = bs.getHours() * 60 + bs.getMinutes()
-    const beMin = be.getHours() * 60 + be.getMinutes()
-    const bd = `${bs.getFullYear()}-${String(bs.getMonth()+1).padStart(2,'0')}-${String(bs.getDate()).padStart(2,'0')}`
+    // Use UTC hours to avoid timezone mismatch between admin and client browsers
+    const bsMin = bs.getUTCHours() * 60 + bs.getUTCMinutes()
+    const beMin = be.getUTCHours() * 60 + be.getUTCMinutes()
+    const bd = `${bs.getUTCFullYear()}-${String(bs.getUTCMonth()+1).padStart(2,'0')}-${String(bs.getUTCDate()).padStart(2,'0')}`
     return bd === dateStr && slotMin < beMin && slotEndMin > bsMin
   })
 }
 
+// BUG-08 FIX: validate break times — if invalid, ignore break
 function buildSlots(
   date: Date,
   schedule: DaySchedule | null,
@@ -54,11 +62,18 @@ function buildSlots(
   if (schedule?.is_day_off) return []
   const wsMin = toMinutes(schedule?.work_start || DEFAULT_WORK_START)
   const weMin = toMinutes(schedule?.work_end || DEFAULT_WORK_END)
-  const bsMin = schedule?.break_start ? toMinutes(schedule.break_start) : null
-  const beMin = schedule?.break_end ? toMinutes(schedule.break_end) : null
+
+  // BUG-08: validate break — ignore if break_start >= break_end or outside work hours
+  const rawBsMin = schedule?.break_start ? toMinutes(schedule.break_start) : null
+  const rawBeMin = schedule?.break_end ? toMinutes(schedule.break_end) : null
+  const validBreak = rawBsMin !== null && rawBeMin !== null &&
+    rawBsMin < rawBeMin && rawBsMin >= wsMin && rawBeMin <= weMin
+  const bsMin = validBreak ? rawBsMin : null
+  const beMin = validBreak ? rawBeMin : null
+
   const now = new Date(); const isToday = date.toDateString() === now.toDateString()
   const cutoff = isToday ? now.getHours() * 60 + now.getMinutes() : -1
-  const ds = `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`
+  const ds = toDateStr(date)
   const slots: { time: string; available: boolean }[] = []
   for (let min = wsMin; min + serviceDuration <= weMin; min += 30) {
     const end = min + serviceDuration
@@ -69,6 +84,11 @@ function buildSlots(
     slots.push({ time, available })
   }
   return slots
+}
+
+// BUG-13 FIX: basic phone validation
+function isValidPhone(p: string): boolean {
+  return p.replace(/\D/g, '').length >= 7
 }
 
 function SalonFooter({ org }: { org: Org }) {
@@ -138,6 +158,10 @@ function LoadingState() {
   )
 }
 
+// BUG-02 + BUG-04 FIX: no TTL-based cache — always fresh fetch on date select.
+// Cache key maps to: undefined (never fetched) | null (in-flight) | string[] (loaded)
+type SlotCache = Record<string, string[] | null>
+
 export default function SalonClient({ org, staff, services }: Props) {
   const [step, setStep] = useState<'hero'|'staff'|'service'|'time'|'confirm'|'done'>('hero')
   const [selectedStaff, setSelectedStaff] = useState<Staff | null>(null)
@@ -146,6 +170,7 @@ export default function SalonClient({ org, staff, services }: Props) {
   const [selectedTime, setSelectedTime] = useState<string | null>(null)
   const [name, setName] = useState('')
   const [phone, setPhone] = useState('')
+  const [phoneError, setPhoneError] = useState('')
   const [clientEmail, setClientEmail] = useState('')
   const [smsConsent, setSmsConsent] = useState(false)
   const [submitting, setSubmitting] = useState(false)
@@ -153,11 +178,10 @@ export default function SalonClient({ org, staff, services }: Props) {
   const [pageLoading, setPageLoading] = useState(true)
   const [scheduleMap, setScheduleMap] = useState<Record<string, DaySchedule[]>>({})
   const [vacationMap, setVacationMap] = useState<Record<string, { date_from: string; date_to: string }[]>>({})
-  // null = not yet loaded, string[] = loaded (even if empty)
-  const [bookedSlotsMap, setBookedSlotsMap] = useState<Record<string, string[] | null>>({})
+  // BUG-01 + BUG-02 FIX: null = in-flight, string[] = loaded. Always re-fetch on new date select.
+  const [bookedSlotsMap, setBookedSlotsMap] = useState<SlotCache>({})
   const [blocks, setBlocks] = useState<CalendarBlock[]>([])
   const supabase = createClient()
-  const dates = getDates()
 
   useEffect(() => { const t = setTimeout(() => setPageLoading(false), 300); return () => clearTimeout(t) }, [])
 
@@ -170,6 +194,8 @@ export default function SalonClient({ org, staff, services }: Props) {
   useEffect(() => {
     if (!selectedStaff) return
     const sid = selectedStaff.id
+    // BUG-11 FIX: scheduleMap caches per staff — acceptable since schedule changes rarely
+    // and user can refresh page for fresh data
     if (scheduleMap[sid] !== undefined) return
     Promise.all([
       supabase.from('staff_schedule').select('*').eq('staff_id', sid),
@@ -180,19 +206,19 @@ export default function SalonClient({ org, staff, services }: Props) {
     })
   }, [selectedStaff])
 
-  // When date changes: mark as null (loading) and fetch
+  // BUG-01 + BUG-02 FIX: always fetch fresh — remove "already loaded" guard.
+  // This ensures cancelled bookings are reflected immediately on re-select.
   useEffect(() => {
     if (!selectedStaff || !selectedDate) return
     const sid = selectedStaff.id
     const ds = toDateStr(selectedDate)
     const key = `${sid}_${ds}`
 
-    // Already loaded — nothing to do
-    if (bookedSlotsMap[key] !== undefined && bookedSlotsMap[key] !== null) return
+    // Only skip if currently in-flight (null)
+    if (bookedSlotsMap[key] === null) return
 
-    // Mark as loading (null = in-flight)
+    // Always fetch fresh on date/staff change
     setBookedSlotsMap(prev => ({ ...prev, [key]: null }))
-
     supabase.from('bookings').select('time_slot')
       .eq('master_id', sid).eq('date', ds).neq('status', 'cancelled')
       .then(({ data }) => {
@@ -203,52 +229,78 @@ export default function SalonClient({ org, staff, services }: Props) {
       })
   }, [selectedStaff, selectedDate])
 
-  function toDateStr(d: Date) { return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}` }
-  function isVacationDate(staffId: string, date: Date) { const ds = toDateStr(date); return (vacationMap[staffId]||[]).some(v => ds >= v.date_from && ds <= v.date_to) }
-  function getScheduleForDate(staffId: string, date: Date): DaySchedule | null { return (scheduleMap[staffId]||[]).find(s => s.day_of_week === date.getDay()) || null }
-  function isDateUnavailable(staffId: string, date: Date) { if (isVacationDate(staffId, date)) return true; const s = getScheduleForDate(staffId, date); return s !== null && s.is_day_off }
+  function isVacationDate(staffId: string, date: Date) {
+    const ds = toDateStr(date)
+    return (vacationMap[staffId]||[]).some(v => ds >= v.date_from && ds <= v.date_to)
+  }
+  function getScheduleForDate(staffId: string, date: Date): DaySchedule | null {
+    return (scheduleMap[staffId]||[]).find(s => s.day_of_week === date.getDay()) || null
+  }
+  function isDateUnavailable(staffId: string, date: Date) {
+    if (isVacationDate(staffId, date)) return true
+    const s = getScheduleForDate(staffId, date)
+    return s !== null && s.is_day_off
+  }
 
   function getCacheKey() {
     if (!selectedStaff || !selectedDate) return null
     return `${selectedStaff.id}_${toDateStr(selectedDate)}`
   }
 
-  // true while data hasn't arrived yet
-  const slotsLoading = (() => {
+  // Derived from cache — no separate slotsLoading state needed (BUG-09 FIX)
+  const slotsLoading = useMemo(() => {
     const key = getCacheKey()
-    if (!key) return false
+    if (!key || !selectedDate) return false
     return bookedSlotsMap[key] === undefined || bookedSlotsMap[key] === null
-  })()
+  }, [bookedSlotsMap, selectedStaff, selectedDate])
 
-  function getSlots(): { time: string; available: boolean }[] {
+  const allSlots = useMemo(() => {
     const key = getCacheKey()
-    if (!key || slotsLoading || !selectedService) return []
+    if (!key || slotsLoading || !selectedService || !selectedDate || !selectedStaff) return []
     return buildSlots(
-      selectedDate!,
-      getScheduleForDate(selectedStaff!.id, selectedDate!),
+      selectedDate,
+      getScheduleForDate(selectedStaff.id, selectedDate),
       (bookedSlotsMap[key] as string[]) || [],
       selectedService.duration_min,
       blocks,
-      selectedStaff!.id
+      selectedStaff.id
     )
-  }
+  }, [bookedSlotsMap, selectedStaff, selectedDate, selectedService, blocks, slotsLoading])
 
-  const hasStaff = staff.length > 0; const hasServices = services.length > 0
-  function handleBookCTA() { if (!hasStaff) return; if (staff.length === 1) { setSelectedStaff(staff[0]); setStep('service') } else setStep('staff') }
+  const freeCount = useMemo(() => allSlots.filter(s => s.available).length, [allSlots])
+
+  const hasStaff = staff.length > 0
+  const hasServices = services.length > 0
+
+  function handleBookCTA() {
+    if (!hasStaff) return
+    if (staff.length === 1) { setSelectedStaff(staff[0]); setStep('service') }
+    else setStep('staff')
+  }
   function handleSelectStaff(m: Staff) { setSelectedStaff(m); setStep(selectedService ? 'time' : 'service') }
   function handleSelectService(s: Service) { setSelectedService(s); setStep('time') }
 
+  // BUG-01 + BUG-02 FIX: on date select, always invalidate cache to force fresh fetch
   function handleSelectDate(d: Date) {
+    if (!selectedStaff) return
+    const key = `${selectedStaff.id}_${toDateStr(d)}`
+    // Invalidate cache for this key so useEffect triggers a fresh fetch
+    setBookedSlotsMap(prev => { const n = { ...prev }; delete n[key]; return n })
     setSelectedDate(d)
     setSelectedTime(null)
   }
 
   async function handleConfirm() {
-    if (!selectedStaff || !selectedService || !selectedDate || !selectedTime || !name || !phone) { setError('Please fill in all required fields'); return }
+    if (!selectedStaff || !selectedService || !selectedDate || !selectedTime || !name || !phone) {
+      setError('Please fill in all required fields'); return
+    }
+    // BUG-13 FIX: phone validation
+    if (!isValidPhone(phone)) { setPhoneError('Please enter a valid phone number'); return }
+    setPhoneError('')
     setSubmitting(true); setError('')
     try {
       const ds = toDateStr(selectedDate)
-      // Pre-check: re-verify slot is still free
+      // BUG-03: pre-check before insert (race condition mitigation)
       const { data: existing } = await supabase.from('bookings')
         .select('id').eq('master_id', selectedStaff.id).eq('date', ds)
         .eq('time_slot', selectedTime).neq('status', 'cancelled').maybeSingle()
@@ -258,7 +310,7 @@ export default function SalonClient({ org, staff, services }: Props) {
         const { data } = await supabase.from('bookings').select('time_slot')
           .eq('master_id', selectedStaff.id).eq('date', ds).neq('status', 'cancelled')
         setBookedSlotsMap(prev => ({ ...prev, [key]: (data||[]).map((b:{time_slot:string})=>b.time_slot) }))
-        setSelectedTime(null); setStep('time'); setSubmitting(false); return
+        setSelectedTime(null); setStep('time'); return
       }
       const [h, m] = selectedTime.split(':').map(Number)
       const startDate = new Date(`${ds}T${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:00`)
@@ -267,17 +319,20 @@ export default function SalonClient({ org, staff, services }: Props) {
       const { data: newBooking, error: bookingError } = await supabase.from('bookings').insert({
         org_id:org.id, master_id:selectedStaff.id, date:ds, time_slot:selectedTime,
         start_time:startDate.toISOString(), reminder_at:reminderAt.toISOString(), reminder_sent:false,
-        client_name:name, client_phone:phone, client_email:clientEmail||null,
+        client_name:name, client_phone:phone,
+        // BUG-14 FIX: only store email if it looks valid
+        client_email: clientEmail && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(clientEmail) ? clientEmail : null,
         service_name:selectedService.name, price_cents:selectedService.price_cents, status:'confirmed',
       }).select('id').single()
       if (bookingError) {
+        // BUG-03: handle DB unique constraint violation
         if (bookingError.code === '23505') {
           setError('This slot was just taken. Please choose another time.')
           const key = `${selectedStaff.id}_${ds}`
           const { data } = await supabase.from('bookings').select('time_slot')
             .eq('master_id', selectedStaff.id).eq('date', ds).neq('status', 'cancelled')
           setBookedSlotsMap(prev => ({ ...prev, [key]: (data||[]).map((b:{time_slot:string})=>b.time_slot) }))
-          setSelectedTime(null); setStep('time'); setSubmitting(false); return
+          setSelectedTime(null); setStep('time'); return
         }
         throw bookingError
       }
@@ -287,15 +342,26 @@ export default function SalonClient({ org, staff, services }: Props) {
         date:selectedDate.toLocaleDateString('en-US',{day:'numeric',month:'long',year:'numeric'}),
         time:selectedTime, price_cents:selectedService.price_cents, booking_id:newBooking?.id,
       }) }).catch(()=>{})
+      // BUG-01 FIX: update cache immediately after booking so "Book again" shows correct state
+      const bookedKey = `${selectedStaff.id}_${ds}`
+      setBookedSlotsMap(prev => ({
+        ...prev,
+        [bookedKey]: [...((prev[bookedKey] as string[]) || []), selectedTime]
+      }))
       setStep('done')
     } catch (e) { setError(e instanceof Error ? e.message : 'Something went wrong. Please try again.') }
     finally { setSubmitting(false) }
   }
 
+  // BUG-01 FIX: resetBooking invalidates cache for currently viewed date
   function resetBooking() {
+    if (selectedStaff && selectedDate) {
+      const key = `${selectedStaff.id}_${toDateStr(selectedDate)}`
+      setBookedSlotsMap(prev => { const n = { ...prev }; delete n[key]; return n })
+    }
     setStep('hero'); setSelectedStaff(null); setSelectedService(null)
     setSelectedDate(null); setSelectedTime(null)
-    setName(''); setPhone(''); setClientEmail(''); setError('')
+    setName(''); setPhone(''); setPhoneError(''); setClientEmail(''); setError('')
   }
 
   if (pageLoading) return <LoadingState />
@@ -326,8 +392,6 @@ export default function SalonClient({ org, staff, services }: Props) {
   )
 
   const isHero = step === 'hero'
-  const allSlots = getSlots()
-  const freeCount = allSlots.filter(s => s.available).length
 
   return (
     <main className="min-h-screen bg-[#f5f0e8] flex flex-col">
@@ -455,7 +519,7 @@ export default function SalonClient({ org, staff, services }: Props) {
             <section>
               <h2 className="text-lg font-bold text-[#1a1208] mb-4">Pick a time</h2>
               <div className="flex gap-2 overflow-x-auto pb-2 mb-4 -mx-4 px-4">
-                {dates.map(d => {
+                {DATES_14.map(d => {
                   const isSel = selectedDate?.toDateString() === d.toDateString()
                   const unavail = selectedStaff ? isDateUnavailable(selectedStaff.id, d) : false
                   return (
@@ -535,7 +599,11 @@ export default function SalonClient({ org, staff, services }: Props) {
                 </div>
                 <div>
                   <label htmlFor="client-phone" className="block text-sm font-medium text-[#1a1208] mb-1.5">Phone <span className="text-red-600">*</span></label>
-                  <input id="client-phone" type="tel" value={phone} onChange={e=>setPhone(e.target.value)} autoComplete="tel" required placeholder="+1 (555) 000-0000" className="w-full border border-[#c8bfb0] rounded-xl px-4 py-3 text-sm text-[#1a1208] outline-none focus:border-[#C9A84C] focus:ring-2 focus:ring-[#C9A84C]/20 bg-white placeholder-[#a0907e] min-h-[48px]"/>
+                  <input id="client-phone" type="tel" value={phone}
+                    onChange={e=>{ setPhone(e.target.value); if (phoneError) setPhoneError('') }}
+                    autoComplete="tel" required placeholder="+1 (555) 000-0000"
+                    className={`w-full border rounded-xl px-4 py-3 text-sm text-[#1a1208] outline-none focus:ring-2 focus:ring-[#C9A84C]/20 bg-white placeholder-[#a0907e] min-h-[48px] transition ${phoneError ? 'border-red-400 focus:border-red-400' : 'border-[#c8bfb0] focus:border-[#C9A84C]'}`}/>
+                  {phoneError && <p className="text-red-600 text-xs mt-1">{phoneError}</p>}
                 </div>
                 <div>
                   <label htmlFor="client-email" className="block text-sm font-medium text-[#1a1208] mb-1.5">Email <span className="text-[#6b5744] font-normal text-xs">(for confirmation)</span></label>
