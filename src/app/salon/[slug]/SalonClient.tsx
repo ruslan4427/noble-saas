@@ -43,8 +43,8 @@ function isSlotBlocked(dateStr: string, slotMin: number, slotEndMin: number, sta
   })
 }
 
-// Returns only truly available slots — blocked and booked slots are excluded entirely
-function buildSlots(date: Date, schedule: DaySchedule | null, bookedSlots: string[], serviceDuration: number, blocks: CalendarBlock[], staffId: string): string[] {
+// Returns all slots in working hours — booked/blocked ones are disabled (not selectable)
+function buildSlots(date: Date, schedule: DaySchedule | null, bookedSlots: string[], serviceDuration: number, blocks: CalendarBlock[], staffId: string): { time: string; available: boolean }[] {
   if (schedule?.is_day_off) return []
   const wsMin = toMinutes(schedule?.work_start || DEFAULT_WORK_START)
   const weMin = toMinutes(schedule?.work_end || DEFAULT_WORK_END)
@@ -53,14 +53,14 @@ function buildSlots(date: Date, schedule: DaySchedule | null, bookedSlots: strin
   const now = new Date(); const isToday = date.toDateString() === now.toDateString()
   const cutoff = isToday ? now.getHours() * 60 + now.getMinutes() : -1
   const ds = `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`
-  const slots: string[] = []
+  const slots: { time: string; available: boolean }[] = []
   for (let min = wsMin; min + serviceDuration <= weMin; min += 30) {
     const end = min + serviceDuration
     if (isToday && min <= cutoff) continue
     if (bsMin !== null && beMin !== null && min < beMin && end > bsMin) continue
-    if (isSlotBlocked(ds, min, end, staffId, blocks)) continue  // skip blocked entirely
-    if (bookedSlots.includes(toTimeStr(min))) continue          // skip booked entirely
-    slots.push(toTimeStr(min))
+    const time = toTimeStr(min)
+    const available = !isSlotBlocked(ds, min, end, staffId, blocks) && !bookedSlots.includes(time)
+    slots.push({ time, available })
   }
   return slots
 }
@@ -182,7 +182,7 @@ export default function SalonClient({ org, staff, services }: Props) {
   function isVacationDate(staffId: string, date: Date) { const ds = toDateStr(date); return (vacationMap[staffId]||[]).some(v => ds >= v.date_from && ds <= v.date_to) }
   function getScheduleForDate(staffId: string, date: Date): DaySchedule | null { return (scheduleMap[staffId]||[]).find(s => s.day_of_week === date.getDay()) || null }
   function isDateUnavailable(staffId: string, date: Date) { if (isVacationDate(staffId, date)) return true; const s = getScheduleForDate(staffId, date); return s !== null && s.is_day_off }
-  function getAvailableSlots(): string[] {
+  function getSlots(): { time: string; available: boolean }[] {
     if (!selectedStaff || !selectedDate || !selectedService) return []
     const sid = selectedStaff.id; const key = `${sid}_${toDateStr(selectedDate)}`
     return buildSlots(selectedDate, getScheduleForDate(sid, selectedDate), bookedSlotsMap[key]||[], selectedService.duration_min, blocks, sid)
@@ -198,52 +198,36 @@ export default function SalonClient({ org, staff, services }: Props) {
     setSubmitting(true); setError('')
     try {
       const ds = toDateStr(selectedDate)
-
-      // Re-check slot availability right before booking (prevents race conditions)
       const { data: existing } = await supabase.from('bookings')
         .select('id').eq('master_id', selectedStaff.id).eq('date', ds)
         .eq('time_slot', selectedTime).neq('status', 'cancelled').maybeSingle()
       if (existing) {
         setError('This slot was just taken. Please choose another time.')
-        // Refresh booked slots for this date
         const key = `${selectedStaff.id}_${ds}`
-        const { data } = await supabase.from('bookings').select('time_slot')
-          .eq('master_id', selectedStaff.id).eq('date', ds).neq('status', 'cancelled')
+        const { data } = await supabase.from('bookings').select('time_slot').eq('master_id', selectedStaff.id).eq('date', ds).neq('status', 'cancelled')
         setBookedSlotsMap(prev => ({ ...prev, [key]: (data||[]).map((b:{ time_slot:string })=>b.time_slot) }))
-        setSelectedTime(null)
-        setStep('time')
-        setSubmitting(false)
-        return
+        setSelectedTime(null); setStep('time'); setSubmitting(false); return
       }
-
       const [h, m] = selectedTime.split(':').map(Number)
       const startDate = new Date(`${ds}T${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:00`)
       const reminderAt = new Date(startDate.getTime() - 2*60*60*1000)
       if (smsConsent && phone) await fetch('/api/sms/consent', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ org_id:org.id, client_phone:phone, client_name:name, consented:true }) })
-
       const { data: newBooking, error: bookingError } = await supabase.from('bookings').insert({
         org_id:org.id, master_id:selectedStaff.id, date:ds, time_slot:selectedTime,
         start_time:startDate.toISOString(), reminder_at:reminderAt.toISOString(), reminder_sent:false,
         client_name:name, client_phone:phone, client_email:clientEmail||null,
         service_name:selectedService.name, price_cents:selectedService.price_cents, status:'confirmed',
       }).select('id').single()
-
-      // Handle unique constraint violation (double booking race condition)
       if (bookingError) {
         if (bookingError.code === '23505') {
           setError('This slot was just taken. Please choose another time.')
           const key = `${selectedStaff.id}_${ds}`
-          const { data } = await supabase.from('bookings').select('time_slot')
-            .eq('master_id', selectedStaff.id).eq('date', ds).neq('status', 'cancelled')
+          const { data } = await supabase.from('bookings').select('time_slot').eq('master_id', selectedStaff.id).eq('date', ds).neq('status', 'cancelled')
           setBookedSlotsMap(prev => ({ ...prev, [key]: (data||[]).map((b:{ time_slot:string })=>b.time_slot) }))
-          setSelectedTime(null)
-          setStep('time')
-          setSubmitting(false)
-          return
+          setSelectedTime(null); setStep('time'); setSubmitting(false); return
         }
         throw bookingError
       }
-
       fetch('/api/email/booking', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({
         org_id:org.id, client_name:name, client_phone:phone, client_email:clientEmail||null,
         master_name:selectedStaff.name, service_name:selectedService.name,
@@ -285,7 +269,8 @@ export default function SalonClient({ org, staff, services }: Props) {
   )
 
   const isHero = step === 'hero'
-  const availableSlots = step === 'time' ? getAvailableSlots() : []
+  const allSlots = step === 'time' ? getSlots() : []
+  const freeCount = allSlots.filter(s => s.available).length
 
   return (
     <main className="min-h-screen bg-[#f5f0e8] flex flex-col">
@@ -430,15 +415,25 @@ export default function SalonClient({ org, staff, services }: Props) {
                 <div className="bg-white rounded-xl p-5 text-center text-sm text-[#6b5744]">Select a date to see available slots</div>
               ) : slotsLoading ? (
                 <div className="bg-white rounded-xl p-5 text-center"><svg className="animate-spin w-5 h-5 text-[#C9A84C] mx-auto" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" strokeDasharray="30 70"/></svg></div>
-              ) : availableSlots.length === 0 ? (
-                <div className="bg-white rounded-xl p-5 text-center space-y-1"><p className="text-sm font-medium text-[#1a1208]">No available slots</p><p className="text-xs text-[#6b5744]">Try a different date or barber</p></div>
+              ) : allSlots.length === 0 ? (
+                <div className="bg-white rounded-xl p-5 text-center space-y-1"><p className="text-sm font-medium text-[#1a1208]">No slots for this day</p><p className="text-xs text-[#6b5744]">Try a different date or barber</p></div>
               ) : (
                 <>
-                  <p className="text-xs text-[#6b5744] mb-2">{availableSlots.length} {availableSlots.length === 1 ? 'slot' : 'slots'} available</p>
+                  <p className="text-xs text-[#6b5744] mb-2">
+                    {freeCount > 0 ? `${freeCount} ${freeCount === 1 ? 'slot' : 'slots'} available` : 'All slots are taken — try another date'}
+                  </p>
                   <div className="grid grid-cols-3 gap-2">
-                    {availableSlots.map(time => (
-                      <button key={time} onClick={() => setSelectedTime(time)}
-                        className={`py-3 rounded-lg text-sm font-medium border transition min-h-[44px] active:scale-[0.97] ${selectedTime===time?'border-[#C9A84C] bg-[#C9A84C] text-black':'border-[#d4c9b8] bg-white text-[#1a1208] hover:border-[#C9A84C]'}`}>
+                    {allSlots.map(({ time, available }) => (
+                      <button key={time}
+                        onClick={() => available && setSelectedTime(time)}
+                        disabled={!available}
+                        className={`py-3 rounded-lg text-sm font-medium border transition min-h-[44px] ${
+                          !available
+                            ? 'border-[#e8dfc9] bg-[#f0ebe0] text-[#c0b5a8] cursor-not-allowed opacity-60'
+                            : selectedTime === time
+                              ? 'border-[#C9A84C] bg-[#C9A84C] text-black active:scale-[0.97]'
+                              : 'border-[#d4c9b8] bg-white text-[#1a1208] hover:border-[#C9A84C] active:scale-[0.97]'
+                        }`}>
                         {toAmPm(time)}
                       </button>
                     ))}
