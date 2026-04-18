@@ -18,11 +18,9 @@ interface Org {
   sub_status: string; trial_ends_at: string | null; timezone?: string
   owner_name?: string | null; owner_avatar_url?: string | null
   instagram?: string | null; facebook?: string | null; tiktok?: string | null
+  phone?: string | null; address?: string | null
 }
-interface Staff {
-  id: string; name: string; role: string; is_active: boolean
-  avatar_url?: string | null
-}
+interface Staff { id: string; name: string; role: string; is_active: boolean; avatar_url?: string | null }
 interface Service { id: string; name: string; price_cents: number; duration_min: number; is_active: boolean }
 
 function Toast({ message, onClose }: { message: string; onClose: () => void }) {
@@ -61,10 +59,7 @@ function AvatarUpload({ currentUrl, name, onUploaded, path }: {
     const ext = file.name.split('.').pop()
     const filePath = `${path}.${ext}`
     const { error } = await supabase.storage.from('avatars').upload(filePath, file, { upsert: true })
-    if (!error) {
-      const url = `${SUPABASE_URL}/storage/v1/object/public/avatars/${filePath}?t=${Date.now()}`
-      onUploaded(url)
-    }
+    if (!error) onUploaded(`${SUPABASE_URL}/storage/v1/object/public/avatars/${filePath}?t=${Date.now()}`)
     setUploading(false)
   }
 
@@ -76,9 +71,7 @@ function AvatarUpload({ currentUrl, name, onUploaded, path }: {
           className="text-xs text-[#C9A84C] border border-[#C9A84C]/30 hover:bg-[#C9A84C]/10 px-3 py-1.5 rounded transition disabled:opacity-50">
           {uploading ? 'Uploading...' : 'Upload photo'}
         </button>
-        {currentUrl && (
-          <button onClick={() => onUploaded('')} className="ml-2 text-xs text-white/30 hover:text-red-400 transition">Remove</button>
-        )}
+        {currentUrl && <button onClick={() => onUploaded('')} className="ml-2 text-xs text-white/30 hover:text-red-400 transition">Remove</button>}
         <p className="text-white/20 text-[10px] mt-1">JPG, PNG, WebP · max 2MB</p>
         <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleFile} />
       </div>
@@ -178,6 +171,8 @@ export default function Dashboard() {
   // Settings
   const [settingsName, setSettingsName] = useState('')
   const [settingsSlug, setSettingsSlug] = useState('')
+  const [settingsPhone, setSettingsPhone] = useState('')
+  const [settingsAddress, setSettingsAddress] = useState('')
   const [settingsOwnerName, setSettingsOwnerName] = useState('')
   const [settingsOwnerAvatarUrl, setSettingsOwnerAvatarUrl] = useState('')
   const [settingsInstagram, setSettingsInstagram] = useState('')
@@ -195,6 +190,7 @@ export default function Dashboard() {
       if (!orgData) { router.push('/onboarding'); return }
       setOrg(orgData)
       setSettingsName(orgData.name); setSettingsSlug(orgData.slug)
+      setSettingsPhone(orgData.phone || ''); setSettingsAddress(orgData.address || '')
       setSettingsOwnerName(orgData.owner_name || ''); setSettingsOwnerAvatarUrl(orgData.owner_avatar_url || '')
       setSettingsInstagram(orgData.instagram || ''); setSettingsFacebook(orgData.facebook || ''); setSettingsTiktok(orgData.tiktok || '')
       const [{ data: staffData }, { data: servicesData }] = await Promise.all([
@@ -213,37 +209,23 @@ export default function Dashboard() {
     catch { showToast('Copied!') }
   }
 
-  // ── Staff ───────────────────────────────────────────────────────────────
   async function handleAddStaff() {
     if (!newStaffName.trim() || !org) return
     setStaffSaving(true)
-    const { data: inserted } = await supabase.from('staff').insert({
-      org_id: org.id, name: newStaffName.trim(), role: newStaffRole.trim(),
-    }).select('id').single()
-    // if avatar was uploaded to temp path, move it to real staff id
-    if (inserted?.id && newStaffAvatarUrl) {
-      await supabase.from('staff').update({ avatar_url: newStaffAvatarUrl }).eq('id', inserted.id)
-    }
+    const { data: inserted } = await supabase.from('staff').insert({ org_id: org.id, name: newStaffName.trim(), role: newStaffRole.trim() }).select('id').single()
+    if (inserted?.id && newStaffAvatarUrl) await supabase.from('staff').update({ avatar_url: newStaffAvatarUrl }).eq('id', inserted.id)
     const { data } = await supabase.from('staff').select('*').eq('org_id', org.id).eq('is_active', true)
     setStaff(data || []); setNewStaffName(''); setNewStaffRole(''); setNewStaffAvatarUrl(''); setShowAddStaff(false); setStaffSaving(false)
     showToast('Staff member added!')
   }
 
-  function openEditStaff(s: Staff) {
-    setEditingStaff(s); setEditStaffName(s.name); setEditStaffRole(s.role)
-    setEditStaffAvatarUrl(s.avatar_url || ''); setShowAddStaff(false)
-  }
+  function openEditStaff(s: Staff) { setEditingStaff(s); setEditStaffName(s.name); setEditStaffRole(s.role); setEditStaffAvatarUrl(s.avatar_url || ''); setShowAddStaff(false) }
 
   async function handleSaveStaff() {
     if (!editingStaff || !editStaffName.trim()) return
     setStaffSaving(true)
-    await supabase.from('staff').update({
-      name: editStaffName.trim(), role: editStaffRole.trim(),
-      avatar_url: editStaffAvatarUrl || null,
-    }).eq('id', editingStaff.id)
-    setStaff(prev => prev.map(s => s.id === editingStaff.id
-      ? { ...s, name: editStaffName.trim(), role: editStaffRole.trim(), avatar_url: editStaffAvatarUrl || null }
-      : s))
+    await supabase.from('staff').update({ name: editStaffName.trim(), role: editStaffRole.trim(), avatar_url: editStaffAvatarUrl || null }).eq('id', editingStaff.id)
+    setStaff(prev => prev.map(s => s.id === editingStaff.id ? { ...s, name: editStaffName.trim(), role: editStaffRole.trim(), avatar_url: editStaffAvatarUrl || null } : s))
     setEditingStaff(null); setStaffSaving(false); showToast('Staff member updated!')
   }
 
@@ -254,7 +236,6 @@ export default function Dashboard() {
     setStaff(prev => prev.filter(s => s.id !== id)); setDeletingStaffId(null); showToast('Staff member removed.')
   }
 
-  // ── Services ────────────────────────────────────────────────────────────
   async function handleAddService() {
     if (!newServiceName.trim() || !newServicePrice || !org) return
     setServiceSaving(true)
@@ -267,15 +248,13 @@ export default function Dashboard() {
 
   function openEditService(s: Service) {
     setEditingService(s); setEditServiceName(s.name)
-    setEditServicePrice(String((s.price_cents / 100).toFixed(0)))
-    setEditServiceDuration(String(s.duration_min)); setShowAddService(false)
+    setEditServicePrice(String((s.price_cents / 100).toFixed(0))); setEditServiceDuration(String(s.duration_min)); setShowAddService(false)
   }
 
   async function handleSaveService() {
     if (!editingService || !editServiceName.trim() || !editServicePrice) return
     setServiceSaving(true)
-    const price_cents = Math.round(parseFloat(editServicePrice) * 100)
-    const duration_min = parseInt(editServiceDuration)
+    const price_cents = Math.round(parseFloat(editServicePrice) * 100); const duration_min = parseInt(editServiceDuration)
     await supabase.from('services').update({ name: editServiceName.trim(), price_cents, duration_min }).eq('id', editingService.id)
     setServices(prev => prev.map(s => s.id === editingService.id ? { ...s, name: editServiceName.trim(), price_cents, duration_min } : s))
     setEditingService(null); setServiceSaving(false); showToast('Service updated!')
@@ -288,13 +267,14 @@ export default function Dashboard() {
     setServices(prev => prev.filter(s => s.id !== id)); setDeletingServiceId(null); showToast('Service removed.')
   }
 
-  // ── Settings ────────────────────────────────────────────────────────────
   async function handleSaveSettings() {
     if (!org || !settingsName.trim() || !settingsSlug.trim()) return
     setSettingsSaving(true); setSettingsError('')
     const slug = generateSlug(settingsSlug)
     const { error } = await supabase.from('organizations').update({
       name: settingsName.trim(), slug,
+      phone: settingsPhone.trim() || null,
+      address: settingsAddress.trim() || null,
       owner_name: settingsOwnerName.trim() || null,
       owner_avatar_url: settingsOwnerAvatarUrl || null,
       instagram: settingsInstagram.trim() || null,
@@ -304,6 +284,7 @@ export default function Dashboard() {
     if (error) { setSettingsError(error.message.includes('unique') ? 'This URL is already taken.' : error.message); setSettingsSaving(false); return }
     setOrg(prev => prev ? {
       ...prev, name: settingsName.trim(), slug,
+      phone: settingsPhone.trim() || null, address: settingsAddress.trim() || null,
       owner_name: settingsOwnerName.trim() || null, owner_avatar_url: settingsOwnerAvatarUrl || null,
       instagram: settingsInstagram.trim() || null, facebook: settingsFacebook.trim() || null, tiktok: settingsTiktok.trim() || null,
     } : prev)
@@ -433,19 +414,12 @@ export default function Dashboard() {
                 </button>
               ))}
             </div>
-
             {staffTab === 'members' && (
               <>
-                {/* ── Add form ── */}
                 {showAddStaff && !editingStaff && (
                   <div className="bg-white/5 border border-[#C9A84C]/30 rounded-xl p-4 space-y-4">
                     <h3 className="text-sm font-semibold text-[#C9A84C]">New staff member</h3>
-                    <AvatarUpload
-                      currentUrl={newStaffAvatarUrl}
-                      name={newStaffName}
-                      path={`staff/tmp-${newStaffTempId}`}
-                      onUploaded={url => setNewStaffAvatarUrl(url)}
-                    />
+                    <AvatarUpload currentUrl={newStaffAvatarUrl} name={newStaffName} path={`staff/tmp-${newStaffTempId}`} onUploaded={url => setNewStaffAvatarUrl(url)} />
                     <input value={newStaffName} onChange={e => setNewStaffName(e.target.value)} className={inputCls} placeholder="Full name" />
                     <input value={newStaffRole} onChange={e => setNewStaffRole(e.target.value)} className={inputCls} placeholder="Specialty (e.g. Barber, Colorist, Nail tech...)" />
                     <div className="flex gap-2">
@@ -454,17 +428,10 @@ export default function Dashboard() {
                     </div>
                   </div>
                 )}
-
-                {/* ── Edit form ── */}
                 {editingStaff && (
                   <div className="bg-white/5 border border-[#C9A84C]/30 rounded-xl p-4 space-y-4">
                     <h3 className="text-sm font-semibold text-[#C9A84C]">Edit staff member</h3>
-                    <AvatarUpload
-                      currentUrl={editStaffAvatarUrl}
-                      name={editStaffName}
-                      path={`staff/${editingStaff.id}`}
-                      onUploaded={url => setEditStaffAvatarUrl(url)}
-                    />
+                    <AvatarUpload currentUrl={editStaffAvatarUrl} name={editStaffName} path={`staff/${editingStaff.id}`} onUploaded={url => setEditStaffAvatarUrl(url)} />
                     <input value={editStaffName} onChange={e => setEditStaffName(e.target.value)} className={inputCls} placeholder="Full name" />
                     <input value={editStaffRole} onChange={e => setEditStaffRole(e.target.value)} className={inputCls} placeholder="Specialty (e.g. Barber, Colorist, Nail tech...)" />
                     <div className="flex gap-2">
@@ -473,7 +440,6 @@ export default function Dashboard() {
                     </div>
                   </div>
                 )}
-
                 {staff.length === 0 ? (
                   <div className="bg-white/5 border border-white/10 rounded-xl p-8 text-center text-white/40">No staff members yet. Add your first barber!</div>
                 ) : (
@@ -557,6 +523,8 @@ export default function Dashboard() {
         {activeTab === 'settings' && (
           <div className="space-y-4 max-w-lg">
             <h2 className="font-semibold text-lg">Settings</h2>
+
+            {/* Salon */}
             <div className="bg-white/5 border border-white/10 rounded-xl p-6 space-y-4">
               <h3 className="text-sm font-semibold text-white/60 uppercase tracking-wide">Salon</h3>
               <div>
@@ -571,7 +539,19 @@ export default function Dashboard() {
                 </div>
                 <p className="text-white/30 text-xs mt-1">Changing this will break existing links shared with clients.</p>
               </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-sm text-white/60 mb-1 block">Phone</label>
+                  <input value={settingsPhone} onChange={e => setSettingsPhone(e.target.value)} className={inputCls} placeholder="+1 (555) 000-0000" type="tel" />
+                </div>
+                <div>
+                  <label className="text-sm text-white/60 mb-1 block">Address</label>
+                  <input value={settingsAddress} onChange={e => setSettingsAddress(e.target.value)} className={inputCls} placeholder="123 Main St, City" />
+                </div>
+              </div>
             </div>
+
+            {/* Manager profile */}
             <div className="bg-white/5 border border-white/10 rounded-xl p-6 space-y-4">
               <h3 className="text-sm font-semibold text-white/60 uppercase tracking-wide">Manager profile</h3>
               <AvatarUpload currentUrl={settingsOwnerAvatarUrl} name={settingsOwnerName} path={`managers/${org?.id}`} onUploaded={url => setSettingsOwnerAvatarUrl(url)} />
@@ -580,6 +560,8 @@ export default function Dashboard() {
                 <input value={settingsOwnerName} onChange={e => setSettingsOwnerName(e.target.value)} className={inputCls} placeholder="John Smith" />
               </div>
             </div>
+
+            {/* Social media */}
             <div className="bg-white/5 border border-white/10 rounded-xl p-6 space-y-4">
               <h3 className="text-sm font-semibold text-white/60 uppercase tracking-wide">Social media</h3>
               <p className="text-white/30 text-xs -mt-2">Links appear on your booking page so clients can follow you.</p>
@@ -596,6 +578,7 @@ export default function Dashboard() {
                 <input value={settingsTiktok} onChange={e => setSettingsTiktok(e.target.value)} className={inputCls} placeholder="https://tiktok.com/@yoursalon" />
               </div>
             </div>
+
             {settingsError && <div className="text-red-400 text-sm bg-red-500/10 border border-red-500/20 rounded px-3 py-2">{settingsError}</div>}
             <button onClick={handleSaveSettings} disabled={settingsSaving || !settingsName.trim() || !settingsSlug.trim()} className="w-full bg-[#C9A84C] text-black font-bold px-4 py-3 rounded hover:bg-[#e8d08a] transition text-sm disabled:opacity-50">{settingsSaving ? 'Saving...' : 'Save all settings'}</button>
             <div className="bg-white/5 border border-white/10 rounded-xl p-6">
