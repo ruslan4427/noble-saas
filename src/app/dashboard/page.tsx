@@ -153,11 +153,13 @@ export default function Dashboard() {
   // Staff
   const [showAddStaff, setShowAddStaff] = useState(false)
   const [newStaffName, setNewStaffName] = useState('')
-  const [newStaffRole, setNewStaffRole] = useState('barber')
+  const [newStaffRole, setNewStaffRole] = useState('')
+  const [newStaffAvatarUrl, setNewStaffAvatarUrl] = useState('')
+  const [newStaffTempId] = useState(() => crypto.randomUUID())
   const [staffSaving, setStaffSaving] = useState(false)
   const [editingStaff, setEditingStaff] = useState<Staff | null>(null)
   const [editStaffName, setEditStaffName] = useState('')
-  const [editStaffRole, setEditStaffRole] = useState('barber')
+  const [editStaffRole, setEditStaffRole] = useState('')
   const [editStaffAvatarUrl, setEditStaffAvatarUrl] = useState('')
   const [deletingStaffId, setDeletingStaffId] = useState<string | null>(null)
 
@@ -192,13 +194,9 @@ export default function Dashboard() {
       const { data: orgData } = await supabase.from('organizations').select('*').eq('owner_id', user.id).single()
       if (!orgData) { router.push('/onboarding'); return }
       setOrg(orgData)
-      setSettingsName(orgData.name)
-      setSettingsSlug(orgData.slug)
-      setSettingsOwnerName(orgData.owner_name || '')
-      setSettingsOwnerAvatarUrl(orgData.owner_avatar_url || '')
-      setSettingsInstagram(orgData.instagram || '')
-      setSettingsFacebook(orgData.facebook || '')
-      setSettingsTiktok(orgData.tiktok || '')
+      setSettingsName(orgData.name); setSettingsSlug(orgData.slug)
+      setSettingsOwnerName(orgData.owner_name || ''); setSettingsOwnerAvatarUrl(orgData.owner_avatar_url || '')
+      setSettingsInstagram(orgData.instagram || ''); setSettingsFacebook(orgData.facebook || ''); setSettingsTiktok(orgData.tiktok || '')
       const [{ data: staffData }, { data: servicesData }] = await Promise.all([
         supabase.from('staff').select('*').eq('org_id', orgData.id).eq('is_active', true),
         supabase.from('services').select('*').eq('org_id', orgData.id).eq('is_active', true),
@@ -219,9 +217,15 @@ export default function Dashboard() {
   async function handleAddStaff() {
     if (!newStaffName.trim() || !org) return
     setStaffSaving(true)
-    await supabase.from('staff').insert({ org_id: org.id, name: newStaffName.trim(), role: newStaffRole })
+    const { data: inserted } = await supabase.from('staff').insert({
+      org_id: org.id, name: newStaffName.trim(), role: newStaffRole.trim(),
+    }).select('id').single()
+    // if avatar was uploaded to temp path, move it to real staff id
+    if (inserted?.id && newStaffAvatarUrl) {
+      await supabase.from('staff').update({ avatar_url: newStaffAvatarUrl }).eq('id', inserted.id)
+    }
     const { data } = await supabase.from('staff').select('*').eq('org_id', org.id).eq('is_active', true)
-    setStaff(data || []); setNewStaffName(''); setNewStaffRole('barber'); setShowAddStaff(false); setStaffSaving(false)
+    setStaff(data || []); setNewStaffName(''); setNewStaffRole(''); setNewStaffAvatarUrl(''); setShowAddStaff(false); setStaffSaving(false)
     showToast('Staff member added!')
   }
 
@@ -234,11 +238,11 @@ export default function Dashboard() {
     if (!editingStaff || !editStaffName.trim()) return
     setStaffSaving(true)
     await supabase.from('staff').update({
-      name: editStaffName.trim(), role: editStaffRole,
+      name: editStaffName.trim(), role: editStaffRole.trim(),
       avatar_url: editStaffAvatarUrl || null,
     }).eq('id', editingStaff.id)
     setStaff(prev => prev.map(s => s.id === editingStaff.id
-      ? { ...s, name: editStaffName.trim(), role: editStaffRole, avatar_url: editStaffAvatarUrl || null }
+      ? { ...s, name: editStaffName.trim(), role: editStaffRole.trim(), avatar_url: editStaffAvatarUrl || null }
       : s))
     setEditingStaff(null); setStaffSaving(false); showToast('Staff member updated!')
   }
@@ -300,11 +304,8 @@ export default function Dashboard() {
     if (error) { setSettingsError(error.message.includes('unique') ? 'This URL is already taken.' : error.message); setSettingsSaving(false); return }
     setOrg(prev => prev ? {
       ...prev, name: settingsName.trim(), slug,
-      owner_name: settingsOwnerName.trim() || null,
-      owner_avatar_url: settingsOwnerAvatarUrl || null,
-      instagram: settingsInstagram.trim() || null,
-      facebook: settingsFacebook.trim() || null,
-      tiktok: settingsTiktok.trim() || null,
+      owner_name: settingsOwnerName.trim() || null, owner_avatar_url: settingsOwnerAvatarUrl || null,
+      instagram: settingsInstagram.trim() || null, facebook: settingsFacebook.trim() || null, tiktok: settingsTiktok.trim() || null,
     } : prev)
     setSettingsSlug(slug); setSettingsSaving(false); showToast('Settings saved!')
   }
@@ -435,21 +436,26 @@ export default function Dashboard() {
 
             {staffTab === 'members' && (
               <>
+                {/* ── Add form ── */}
                 {showAddStaff && !editingStaff && (
-                  <div className="bg-white/5 border border-[#C9A84C]/30 rounded-xl p-4 space-y-3">
+                  <div className="bg-white/5 border border-[#C9A84C]/30 rounded-xl p-4 space-y-4">
                     <h3 className="text-sm font-semibold text-[#C9A84C]">New staff member</h3>
+                    <AvatarUpload
+                      currentUrl={newStaffAvatarUrl}
+                      name={newStaffName}
+                      path={`staff/tmp-${newStaffTempId}`}
+                      onUploaded={url => setNewStaffAvatarUrl(url)}
+                    />
                     <input value={newStaffName} onChange={e => setNewStaffName(e.target.value)} className={inputCls} placeholder="Full name" />
-                    <select value={newStaffRole} onChange={e => setNewStaffRole(e.target.value)} className={inputCls}>
-                      <option value="barber">Barber</option>
-                      <option value="manager">Manager</option>
-                      <option value="owner">Owner</option>
-                    </select>
+                    <input value={newStaffRole} onChange={e => setNewStaffRole(e.target.value)} className={inputCls} placeholder="Specialty (e.g. Barber, Colorist, Nail tech...)" />
                     <div className="flex gap-2">
                       <button onClick={handleAddStaff} disabled={staffSaving || !newStaffName.trim()} className="bg-[#C9A84C] text-black text-sm font-bold px-4 py-2 rounded hover:bg-[#e8d08a] transition disabled:opacity-40">{staffSaving ? 'Saving...' : 'Add'}</button>
-                      <button onClick={() => setShowAddStaff(false)} className="border border-white/20 text-white/60 text-sm px-4 py-2 rounded hover:border-white/40 transition">Cancel</button>
+                      <button onClick={() => { setShowAddStaff(false); setNewStaffAvatarUrl('') }} className="border border-white/20 text-white/60 text-sm px-4 py-2 rounded hover:border-white/40 transition">Cancel</button>
                     </div>
                   </div>
                 )}
+
+                {/* ── Edit form ── */}
                 {editingStaff && (
                   <div className="bg-white/5 border border-[#C9A84C]/30 rounded-xl p-4 space-y-4">
                     <h3 className="text-sm font-semibold text-[#C9A84C]">Edit staff member</h3>
@@ -460,17 +466,14 @@ export default function Dashboard() {
                       onUploaded={url => setEditStaffAvatarUrl(url)}
                     />
                     <input value={editStaffName} onChange={e => setEditStaffName(e.target.value)} className={inputCls} placeholder="Full name" />
-                    <select value={editStaffRole} onChange={e => setEditStaffRole(e.target.value)} className={inputCls}>
-                      <option value="barber">Barber</option>
-                      <option value="manager">Manager</option>
-                      <option value="owner">Owner</option>
-                    </select>
+                    <input value={editStaffRole} onChange={e => setEditStaffRole(e.target.value)} className={inputCls} placeholder="Specialty (e.g. Barber, Colorist, Nail tech...)" />
                     <div className="flex gap-2">
                       <button onClick={handleSaveStaff} disabled={staffSaving || !editStaffName.trim()} className="bg-[#C9A84C] text-black text-sm font-bold px-4 py-2 rounded hover:bg-[#e8d08a] transition disabled:opacity-40">{staffSaving ? 'Saving...' : 'Save changes'}</button>
                       <button onClick={() => setEditingStaff(null)} className="border border-white/20 text-white/60 text-sm px-4 py-2 rounded hover:border-white/40 transition">Cancel</button>
                     </div>
                   </div>
                 )}
+
                 {staff.length === 0 ? (
                   <div className="bg-white/5 border border-white/10 rounded-xl p-8 text-center text-white/40">No staff members yet. Add your first barber!</div>
                 ) : (
@@ -479,7 +482,7 @@ export default function Dashboard() {
                       <div key={s.id} className={`bg-white/5 border rounded-xl px-4 py-3 flex items-center justify-between transition ${editingStaff?.id === s.id ? 'border-[#C9A84C]/40' : 'border-white/10'}`}>
                         <div className="flex items-center gap-3">
                           <Avatar name={s.name} url={s.avatar_url} size={10} />
-                          <div><div className="font-medium">{s.name}</div><div className="text-white/40 text-xs capitalize">{s.role}</div></div>
+                          <div><div className="font-medium">{s.name}</div><div className="text-white/40 text-xs">{s.role || '—'}</div></div>
                         </div>
                         <div className="flex items-center gap-2">
                           <button onClick={() => setStaffTab('schedule')} className="text-xs text-white/40 hover:text-[#C9A84C] transition border border-white/10 hover:border-[#C9A84C]/30 px-2 py-1 rounded">Schedule</button>
@@ -554,8 +557,6 @@ export default function Dashboard() {
         {activeTab === 'settings' && (
           <div className="space-y-4 max-w-lg">
             <h2 className="font-semibold text-lg">Settings</h2>
-
-            {/* Salon */}
             <div className="bg-white/5 border border-white/10 rounded-xl p-6 space-y-4">
               <h3 className="text-sm font-semibold text-white/60 uppercase tracking-wide">Salon</h3>
               <div>
@@ -571,52 +572,32 @@ export default function Dashboard() {
                 <p className="text-white/30 text-xs mt-1">Changing this will break existing links shared with clients.</p>
               </div>
             </div>
-
-            {/* Manager profile */}
             <div className="bg-white/5 border border-white/10 rounded-xl p-6 space-y-4">
               <h3 className="text-sm font-semibold text-white/60 uppercase tracking-wide">Manager profile</h3>
-              <AvatarUpload
-                currentUrl={settingsOwnerAvatarUrl}
-                name={settingsOwnerName}
-                path={`managers/${org?.id}`}
-                onUploaded={url => setSettingsOwnerAvatarUrl(url)}
-              />
+              <AvatarUpload currentUrl={settingsOwnerAvatarUrl} name={settingsOwnerName} path={`managers/${org?.id}`} onUploaded={url => setSettingsOwnerAvatarUrl(url)} />
               <div>
                 <label className="text-sm text-white/60 mb-1 block">Your name</label>
                 <input value={settingsOwnerName} onChange={e => setSettingsOwnerName(e.target.value)} className={inputCls} placeholder="John Smith" />
               </div>
             </div>
-
-            {/* Social links */}
             <div className="bg-white/5 border border-white/10 rounded-xl p-6 space-y-4">
               <h3 className="text-sm font-semibold text-white/60 uppercase tracking-wide">Social media</h3>
               <p className="text-white/30 text-xs -mt-2">Links appear on your booking page so clients can follow you.</p>
               <div>
-                <label className="text-sm text-white/60 mb-1 flex items-center gap-1.5 block">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" className="text-pink-400"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
-                  Instagram
-                </label>
+                <label className="text-sm text-white/60 mb-1 flex items-center gap-1.5 block"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" className="text-pink-400"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>Instagram</label>
                 <input value={settingsInstagram} onChange={e => setSettingsInstagram(e.target.value)} className={inputCls} placeholder="https://instagram.com/yoursalon" />
               </div>
               <div>
-                <label className="text-sm text-white/60 mb-1 flex items-center gap-1.5 block">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" className="text-blue-400"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
-                  Facebook
-                </label>
+                <label className="text-sm text-white/60 mb-1 flex items-center gap-1.5 block"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" className="text-blue-400"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>Facebook</label>
                 <input value={settingsFacebook} onChange={e => setSettingsFacebook(e.target.value)} className={inputCls} placeholder="https://facebook.com/yoursalon" />
               </div>
               <div>
-                <label className="text-sm text-white/60 mb-1 flex items-center gap-1.5 block">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" className="text-white"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.69a8.16 8.16 0 004.77 1.52V6.76a4.85 4.85 0 01-1-.07z"/></svg>
-                  TikTok
-                </label>
+                <label className="text-sm text-white/60 mb-1 flex items-center gap-1.5 block"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.69a8.16 8.16 0 004.77 1.52V6.76a4.85 4.85 0 01-1-.07z"/></svg>TikTok</label>
                 <input value={settingsTiktok} onChange={e => setSettingsTiktok(e.target.value)} className={inputCls} placeholder="https://tiktok.com/@yoursalon" />
               </div>
             </div>
-
             {settingsError && <div className="text-red-400 text-sm bg-red-500/10 border border-red-500/20 rounded px-3 py-2">{settingsError}</div>}
             <button onClick={handleSaveSettings} disabled={settingsSaving || !settingsName.trim() || !settingsSlug.trim()} className="w-full bg-[#C9A84C] text-black font-bold px-4 py-3 rounded hover:bg-[#e8d08a] transition text-sm disabled:opacity-50">{settingsSaving ? 'Saving...' : 'Save all settings'}</button>
-
             <div className="bg-white/5 border border-white/10 rounded-xl p-6">
               <h3 className="font-semibold mb-3">Subscription</h3>
               <p className="text-white/50 text-sm mb-4">Plan: <span className="text-white capitalize">{org?.plan_id}</span> · Status: <span className="text-white capitalize">{org?.sub_status}</span></p>
