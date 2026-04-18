@@ -43,8 +43,14 @@ function isSlotBlocked(dateStr: string, slotMin: number, slotEndMin: number, sta
   })
 }
 
-// Returns all slots in working hours — booked/blocked ones are disabled (not selectable)
-function buildSlots(date: Date, schedule: DaySchedule | null, bookedSlots: string[], serviceDuration: number, blocks: CalendarBlock[], staffId: string): { time: string; available: boolean }[] {
+function buildSlots(
+  date: Date,
+  schedule: DaySchedule | null,
+  bookedSlots: string[],
+  serviceDuration: number,
+  blocks: CalendarBlock[],
+  staffId: string
+): { time: string; available: boolean }[] {
   if (schedule?.is_day_off) return []
   const wsMin = toMinutes(schedule?.work_start || DEFAULT_WORK_START)
   const weMin = toMinutes(schedule?.work_end || DEFAULT_WORK_END)
@@ -147,16 +153,20 @@ export default function SalonClient({ org, staff, services }: Props) {
   const [pageLoading, setPageLoading] = useState(true)
   const [scheduleMap, setScheduleMap] = useState<Record<string, DaySchedule[]>>({})
   const [vacationMap, setVacationMap] = useState<Record<string, { date_from: string; date_to: string }[]>>({})
-  const [bookedSlotsMap, setBookedSlotsMap] = useState<Record<string, string[]>>({})
+  // null = not yet loaded, string[] = loaded (even if empty)
+  const [bookedSlotsMap, setBookedSlotsMap] = useState<Record<string, string[] | null>>({})
   const [blocks, setBlocks] = useState<CalendarBlock[]>([])
-  const [slotsLoading, setSlotsLoading] = useState(false)
   const supabase = createClient()
   const dates = getDates()
 
   useEffect(() => { const t = setTimeout(() => setPageLoading(false), 300); return () => clearTimeout(t) }, [])
+
   useEffect(() => {
-    supabase.from('calendar_blocks').select('staff_id,start_time,end_time').eq('org_id', org.id).gte('end_time', new Date().toISOString()).then(({ data }) => setBlocks(data || []))
+    supabase.from('calendar_blocks').select('staff_id,start_time,end_time')
+      .eq('org_id', org.id).gte('end_time', new Date().toISOString())
+      .then(({ data }) => setBlocks(data || []))
   }, [org.id])
+
   useEffect(() => {
     if (!selectedStaff) return
     const sid = selectedStaff.id
@@ -169,23 +179,58 @@ export default function SalonClient({ org, staff, services }: Props) {
       setVacationMap(prev => ({ ...prev, [sid]: vac || [] }))
     })
   }, [selectedStaff])
+
+  // When date changes: mark as null (loading) and fetch
   useEffect(() => {
     if (!selectedStaff || !selectedDate) return
-    const sid = selectedStaff.id; const ds = toDateStr(selectedDate); const key = `${sid}_${ds}`
-    if (bookedSlotsMap[key] !== undefined) return
-    setSlotsLoading(true)
-    supabase.from('bookings').select('time_slot').eq('master_id', sid).eq('date', ds).neq('status', 'cancelled')
-      .then(({ data }) => { setBookedSlotsMap(prev => ({ ...prev, [key]: (data||[]).map((b:{ time_slot:string })=>b.time_slot) })); setSlotsLoading(false) })
+    const sid = selectedStaff.id
+    const ds = toDateStr(selectedDate)
+    const key = `${sid}_${ds}`
+
+    // Already loaded — nothing to do
+    if (bookedSlotsMap[key] !== undefined && bookedSlotsMap[key] !== null) return
+
+    // Mark as loading (null = in-flight)
+    setBookedSlotsMap(prev => ({ ...prev, [key]: null }))
+
+    supabase.from('bookings').select('time_slot')
+      .eq('master_id', sid).eq('date', ds).neq('status', 'cancelled')
+      .then(({ data }) => {
+        setBookedSlotsMap(prev => ({
+          ...prev,
+          [key]: (data || []).map((b: { time_slot: string }) => b.time_slot)
+        }))
+      })
   }, [selectedStaff, selectedDate])
 
   function toDateStr(d: Date) { return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}` }
   function isVacationDate(staffId: string, date: Date) { const ds = toDateStr(date); return (vacationMap[staffId]||[]).some(v => ds >= v.date_from && ds <= v.date_to) }
   function getScheduleForDate(staffId: string, date: Date): DaySchedule | null { return (scheduleMap[staffId]||[]).find(s => s.day_of_week === date.getDay()) || null }
   function isDateUnavailable(staffId: string, date: Date) { if (isVacationDate(staffId, date)) return true; const s = getScheduleForDate(staffId, date); return s !== null && s.is_day_off }
+
+  function getCacheKey() {
+    if (!selectedStaff || !selectedDate) return null
+    return `${selectedStaff.id}_${toDateStr(selectedDate)}`
+  }
+
+  // true while data hasn't arrived yet
+  const slotsLoading = (() => {
+    const key = getCacheKey()
+    if (!key) return false
+    return bookedSlotsMap[key] === undefined || bookedSlotsMap[key] === null
+  })()
+
   function getSlots(): { time: string; available: boolean }[] {
-    if (!selectedStaff || !selectedDate || !selectedService) return []
-    const sid = selectedStaff.id; const key = `${sid}_${toDateStr(selectedDate)}`
-    return buildSlots(selectedDate, getScheduleForDate(sid, selectedDate), bookedSlotsMap[key]||[], selectedService.duration_min, blocks, sid)
+    const key = getCacheKey()
+    if (!key || slotsLoading || !selectedService) return []
+    return buildSlots(
+      selectedDate!,
+      getScheduleForDate(selectedStaff!.id, selectedDate!),
+      (bookedSlotsMap[key] as string[]) || [],
+      selectedService.duration_min,
+      blocks,
+      selectedStaff!.id
+    )
   }
 
   const hasStaff = staff.length > 0; const hasServices = services.length > 0
@@ -193,19 +238,26 @@ export default function SalonClient({ org, staff, services }: Props) {
   function handleSelectStaff(m: Staff) { setSelectedStaff(m); setStep(selectedService ? 'time' : 'service') }
   function handleSelectService(s: Service) { setSelectedService(s); setStep('time') }
 
+  function handleSelectDate(d: Date) {
+    setSelectedDate(d)
+    setSelectedTime(null)
+  }
+
   async function handleConfirm() {
     if (!selectedStaff || !selectedService || !selectedDate || !selectedTime || !name || !phone) { setError('Please fill in all required fields'); return }
     setSubmitting(true); setError('')
     try {
       const ds = toDateStr(selectedDate)
+      // Pre-check: re-verify slot is still free
       const { data: existing } = await supabase.from('bookings')
         .select('id').eq('master_id', selectedStaff.id).eq('date', ds)
         .eq('time_slot', selectedTime).neq('status', 'cancelled').maybeSingle()
       if (existing) {
         setError('This slot was just taken. Please choose another time.')
         const key = `${selectedStaff.id}_${ds}`
-        const { data } = await supabase.from('bookings').select('time_slot').eq('master_id', selectedStaff.id).eq('date', ds).neq('status', 'cancelled')
-        setBookedSlotsMap(prev => ({ ...prev, [key]: (data||[]).map((b:{ time_slot:string })=>b.time_slot) }))
+        const { data } = await supabase.from('bookings').select('time_slot')
+          .eq('master_id', selectedStaff.id).eq('date', ds).neq('status', 'cancelled')
+        setBookedSlotsMap(prev => ({ ...prev, [key]: (data||[]).map((b:{time_slot:string})=>b.time_slot) }))
         setSelectedTime(null); setStep('time'); setSubmitting(false); return
       }
       const [h, m] = selectedTime.split(':').map(Number)
@@ -222,8 +274,9 @@ export default function SalonClient({ org, staff, services }: Props) {
         if (bookingError.code === '23505') {
           setError('This slot was just taken. Please choose another time.')
           const key = `${selectedStaff.id}_${ds}`
-          const { data } = await supabase.from('bookings').select('time_slot').eq('master_id', selectedStaff.id).eq('date', ds).neq('status', 'cancelled')
-          setBookedSlotsMap(prev => ({ ...prev, [key]: (data||[]).map((b:{ time_slot:string })=>b.time_slot) }))
+          const { data } = await supabase.from('bookings').select('time_slot')
+            .eq('master_id', selectedStaff.id).eq('date', ds).neq('status', 'cancelled')
+          setBookedSlotsMap(prev => ({ ...prev, [key]: (data||[]).map((b:{time_slot:string})=>b.time_slot) }))
           setSelectedTime(null); setStep('time'); setSubmitting(false); return
         }
         throw bookingError
@@ -239,7 +292,11 @@ export default function SalonClient({ org, staff, services }: Props) {
     finally { setSubmitting(false) }
   }
 
-  function resetBooking() { setStep('hero'); setSelectedStaff(null); setSelectedService(null); setSelectedDate(null); setSelectedTime(null); setName(''); setPhone(''); setClientEmail(''); setError('') }
+  function resetBooking() {
+    setStep('hero'); setSelectedStaff(null); setSelectedService(null)
+    setSelectedDate(null); setSelectedTime(null)
+    setName(''); setPhone(''); setClientEmail(''); setError('')
+  }
 
   if (pageLoading) return <LoadingState />
 
@@ -269,7 +326,7 @@ export default function SalonClient({ org, staff, services }: Props) {
   )
 
   const isHero = step === 'hero'
-  const allSlots = step === 'time' ? getSlots() : []
+  const allSlots = getSlots()
   const freeCount = allSlots.filter(s => s.available).length
 
   return (
@@ -402,7 +459,9 @@ export default function SalonClient({ org, staff, services }: Props) {
                   const isSel = selectedDate?.toDateString() === d.toDateString()
                   const unavail = selectedStaff ? isDateUnavailable(selectedStaff.id, d) : false
                   return (
-                    <button key={d.toISOString()} onClick={() => { if (!unavail) { setSelectedDate(d); setSelectedTime(null) } }} disabled={unavail}
+                    <button key={d.toISOString()}
+                      onClick={() => { if (!unavail) handleSelectDate(d) }}
+                      disabled={unavail}
                       className={`flex-none flex flex-col items-center px-3.5 py-2.5 rounded-xl border-2 transition min-w-[52px] min-h-[56px] active:scale-[0.97] ${unavail?'border-[#e8dfc9] bg-[#f0ebe0] opacity-40 cursor-not-allowed':isSel?'border-[#C9A84C] bg-[#1a1208] text-white':'border-[#d4c9b8] bg-white text-[#1a1208]'}`}>
                       <span className={`text-[10px] font-medium ${isSel?'text-[#C9A84C]':'text-[#6b5744]'}`}>{d.toLocaleDateString('en-US',{weekday:'short'})}</span>
                       <span className="font-bold text-sm">{d.getDate()}</span>
@@ -411,12 +470,20 @@ export default function SalonClient({ org, staff, services }: Props) {
                   )
                 })}
               </div>
+
               {!selectedDate ? (
                 <div className="bg-white rounded-xl p-5 text-center text-sm text-[#6b5744]">Select a date to see available slots</div>
               ) : slotsLoading ? (
-                <div className="bg-white rounded-xl p-5 text-center"><svg className="animate-spin w-5 h-5 text-[#C9A84C] mx-auto" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" strokeDasharray="30 70"/></svg></div>
+                <div className="bg-white rounded-xl p-5 text-center">
+                  <svg className="animate-spin w-5 h-5 text-[#C9A84C] mx-auto" viewBox="0 0 24 24" fill="none">
+                    <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" strokeDasharray="30 70"/>
+                  </svg>
+                </div>
               ) : allSlots.length === 0 ? (
-                <div className="bg-white rounded-xl p-5 text-center space-y-1"><p className="text-sm font-medium text-[#1a1208]">No slots for this day</p><p className="text-xs text-[#6b5744]">Try a different date or barber</p></div>
+                <div className="bg-white rounded-xl p-5 text-center space-y-1">
+                  <p className="text-sm font-medium text-[#1a1208]">No slots for this day</p>
+                  <p className="text-xs text-[#6b5744]">Try a different date or barber</p>
+                </div>
               ) : (
                 <>
                   <p className="text-xs text-[#6b5744] mb-2">
@@ -440,9 +507,12 @@ export default function SalonClient({ org, staff, services }: Props) {
                   </div>
                 </>
               )}
+
               <div className="flex gap-3 mt-5 items-center">
                 <button onClick={() => setStep('service')} className="text-sm text-[#6b5744] hover:text-[#1a1208] hover:underline px-1 py-2 min-h-[44px]">← Back</button>
-                {selectedDate && selectedTime && <button onClick={() => setStep('confirm')} className="ml-auto bg-[#C9A84C] text-black font-bold px-6 py-3 rounded-xl hover:bg-[#e8d08a] transition min-h-[44px] active:scale-[0.98]">Next →</button>}
+                {selectedDate && selectedTime && !slotsLoading && (
+                  <button onClick={() => setStep('confirm')} className="ml-auto bg-[#C9A84C] text-black font-bold px-6 py-3 rounded-xl hover:bg-[#e8d08a] transition min-h-[44px] active:scale-[0.98]">Next →</button>
+                )}
               </div>
             </section>
           )}
