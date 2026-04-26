@@ -48,7 +48,7 @@ const inputCls = 'w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 
 
 const ITEM_H = 40
 const HOURS   = Array.from({ length: 12 }, (_, i) => String(i + 1))
-const MINS    = ['00', '15', '30', '45']
+const MINS    = Array.from({ length: 60 }, (_, i) => String(i).padStart(2, '0'))
 const AMPM    = ['AM', 'PM']
 
 function DrumColumn({
