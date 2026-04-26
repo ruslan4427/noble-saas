@@ -240,7 +240,7 @@ export default function SalonClient({ org, staff, services }: Props) {
   useEffect(() => { const t = setTimeout(() => setPageLoading(false), 300); return () => clearTimeout(t) }, [])
 
   useEffect(() => {
-    supabase.from('calendar_blocks').select('staff_id,start_time,end_time')
+    supabase.from('calendar_blocks').select('staff_id,start_time,end_time,type')
       .eq('org_id', org.id).gte('end_time', new Date().toISOString())
       .then(({ data }) => setBlocks(data || []))
   }, [org.id])
