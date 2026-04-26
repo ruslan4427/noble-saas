@@ -207,17 +207,28 @@ export default function CalendarBlocks({ orgId, staff }: Props) {
                 className={inputCls} />
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="space-y-3">
               <div>
-                <label className="text-white/40 text-xs mb-1 block">Start time</label>
-                <input type="datetime-local" value={formStart} onChange={e => setFormStart(e.target.value)}
-                  className={inputCls} />
+                <label className="text-white/40 text-xs mb-1 block">Start</label>
+                <div className="grid grid-cols-2 gap-2">
+                  <input type="date" value={formStart.split('T')[0] || ''}
+                    onChange={e => setFormStart(e.target.value + 'T' + (formStart.split('T')[1] || '09:00'))}
+                    className={inputCls} />
+                  <input type="time" value={formStart.split('T')[1] || ''}
+                    onChange={e => setFormStart((formStart.split('T')[0] || '') + 'T' + e.target.value)}
+                    className={inputCls} />
+                </div>
               </div>
               <div>
-                <label className="text-white/40 text-xs mb-1 block">End time</label>
-                <input type="datetime-local" value={formEnd} onChange={e => setFormEnd(e.target.value)}
-                  min={formStart}
-                  className={inputCls} />
+                <label className="text-white/40 text-xs mb-1 block">End</label>
+                <div className="grid grid-cols-2 gap-2">
+                  <input type="date" value={formEnd.split('T')[0] || ''}
+                    onChange={e => setFormEnd(e.target.value + 'T' + (formEnd.split('T')[1] || '18:00'))}
+                    className={inputCls} />
+                  <input type="time" value={formEnd.split('T')[1] || ''}
+                    onChange={e => setFormEnd((formEnd.split('T')[0] || '') + 'T' + e.target.value)}
+                    className={inputCls} />
+                </div>
               </div>
             </div>
           )}
