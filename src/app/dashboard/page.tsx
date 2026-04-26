@@ -9,6 +9,7 @@ import BookingCalendar from '@/components/BookingCalendar'
 import StaffSchedule from '@/components/StaffSchedule'
 import RecentBookings from '@/components/RecentBookings'
 import CalendarBlocks from '@/components/CalendarBlocks'
+import TimePicker from '@/components/TimePicker'
 
 const APP_URL = 'https://www.noblelink.app'
 const SUPABASE_URL = 'https://ecszrloosntejjawlalv.supabase.co'
@@ -19,6 +20,7 @@ interface Org {
   owner_name?: string | null; owner_avatar_url?: string | null
   instagram?: string | null; facebook?: string | null; tiktok?: string | null
   phone?: string | null; address?: string | null
+  work_start?: string | null; work_end?: string | null
 }
 interface Staff { id: string; name: string; role: string; is_active: boolean; avatar_url?: string | null }
 interface Service { id: string; name: string; price_cents: number; duration_min: number; is_active: boolean }
@@ -178,6 +180,8 @@ export default function Dashboard() {
   const [settingsInstagram, setSettingsInstagram] = useState('')
   const [settingsFacebook, setSettingsFacebook] = useState('')
   const [settingsTiktok, setSettingsTiktok] = useState('')
+  const [settingsWorkStart, setSettingsWorkStart] = useState('09:00')
+  const [settingsWorkEnd, setSettingsWorkEnd] = useState('19:00')
   const [settingsSaving, setSettingsSaving] = useState(false)
   const [settingsError, setSettingsError] = useState('')
 
@@ -194,6 +198,7 @@ export default function Dashboard() {
       setSettingsPhone(orgData.phone || ''); setSettingsAddress(orgData.address || '')
       setSettingsOwnerName(orgData.owner_name || ''); setSettingsOwnerAvatarUrl(orgData.owner_avatar_url || '')
       setSettingsInstagram(orgData.instagram || ''); setSettingsFacebook(orgData.facebook || ''); setSettingsTiktok(orgData.tiktok || '')
+      setSettingsWorkStart(orgData.work_start || '09:00'); setSettingsWorkEnd(orgData.work_end || '19:00')
       const [{ data: staffData }, { data: servicesData }] = await Promise.all([
         supabase.from('staff').select('*').eq('org_id', orgData.id).eq('is_active', true),
         supabase.from('services').select('*').eq('org_id', orgData.id).eq('is_active', true),
@@ -214,7 +219,19 @@ export default function Dashboard() {
     if (!newStaffName.trim() || !org) return
     setStaffSaving(true)
     const { data: inserted } = await supabase.from('staff').insert({ org_id: org.id, name: newStaffName.trim(), role: newStaffRole.trim() }).select('id').single()
-    if (inserted?.id && newStaffAvatarUrl) await supabase.from('staff').update({ avatar_url: newStaffAvatarUrl }).eq('id', inserted.id)
+    if (inserted?.id) {
+      if (newStaffAvatarUrl) await supabase.from('staff').update({ avatar_url: newStaffAvatarUrl }).eq('id', inserted.id)
+      // Create default weekly schedule using org working hours
+      const workStart = org.work_start || '09:00'
+      const workEnd = org.work_end || '19:00'
+      const scheduleRows = Array.from({ length: 7 }, (_, dow) => ({
+        staff_id: inserted.id, org_id: org.id, day_of_week: dow,
+        is_day_off: dow === 0 || dow === 6,
+        work_start: workStart, work_end: workEnd,
+        break_start: '13:00', break_end: '14:00',
+      }))
+      await supabase.from('staff_schedule').upsert(scheduleRows, { onConflict: 'staff_id,day_of_week' })
+    }
     const { data } = await supabase.from('staff').select('*').eq('org_id', org.id).eq('is_active', true)
     setStaff(data || []); setNewStaffName(''); setNewStaffRole(''); setNewStaffAvatarUrl(''); setShowAddStaff(false); setStaffSaving(false)
     showToast('Staff member added!')
@@ -281,13 +298,21 @@ export default function Dashboard() {
       instagram: settingsInstagram.trim() || null,
       facebook: settingsFacebook.trim() || null,
       tiktok: settingsTiktok.trim() || null,
+      work_start: settingsWorkStart,
+      work_end: settingsWorkEnd,
     }).eq('id', org.id)
     if (error) { setSettingsError(error.message.includes('unique') ? 'This URL is already taken.' : error.message); setSettingsSaving(false); return }
+    // Propagate new hours to all existing staff working days
+    await supabase.from('staff_schedule')
+      .update({ work_start: settingsWorkStart, work_end: settingsWorkEnd })
+      .eq('org_id', org.id)
+      .eq('is_day_off', false)
     setOrg(prev => prev ? {
       ...prev, name: settingsName.trim(), slug,
       phone: settingsPhone.trim() || null, address: settingsAddress.trim() || null,
       owner_name: settingsOwnerName.trim() || null, owner_avatar_url: settingsOwnerAvatarUrl || null,
       instagram: settingsInstagram.trim() || null, facebook: settingsFacebook.trim() || null, tiktok: settingsTiktok.trim() || null,
+      work_start: settingsWorkStart, work_end: settingsWorkEnd,
     } : prev)
     setSettingsSlug(slug); setSettingsSaving(false); showToast('Settings saved!')
   }
@@ -393,7 +418,7 @@ export default function Dashboard() {
                 </button>
               ))}
             </div>
-            {calendarTab === 'bookings' && <BookingCalendar orgId={org.id} orgTimezone={org.timezone || 'America/New_York'} staff={staff} />}
+            {calendarTab === 'bookings' && <BookingCalendar orgId={org.id} orgTimezone={org.timezone || 'America/New_York'} staff={staff} orgWorkStart={org.work_start || '09:00'} orgWorkEnd={org.work_end || '19:00'} />}
             {calendarTab === 'blocks' && <CalendarBlocks orgId={org.id} staff={staff} />}
           </div>
         )}
@@ -548,6 +573,24 @@ export default function Dashboard() {
                 <div>
                   <label className="text-sm text-white/60 mb-1 block">Address</label>
                   <input value={settingsAddress} onChange={e => setSettingsAddress(e.target.value)} className={inputCls} placeholder="123 Main St, City" />
+                </div>
+              </div>
+            </div>
+
+            {/* Working hours */}
+            <div className="bg-white/5 border border-white/10 rounded-xl p-6 space-y-4">
+              <div>
+                <h3 className="text-sm font-semibold text-white/60 uppercase tracking-wide">Working hours</h3>
+                <p className="text-white/30 text-xs mt-1">Sets the booking window for all staff. Changes apply to existing schedules.</p>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm text-white/60 mb-2 block">Opens at</label>
+                  <TimePicker value={settingsWorkStart} onChange={setSettingsWorkStart} />
+                </div>
+                <div>
+                  <label className="text-sm text-white/60 mb-2 block">Closes at</label>
+                  <TimePicker value={settingsWorkEnd} onChange={setSettingsWorkEnd} />
                 </div>
               </div>
             </div>

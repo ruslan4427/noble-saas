@@ -3,6 +3,7 @@ export const dynamic = 'force-dynamic'
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
+import TimePicker from '@/components/TimePicker'
 
 const STEPS = ['Salon name', 'Category', 'Timezone', 'Your profile', 'Working hours', 'Preview']
 const CATEGORIES = ['Barbershop', 'Hair salon', 'Nail salon', 'Spa & wellness', 'Tattoo studio', 'Other']
@@ -50,6 +51,7 @@ export default function Onboarding() {
         slug: data.slug, name: data.name, owner_id: user.id,
         timezone: data.timezone, business_category: data.category,
         owner_name: data.ownerName.trim() || null,
+        work_start: data.open, work_end: data.close,
       })
       if (orgError) throw orgError
 
@@ -171,14 +173,12 @@ export default function Onboarding() {
             <div className="space-y-4 mt-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="text-sm text-white/60 mb-1 block">Opens at</label>
-                  <input type="time" value={data.open} onChange={e => update('open', e.target.value)}
-                    className="w-full bg-white/10 border border-white/20 rounded px-3 py-2 text-white text-sm outline-none focus:border-[#C9A84C]" />
+                  <label className="text-sm text-white/60 mb-2 block">Opens at</label>
+                  <TimePicker value={data.open} onChange={v => update('open', v)} />
                 </div>
                 <div>
-                  <label className="text-sm text-white/60 mb-1 block">Closes at</label>
-                  <input type="time" value={data.close} onChange={e => update('close', e.target.value)}
-                    className="w-full bg-white/10 border border-white/20 rounded px-3 py-2 text-white text-sm outline-none focus:border-[#C9A84C]" />
+                  <label className="text-sm text-white/60 mb-2 block">Closes at</label>
+                  <TimePicker value={data.close} onChange={v => update('close', v)} />
                 </div>
               </div>
               <p className="text-white/40 text-xs">You can customize per-staff schedules later in the dashboard.</p>

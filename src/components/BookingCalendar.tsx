@@ -13,7 +13,7 @@ interface CalendarBlock {
   start_time: string; end_time: string; reason: string
 }
 interface Staff { id: string; name: string; role: string }
-interface Props { orgId: string; orgTimezone: string; staff: Staff[] }
+interface Props { orgId: string; orgTimezone: string; staff: Staff[]; orgWorkStart?: string; orgWorkEnd?: string }
 interface DragState { bookingId: string; originDate: string; originTime: string; originMasterId: string }
 interface DropTarget { date: string; time: string; masterId: string }
 interface RescheduleConfirm { booking: Booking; newDate: string; newTime: string; newMasterId: string }
@@ -47,7 +47,11 @@ function toDateStr(d: Date) { return `${d.getFullYear()}-${String(d.getMonth()+1
 function formatDate(d: Date) { return d.toLocaleDateString('en-US',{day:'numeric',month:'short'}) }
 function formatDateFull(d: Date) { return d.toLocaleDateString('en-US',{weekday:'long',day:'numeric',month:'long',year:'numeric'}) }
 
-const HOURS = Array.from({length:11},(_,i)=>i+9)
+function buildHours(workStart?: string, workEnd?: string): number[] {
+  const s = workStart ? parseInt(workStart.split(':')[0]) : 9
+  const e = workEnd   ? parseInt(workEnd.split(':')[0])   : 19
+  return Array.from({ length: Math.max(e - s + 1, 1) }, (_, i) => i + s)
+}
 
 function isHourBlocked(dateStr: string, hour: number, staffId: string | null, blocks: CalendarBlock[]): CalendarBlock | null {
   const slotStart = new Date(`${dateStr}T${String(hour).padStart(2,'0')}:00:00`).getTime()
@@ -167,11 +171,11 @@ function DropCell({ date, time, masterId, children, onDrop, isOver, isToday, blo
   )
 }
 
-function WeekView({ weekStart, bookings, blocks, staffColorMap, staff, onBookingClick, dragState, onDragStart, onDrop }: {
+function WeekView({ weekStart, bookings, blocks, staffColorMap, staff, onBookingClick, dragState, onDragStart, onDrop, hours }: {
   weekStart:Date; bookings:Booking[]; blocks:CalendarBlock[]
   staffColorMap:Map<string,typeof STAFF_COLORS[0]>; staff:Staff[]
   onBookingClick:(b:Booking)=>void; dragState:DragState|null
-  onDragStart:(b:Booking)=>void; onDrop:(t:DropTarget)=>void
+  onDragStart:(b:Booking)=>void; onDrop:(t:DropTarget)=>void; hours:number[]
 }) {
   const days=Array.from({length:7},(_,i)=>addDays(weekStart,i)); const today=new Date()
   return (
@@ -187,8 +191,7 @@ function WeekView({ weekStart, bookings, blocks, staffColorMap, staff, onBooking
           )})}
         </div>
         <div>
-          {HOURS.map(hour=>{
-            const hourLabel = (h: number): string => { const p = h>=12?"PM":"AM"; const hh = h%12||12; return hh+":00 "+p; };
+          {hours.map(hour=>{
             const label = toAmPm(`${String(hour).padStart(2,'0')}:00`)
             return (
               <div key={hour} className="grid grid-cols-[56px_repeat(7,1fr)]">
@@ -212,17 +215,17 @@ function WeekView({ weekStart, bookings, blocks, staffColorMap, staff, onBooking
   )
 }
 
-function DayView({ date, bookings, blocks, staffColorMap, staff, onBookingClick, dragState, onDragStart, onDrop }: {
+function DayView({ date, bookings, blocks, staffColorMap, staff, onBookingClick, dragState, onDragStart, onDrop, hours }: {
   date:Date; bookings:Booking[]; blocks:CalendarBlock[]
   staffColorMap:Map<string,typeof STAFF_COLORS[0]>; staff:Staff[]
   onBookingClick:(b:Booking)=>void; dragState:DragState|null
-  onDragStart:(b:Booking)=>void; onDrop:(t:DropTarget)=>void
+  onDragStart:(b:Booking)=>void; onDrop:(t:DropTarget)=>void; hours:number[]
 }) {
   const dateStr=toDateStr(date); const dayBookings=bookings.filter(b=>b.date===dateStr)
   return (
     <div>
       <div className="mb-3 text-white/50 text-sm font-medium">{formatDateFull(date)}</div>
-      {HOURS.map(hour=>{
+      {hours.map(hour=>{
         const timeStr=`${String(hour).padStart(2,'0')}:00`
         const slotBookings=dayBookings.filter(b=>parseInt(b.time_slot.split(':')[0])===hour)
         const blk=isHourBlocked(dateStr, hour, null, blocks)
@@ -258,7 +261,7 @@ function DayView({ date, bookings, blocks, staffColorMap, staff, onBookingClick,
   )
 }
 
-export default function BookingCalendar({ orgId, orgTimezone, staff }: Props) {
+export default function BookingCalendar({ orgId, orgTimezone, staff, orgWorkStart, orgWorkEnd }: Props) {
   const [view, setView] = useState<'week'|'day'>('week')
   const [currentDate, setCurrentDate] = useState(() => new Date())
   const [bookings, setBookings] = useState<Booking[]>([])
@@ -272,6 +275,7 @@ export default function BookingCalendar({ orgId, orgTimezone, staff }: Props) {
   const [showCancelled, setShowCancelled] = useState(false)
   const supabase = createClient()
 
+  const hours = buildHours(orgWorkStart, orgWorkEnd)
   const staffColorMap = new Map(staff.map((s,i) => [s.id, getStaffColor(i)]))
   const weekStart = startOfWeek(currentDate)
   const rangeStart = view==='week' ? weekStart : new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate())
@@ -413,8 +417,8 @@ export default function BookingCalendar({ orgId, orgTimezone, staff }: Props) {
 
       <div className="bg-white/5 border border-white/10 rounded-xl p-4 relative min-h-[400px]">
         {loading && <div className="absolute inset-0 flex items-center justify-center bg-[#0F0A00]/50 rounded-xl z-10"><svg className="animate-spin w-5 h-5 text-[#C9A84C]" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" strokeDasharray="30 70"/></svg></div>}
-        {view==='week' && <WeekView weekStart={weekStart} bookings={displayedBookings} blocks={blocks} staffColorMap={staffColorMap} staff={staff} onBookingClick={setSelectedBooking} dragState={dragState} onDragStart={handleDragStart} onDrop={handleDrop}/>}
-        {view==='day' && <DayView date={currentDate} bookings={displayedBookings} blocks={blocks} staffColorMap={staffColorMap} staff={staff} onBookingClick={setSelectedBooking} dragState={dragState} onDragStart={handleDragStart} onDrop={handleDrop}/>}
+        {view==='week' && <WeekView weekStart={weekStart} bookings={displayedBookings} blocks={blocks} staffColorMap={staffColorMap} staff={staff} onBookingClick={setSelectedBooking} dragState={dragState} onDragStart={handleDragStart} onDrop={handleDrop} hours={hours}/>}
+        {view==='day' && <DayView date={currentDate} bookings={displayedBookings} blocks={blocks} staffColorMap={staffColorMap} staff={staff} onBookingClick={setSelectedBooking} dragState={dragState} onDragStart={handleDragStart} onDrop={handleDrop} hours={hours}/>}
       </div>
 
       {orgTimezone && <p className="text-white/20 text-xs text-right">Timezone: {orgTimezone}</p>}
