@@ -44,6 +44,7 @@ export default function Onboarding() {
     try {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { router.push('/login'); return }
+      if (!user.email_confirmed_at) { router.push('/verify-email'); return }
 
       const { error: orgError } = await supabase.from('organizations').insert({
         slug: data.slug, name: data.name, owner_id: user.id,

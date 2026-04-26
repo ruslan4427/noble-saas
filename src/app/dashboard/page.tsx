@@ -186,6 +186,7 @@ export default function Dashboard() {
     async function load() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { router.push('/login'); return }
+      if (!user.email_confirmed_at) { router.push('/verify-email'); return }
       const { data: orgData } = await supabase.from('organizations').select('*').eq('owner_id', user.id).single()
       if (!orgData) { router.push('/onboarding'); return }
       setOrg(orgData)

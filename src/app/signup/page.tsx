@@ -42,13 +42,18 @@ export default function Signup() {
     e.preventDefault()
     setLoading(true)
     setError('')
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: { data: { full_name: name } }
     })
     if (error) { setError(error.message); setLoading(false); return }
-    router.push('/onboarding')
+    // If email confirmation is enabled, session is null until verified
+    if (!data.session || !data.user?.email_confirmed_at) {
+      router.push('/verify-email')
+    } else {
+      router.push('/onboarding')
+    }
   }
 
   return (
