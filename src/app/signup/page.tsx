@@ -82,6 +82,7 @@ export default function Signup() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [name, setName] = useState('')
+  const [userId, setUserId] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [verifying, setVerifying] = useState(false)
@@ -104,9 +105,17 @@ export default function Signup() {
       options: { data: { full_name: name } },
     })
     if (error) { setError(error.message); setLoading(false); return }
-    if (data.user?.email_confirmed_at) {
-      router.push('/onboarding'); return
-    }
+    const uid = data.user?.id
+    if (!uid) { setError('Signup failed. Try again.'); setLoading(false); return }
+    setUserId(uid)
+    // Send OTP via our API (bypasses Supabase SMTP)
+    const res = await fetch('/api/auth/send-otp', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, userId: uid }),
+    })
+    const json = await res.json()
+    if (!res.ok) { setError(json.error || 'Failed to send code'); setLoading(false); return }
     setLoading(false)
     setStep('verify')
     setCooldown(60)
@@ -114,16 +123,29 @@ export default function Signup() {
 
   async function handleVerify(code: string) {
     setVerifying(true); setError('')
-    const { error } = await supabase.auth.verifyOtp({ email, token: code, type: 'signup' })
-    if (error) { setError(error.message); setVerifying(false); return }
+    const res = await fetch('/api/auth/verify-otp', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, code, userId }),
+    })
+    const json = await res.json()
+    if (!res.ok) { setError(json.error || 'Invalid code'); setVerifying(false); return }
+    // Sign in now that email is confirmed
+    const { error: signInError } = await supabase.auth.signInWithPassword({ email, password })
+    if (signInError) { setError(signInError.message); setVerifying(false); return }
     router.push('/onboarding')
   }
 
   async function handleResend() {
     if (cooldown > 0) return
     setError('')
-    const { error } = await supabase.auth.resend({ type: 'signup', email })
-    if (error) { setError(error.message); return }
+    const res = await fetch('/api/auth/send-otp', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, userId }),
+    })
+    const json = await res.json()
+    if (!res.ok) { setError(json.error || 'Failed to send code'); return }
     setCooldown(60)
   }
 
