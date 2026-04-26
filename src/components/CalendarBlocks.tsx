@@ -1,5 +1,5 @@
 'use client'
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, useMemo } from 'react'
 import { createClient } from '@/lib/supabase'
 
 interface Staff { id: string; name: string }
@@ -63,7 +63,7 @@ export default function CalendarBlocks({ orgId, staff }: Props) {
   const [formReason, setFormReason] = useState('')
   const [formError, setFormError] = useState('')
 
-  const supabase = createClient()
+  const supabase = useMemo(() => createClient(), [])
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -97,7 +97,7 @@ export default function CalendarBlocks({ orgId, staff }: Props) {
     if (block.type === 'full_day') {
       const d = new Date(block.start_time)
       const pad = (n: number) => String(n).padStart(2, '0')
-      setFormDate(`${d.getUTCFullYear()}-${pad(d.getUTCMonth()+1)}-${pad(d.getUTCDate())}`)
+      setFormDate(`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`)
     } else {
       setFormDate(todayDateStr())
     }
@@ -116,8 +116,9 @@ export default function CalendarBlocks({ orgId, staff }: Props) {
     let endISO: string
     if (formType === 'full_day') {
       if (!formDate) { setFormError('Date is required'); return }
-      startISO = formDate + 'T00:00:00.000Z'
-      endISO = formDate + 'T23:59:59.000Z'
+      // Store as local midnight so local date parts match on the booking page
+      startISO = new Date(formDate + 'T00:00:00').toISOString()
+      endISO = new Date(formDate + 'T23:59:59').toISOString()
     } else {
       if (!formStart || !formEnd) { setFormError('Start and end time are required'); return }
       startISO = new Date(formStart).toISOString()

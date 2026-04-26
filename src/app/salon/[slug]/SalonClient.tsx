@@ -40,6 +40,7 @@ function toTimeStr(minutes: number): string {
 // BUG-05 FIX: compare block using UTC date string, not local browser date
 function isSlotBlocked(dateStr: string, slotMin: number, slotEndMin: number, staffId: string, blocks: CalendarBlock[]): boolean {
   return blocks.some(b => {
+    if (b.type === 'full_day') return false
     if (b.staff_id !== null && b.staff_id !== staffId) return false
     const bs = new Date(b.start_time); const be = new Date(b.end_time)
     // Use UTC hours to avoid timezone mismatch between admin and client browsers
@@ -65,7 +66,8 @@ function buildSlots(
     if (b.type !== 'full_day') return false
     if (b.staff_id !== null && b.staff_id !== staffId) return false
     const bs = new Date(b.start_time)
-    const bd = `${bs.getUTCFullYear()}-${String(bs.getUTCMonth()+1).padStart(2,'0')}-${String(bs.getUTCDate()).padStart(2,'0')}`
+    // Use local date parts — consistent with toDateStr(date) which also uses local parts
+    const bd = `${bs.getFullYear()}-${String(bs.getMonth()+1).padStart(2,'0')}-${String(bs.getDate()).padStart(2,'0')}`
     return bd === ds
   })
   if (hasFullDayBlock) return []
