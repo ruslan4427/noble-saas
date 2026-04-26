@@ -131,6 +131,17 @@ export default function Home() {
           </Link>
         </section>
       </div>
+
+      <footer className="border-t border-white/10 px-6 py-6 text-center space-y-2">
+        <div className="flex items-center justify-center gap-4">
+          <Link href="/legal/privacy" className="text-white/30 hover:text-white/60 text-xs transition">Privacy Policy</Link>
+          <span className="text-white/20 text-xs">·</span>
+          <Link href="/legal/terms" className="text-white/30 hover:text-white/60 text-xs transition">Terms & Conditions</Link>
+          <span className="text-white/20 text-xs">·</span>
+          <Link href="/legal" className="text-white/30 hover:text-white/60 text-xs transition">Legal</Link>
+        </div>
+        <p className="text-white/20 text-xs">© {new Date().getFullYear()} Noble. All rights reserved.</p>
+      </footer>
     </main>
   )
 }
