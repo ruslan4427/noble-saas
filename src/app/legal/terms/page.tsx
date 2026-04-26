@@ -75,6 +75,7 @@ export default function TermsAndConditions() {
             <li>The checkbox must be actively checked by the client — it is not pre-checked.</li>
             <li>Consent is tied to the specific mobile number entered and is recorded at the time of booking.</li>
             <li>Clients who do not check the consent checkbox will not receive SMS messages.</li>
+            <li>Providing consent to receive SMS messages is not a condition of purchase.</li>
           </ul>
 
           <p><strong>5.2 Message Frequency</strong></p>
@@ -84,7 +85,7 @@ export default function TermsAndConditions() {
 
           <p><strong>5.3 Message and Data Rates</strong></p>
           <p>
-            <strong>Message and data rates may apply.</strong> Charges depend on the client's mobile carrier and plan. {COMPANY} does not charge separately for SMS messages.
+            <strong>Message and data rates may apply.</strong> Msg &amp; Data rates may apply. Charges depend on the client's mobile carrier and plan. {COMPANY} does not charge separately for SMS messages.
           </p>
 
           <p><strong>5.4 How to Opt Out (STOP)</strong></p>
