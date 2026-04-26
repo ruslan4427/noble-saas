@@ -1,5 +1,5 @@
 'use client'
-import { useEffect, useState, useCallback, useMemo } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState, useCallback, useMemo } from 'react'
 import { createClient } from '@/lib/supabase'
 
 interface Staff { id: string; name: string }
@@ -46,53 +46,104 @@ function nowPlusHours(h: number): string {
 
 const inputCls = 'w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white text-sm outline-none focus:border-[#C9A84C] transition placeholder-white/20'
 
-const MINUTES = [0, 15, 30, 45]
+const ITEM_H = 40
+const HOURS   = Array.from({ length: 12 }, (_, i) => String(i + 1))
+const MINS    = ['00', '15', '30', '45']
+const AMPM    = ['AM', 'PM']
+
+function DrumColumn({
+  items, value, onChange, width = 'w-10',
+}: { items: string[]; value: string; onChange: (v: string) => void; width?: string }) {
+  const ref = useRef<HTMLDivElement>(null)
+  const settling = useRef(false)
+
+  useLayoutEffect(() => {
+    const idx = items.indexOf(value)
+    if (ref.current && idx >= 0) {
+      ref.current.scrollTop = idx * ITEM_H
+    }
+  }, [value, items])
+
+  function onScroll() {
+    if (settling.current) return
+    settling.current = true
+    setTimeout(() => {
+      settling.current = false
+      if (!ref.current) return
+      const idx = Math.round(ref.current.scrollTop / ITEM_H)
+      const clamped = Math.max(0, Math.min(idx, items.length - 1))
+      ref.current.scrollTop = clamped * ITEM_H
+      onChange(items[clamped])
+    }, 120)
+  }
+
+  return (
+    <div
+      ref={ref}
+      onScroll={onScroll}
+      className={`${width} overflow-y-scroll`}
+      style={{
+        height: ITEM_H * 3,
+        scrollSnapType: 'y mandatory',
+        scrollbarWidth: 'none',
+      }}
+    >
+      {/* top padding */}
+      <div style={{ height: ITEM_H, flexShrink: 0 }} />
+      {items.map(item => (
+        <div
+          key={item}
+          style={{ height: ITEM_H, scrollSnapAlign: 'center' }}
+          className={`flex items-center justify-center text-sm font-semibold select-none transition-colors ${
+            item === value ? 'text-white' : 'text-white/25'
+          }`}
+        >
+          {item}
+        </div>
+      ))}
+      {/* bottom padding */}
+      <div style={{ height: ITEM_H, flexShrink: 0 }} />
+    </div>
+  )
+}
 
 function TimePicker({ value, onChange }: { value: string; onChange: (v: string) => void }) {
   const [hStr, mStr] = value.split(':')
   const h24 = parseInt(hStr) || 0
-  const m = MINUTES.includes(parseInt(mStr)) ? parseInt(mStr) : 0
+  const rawM = parseInt(mStr) || 0
+  const nearestM = MINS.reduce((a, b) =>
+    Math.abs(parseInt(b) - rawM) < Math.abs(parseInt(a) - rawM) ? b : a)
   const isPM = h24 >= 12
-  const h12 = h24 === 0 ? 12 : h24 > 12 ? h24 - 12 : h24
+  const h12 = String(h24 === 0 ? 12 : h24 > 12 ? h24 - 12 : h24)
 
-  function emit(newH12: number, newPM: boolean, newM: number) {
-    let h = newH12 === 12 ? (newPM ? 12 : 0) : (newPM ? newH12 + 12 : newH12)
-    onChange(`${String(h).padStart(2,'0')}:${String(newM).padStart(2,'0')}`)
+  function emit(newH12: string, newM: string, newAmPm: string) {
+    const h = parseInt(newH12)
+    let h24out = newAmPm === 'PM'
+      ? (h === 12 ? 12 : h + 12)
+      : (h === 12 ? 0 : h)
+    onChange(`${String(h24out).padStart(2, '0')}:${newM}`)
   }
-
-  const spinH = (dir: 1 | -1) => emit(h12 + dir === 0 ? 12 : h12 + dir === 13 ? 1 : h12 + dir, isPM, m)
-  const spinM = (dir: 1 | -1) => {
-    const idx = MINUTES.indexOf(m)
-    emit(h12, isPM, MINUTES[(idx + dir + MINUTES.length) % MINUTES.length])
-  }
-  const toggleAMPM = () => emit(h12, !isPM, m)
-
-  const btnCls = 'flex items-center justify-center w-7 h-5 text-white/30 hover:text-[#C9A84C] transition select-none'
-  const valCls = 'text-white text-base font-semibold w-8 text-center leading-none'
 
   return (
-    <div className="flex items-center gap-1 bg-white/5 border border-white/10 rounded-lg px-3 py-1.5">
-      {/* Hours */}
-      <div className="flex flex-col items-center gap-0.5">
-        <button type="button" onClick={() => spinH(1)} className={btnCls}>▲</button>
-        <span className={valCls}>{h12}</span>
-        <button type="button" onClick={() => spinH(-1)} className={btnCls}>▼</button>
-      </div>
-
-      <span className="text-white/40 font-bold mb-0.5">:</span>
-
-      {/* Minutes */}
-      <div className="flex flex-col items-center gap-0.5">
-        <button type="button" onClick={() => spinM(1)} className={btnCls}>▲</button>
-        <span className={valCls}>{String(m).padStart(2,'0')}</span>
-        <button type="button" onClick={() => spinM(-1)} className={btnCls}>▼</button>
-      </div>
-
-      {/* AM/PM */}
-      <button type="button" onClick={toggleAMPM}
-        className="ml-1 text-xs font-bold text-[#C9A84C] bg-[#C9A84C]/10 border border-[#C9A84C]/30 rounded px-1.5 py-1 hover:bg-[#C9A84C]/20 transition min-w-[34px]">
-        {isPM ? 'PM' : 'AM'}
-      </button>
+    <div className="relative flex items-center gap-1 bg-white/5 border border-white/10 rounded-xl px-3 py-1 overflow-hidden">
+      {/* centre highlight band */}
+      <div className="pointer-events-none absolute inset-x-3"
+        style={{
+          top: ITEM_H,
+          height: ITEM_H,
+          borderTop: '1px solid rgba(201,168,76,0.4)',
+          borderBottom: '1px solid rgba(201,168,76,0.4)',
+          borderRadius: 6,
+          background: 'rgba(201,168,76,0.06)',
+        }}
+      />
+      <DrumColumn items={HOURS} value={h12} width="w-8"
+        onChange={v => emit(v, nearestM, isPM ? 'PM' : 'AM')} />
+      <span className="text-white/30 font-bold text-sm z-10">:</span>
+      <DrumColumn items={MINS} value={nearestM} width="w-10"
+        onChange={v => emit(h12, v, isPM ? 'PM' : 'AM')} />
+      <DrumColumn items={AMPM} value={isPM ? 'PM' : 'AM'} width="w-10"
+        onChange={v => emit(h12, nearestM, v)} />
     </div>
   )
 }
