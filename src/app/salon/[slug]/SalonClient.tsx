@@ -15,7 +15,7 @@ interface DaySchedule {
   work_start: string | null; work_end: string | null
   break_start: string | null; break_end: string | null
 }
-interface CalendarBlock { staff_id: string | null; start_time: string; end_time: string }
+interface CalendarBlock { staff_id: string | null; start_time: string; end_time: string; type?: string }
 interface Props { org: Org; staff: Staff[]; services: Service[] }
 
 // BUG-15 FIX: Use UTC-based date string to avoid timezone drift
@@ -60,6 +60,15 @@ function buildSlots(
   staffId: string
 ): { time: string; available: boolean }[] {
   if (schedule?.is_day_off) return []
+  const ds = toDateStr(date)
+  const hasFullDayBlock = blocks.some(b => {
+    if (b.type !== 'full_day') return false
+    if (b.staff_id !== null && b.staff_id !== staffId) return false
+    const bs = new Date(b.start_time)
+    const bd = `${bs.getUTCFullYear()}-${String(bs.getUTCMonth()+1).padStart(2,'0')}-${String(bs.getUTCDate()).padStart(2,'0')}`
+    return bd === ds
+  })
+  if (hasFullDayBlock) return []
   const wsMin = toMinutes(schedule?.work_start || DEFAULT_WORK_START)
   const weMin = toMinutes(schedule?.work_end || DEFAULT_WORK_END)
 
@@ -73,7 +82,6 @@ function buildSlots(
 
   const now = new Date(); const isToday = date.toDateString() === now.toDateString()
   const cutoff = isToday ? now.getHours() * 60 + now.getMinutes() : -1
-  const ds = toDateStr(date)
   const slots: { time: string; available: boolean }[] = []
   for (let min = wsMin; min + serviceDuration <= weMin; min += 30) {
     const end = min + serviceDuration

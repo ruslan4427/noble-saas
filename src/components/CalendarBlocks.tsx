@@ -10,6 +10,7 @@ interface Block {
   start_time: string
   end_time: string
   reason: string
+  type: 'time' | 'full_day'
 }
 
 interface Props {
@@ -31,6 +32,12 @@ function toLocalInput(iso: string): string {
   return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`
 }
 
+function todayDateStr(): string {
+  const d = new Date()
+  const pad = (n: number) => String(n).padStart(2, '0')
+  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`
+}
+
 function nowPlusHours(h: number): string {
   const d = new Date(Date.now() + h * 60 * 60 * 1000)
   const pad = (n: number) => String(n).padStart(2, '0')
@@ -48,7 +55,9 @@ export default function CalendarBlocks({ orgId, staff }: Props) {
   const [deleting, setDeleting] = useState<string | null>(null)
 
   // Form state
+  const [formType, setFormType] = useState<'time' | 'full_day'>('time')
   const [formStaffId, setFormStaffId] = useState<string>('all')
+  const [formDate, setFormDate] = useState('')
   const [formStart, setFormStart] = useState('')
   const [formEnd, setFormEnd] = useState('')
   const [formReason, setFormReason] = useState('')
@@ -71,7 +80,9 @@ export default function CalendarBlocks({ orgId, staff }: Props) {
 
   function openAddForm() {
     setEditingBlock(null)
+    setFormType('time')
     setFormStaffId('all')
+    setFormDate(todayDateStr())
     setFormStart(nowPlusHours(1))
     setFormEnd(nowPlusHours(2))
     setFormReason('')
@@ -81,7 +92,15 @@ export default function CalendarBlocks({ orgId, staff }: Props) {
 
   function openEditForm(block: Block) {
     setEditingBlock(block)
+    setFormType(block.type || 'time')
     setFormStaffId(block.staff_id || 'all')
+    if (block.type === 'full_day') {
+      const d = new Date(block.start_time)
+      const pad = (n: number) => String(n).padStart(2, '0')
+      setFormDate(`${d.getUTCFullYear()}-${pad(d.getUTCMonth()+1)}-${pad(d.getUTCDate())}`)
+    } else {
+      setFormDate(todayDateStr())
+    }
     setFormStart(toLocalInput(block.start_time))
     setFormEnd(toLocalInput(block.end_time))
     setFormReason(block.reason)
@@ -91,11 +110,20 @@ export default function CalendarBlocks({ orgId, staff }: Props) {
 
   async function handleSave() {
     setFormError('')
-    if (!formStart || !formEnd) { setFormError('Start and end time are required'); return }
-    const startISO = new Date(formStart).toISOString()
-    const endISO = new Date(formEnd).toISOString()
-    if (new Date(endISO) <= new Date(startISO)) { setFormError('End time must be after start time'); return }
     if (!formReason.trim()) { setFormError('Reason is required'); return }
+
+    let startISO: string
+    let endISO: string
+    if (formType === 'full_day') {
+      if (!formDate) { setFormError('Date is required'); return }
+      startISO = formDate + 'T00:00:00.000Z'
+      endISO = formDate + 'T23:59:59.000Z'
+    } else {
+      if (!formStart || !formEnd) { setFormError('Start and end time are required'); return }
+      startISO = new Date(formStart).toISOString()
+      endISO = new Date(formEnd).toISOString()
+      if (new Date(endISO) <= new Date(startISO)) { setFormError('End time must be after start time'); return }
+    }
 
     setSaving(true)
     const payload = {
@@ -104,6 +132,7 @@ export default function CalendarBlocks({ orgId, staff }: Props) {
       start_time: startISO,
       end_time: endISO,
       reason: formReason.trim(),
+      type: formType,
       updated_at: new Date().toISOString(),
     }
 
@@ -151,22 +180,46 @@ export default function CalendarBlocks({ orgId, staff }: Props) {
       {showForm && (
         <div className="bg-white/5 border border-[#C9A84C]/30 rounded-xl p-5 space-y-4">
           <h4 className="text-sm font-semibold text-[#C9A84C]">
-            {editingBlock ? 'Edit block' : 'New time block'}
+            {editingBlock ? 'Edit block' : 'New block'}
           </h4>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div>
-              <label className="text-white/40 text-xs mb-1 block">Start time</label>
-              <input type="datetime-local" value={formStart} onChange={e => setFormStart(e.target.value)}
-                className={inputCls} />
-            </div>
-            <div>
-              <label className="text-white/40 text-xs mb-1 block">End time</label>
-              <input type="datetime-local" value={formEnd} onChange={e => setFormEnd(e.target.value)}
-                min={formStart}
-                className={inputCls} />
-            </div>
+          {/* Type toggle */}
+          <div className="flex gap-1 bg-black/20 rounded-lg p-1 w-fit">
+            <button
+              type="button"
+              onClick={() => setFormType('time')}
+              className={`px-3 py-1.5 rounded text-xs font-medium transition ${formType === 'time' ? 'bg-[#C9A84C] text-black' : 'text-white/40 hover:text-white'}`}>
+              Time range
+            </button>
+            <button
+              type="button"
+              onClick={() => setFormType('full_day')}
+              className={`px-3 py-1.5 rounded text-xs font-medium transition ${formType === 'full_day' ? 'bg-[#C9A84C] text-black' : 'text-white/40 hover:text-white'}`}>
+              Full day
+            </button>
           </div>
+
+          {formType === 'full_day' ? (
+            <div>
+              <label className="text-white/40 text-xs mb-1 block">Date</label>
+              <input type="date" value={formDate} onChange={e => setFormDate(e.target.value)}
+                className={inputCls} />
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label className="text-white/40 text-xs mb-1 block">Start time</label>
+                <input type="datetime-local" value={formStart} onChange={e => setFormStart(e.target.value)}
+                  className={inputCls} />
+              </div>
+              <div>
+                <label className="text-white/40 text-xs mb-1 block">End time</label>
+                <input type="datetime-local" value={formEnd} onChange={e => setFormEnd(e.target.value)}
+                  min={formStart}
+                  className={inputCls} />
+              </div>
+            </div>
+          )}
 
           <div>
             <label className="text-white/40 text-xs mb-1 block">Staff (leave empty to block all)</label>
@@ -277,28 +330,35 @@ function BlockRow({ block, staff, onEdit, onDelete, deleting, isPast }: {
     ? staff.find(s => s.id === block.staff_id)?.name ?? 'Unknown'
     : 'All staff'
 
-  // Duration in minutes
-  const durationMs = new Date(block.end_time).getTime() - new Date(block.start_time).getTime()
-  const durationMin = Math.round(durationMs / 60000)
-  const durationLabel = durationMin < 60
-    ? `${durationMin}m`
-    : `${Math.floor(durationMin/60)}h${durationMin%60 > 0 ? ` ${durationMin%60}m` : ''}`
+  const isFullDay = block.type === 'full_day'
+
+  const timeLabel = isFullDay
+    ? new Date(block.start_time).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' })
+    : `${formatDT(block.start_time)} → ${formatDT(block.end_time)}`
+
+  const durationLabel = (() => {
+    if (isFullDay) return null
+    const ms = new Date(block.end_time).getTime() - new Date(block.start_time).getTime()
+    const min = Math.round(ms / 60000)
+    return min < 60 ? `${min}m` : `${Math.floor(min/60)}h${min%60 > 0 ? ` ${min%60}m` : ''}`
+  })()
 
   return (
     <div className="flex items-center gap-3 px-4 py-3">
       {/* Color indicator */}
-      <div className="w-1 h-10 rounded-full bg-red-400/60 flex-none" aria-hidden="true" />
+      <div className={`w-1 h-10 rounded-full flex-none ${isFullDay ? 'bg-orange-400/70' : 'bg-red-400/60'}`} aria-hidden="true" />
 
       {/* Info */}
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 flex-wrap">
           <p className="text-white text-sm font-medium">{block.reason}</p>
+          {isFullDay && <span className="text-[10px] font-semibold uppercase tracking-wide text-orange-400 bg-orange-400/10 px-1.5 py-0.5 rounded">Full day</span>}
           <span className="text-white/30 text-xs">·</span>
           <span className="text-white/50 text-xs">{staffName}</span>
         </div>
         <p className="text-white/40 text-xs mt-0.5">
-          {formatDT(block.start_time)} → {formatDT(block.end_time)}
-          <span className="text-white/25 ml-1">({durationLabel})</span>
+          {timeLabel}
+          {durationLabel && <span className="text-white/25 ml-1">({durationLabel})</span>}
         </p>
       </div>
 
