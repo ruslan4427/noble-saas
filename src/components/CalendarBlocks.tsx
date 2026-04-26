@@ -46,6 +46,23 @@ function nowPlusHours(h: number): string {
 
 const inputCls = 'w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white text-sm outline-none focus:border-[#C9A84C] transition placeholder-white/20'
 
+function TimeSelect({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  const options: { val: string; label: string }[] = []
+  for (let h = 0; h < 24; h++) {
+    for (let m = 0; m < 60; m += 30) {
+      const val = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`
+      const ampm = h < 12 ? 'AM' : 'PM'
+      const h12 = h === 0 ? 12 : h > 12 ? h - 12 : h
+      options.push({ val, label: `${h12}:${String(m).padStart(2,'0')} ${ampm}` })
+    }
+  }
+  return (
+    <select value={value} onChange={e => onChange(e.target.value)} className={inputCls}>
+      {options.map(o => <option key={o.val} value={o.val}>{o.label}</option>)}
+    </select>
+  )
+}
+
 export default function CalendarBlocks({ orgId, staff }: Props) {
   const [blocks, setBlocks] = useState<Block[]>([])
   const [loading, setLoading] = useState(true)
@@ -214,9 +231,8 @@ export default function CalendarBlocks({ orgId, staff }: Props) {
                   <input type="date" value={formStart.split('T')[0] || ''}
                     onChange={e => setFormStart(e.target.value + 'T' + (formStart.split('T')[1] || '09:00'))}
                     className={inputCls} />
-                  <input type="time" value={formStart.split('T')[1] || ''}
-                    onChange={e => setFormStart((formStart.split('T')[0] || '') + 'T' + e.target.value)}
-                    className={inputCls} />
+                  <TimeSelect value={formStart.split('T')[1] || '09:00'}
+                    onChange={v => setFormStart((formStart.split('T')[0] || '') + 'T' + v)} />
                 </div>
               </div>
               <div>
@@ -225,9 +241,8 @@ export default function CalendarBlocks({ orgId, staff }: Props) {
                   <input type="date" value={formEnd.split('T')[0] || ''}
                     onChange={e => setFormEnd(e.target.value + 'T' + (formEnd.split('T')[1] || '18:00'))}
                     className={inputCls} />
-                  <input type="time" value={formEnd.split('T')[1] || ''}
-                    onChange={e => setFormEnd((formEnd.split('T')[0] || '') + 'T' + e.target.value)}
-                    className={inputCls} />
+                  <TimeSelect value={formEnd.split('T')[1] || '18:00'}
+                    onChange={v => setFormEnd((formEnd.split('T')[0] || '') + 'T' + v)} />
                 </div>
               </div>
             </div>
