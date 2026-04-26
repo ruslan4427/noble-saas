@@ -226,7 +226,7 @@ export default function Dashboard() {
       const workEnd = org.work_end || '19:00'
       const scheduleRows = Array.from({ length: 7 }, (_, dow) => ({
         staff_id: inserted.id, org_id: org.id, day_of_week: dow,
-        is_day_off: dow === 0 || dow === 6,
+        is_day_off: false,
         work_start: workStart, work_end: workEnd,
         break_start: '13:00', break_end: '14:00',
       }))

@@ -15,7 +15,7 @@ interface Props { orgId: string; staff: Staff[] }
 
 const DAYS_FULL = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
 const DEFAULT_SCHEDULE: DaySchedule[] = DAYS_FULL.map((_, i) => ({
-  day_of_week: i, is_day_off: i === 0 || i === 6,
+  day_of_week: i, is_day_off: false,
   work_start: '09:00', work_end: '18:00', break_start: '13:00', break_end: '14:00',
 }))
 
