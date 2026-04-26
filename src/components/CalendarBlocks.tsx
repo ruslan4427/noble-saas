@@ -46,20 +46,54 @@ function nowPlusHours(h: number): string {
 
 const inputCls = 'w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white text-sm outline-none focus:border-[#C9A84C] transition placeholder-white/20'
 
-function TimeSelect({ value, onChange }: { value: string; onChange: (v: string) => void }) {
-  const options: { val: string; label: string }[] = []
-  for (let h = 0; h < 24; h++) {
-    for (let m = 0; m < 60; m += 30) {
-      const val = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`
-      const ampm = h < 12 ? 'AM' : 'PM'
-      const h12 = h === 0 ? 12 : h > 12 ? h - 12 : h
-      options.push({ val, label: `${h12}:${String(m).padStart(2,'0')} ${ampm}` })
-    }
+const MINUTES = [0, 15, 30, 45]
+
+function TimePicker({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  const [hStr, mStr] = value.split(':')
+  const h24 = parseInt(hStr) || 0
+  const m = MINUTES.includes(parseInt(mStr)) ? parseInt(mStr) : 0
+  const isPM = h24 >= 12
+  const h12 = h24 === 0 ? 12 : h24 > 12 ? h24 - 12 : h24
+
+  function emit(newH12: number, newPM: boolean, newM: number) {
+    let h = newH12 === 12 ? (newPM ? 12 : 0) : (newPM ? newH12 + 12 : newH12)
+    onChange(`${String(h).padStart(2,'0')}:${String(newM).padStart(2,'0')}`)
   }
+
+  const spinH = (dir: 1 | -1) => emit(h12 + dir === 0 ? 12 : h12 + dir === 13 ? 1 : h12 + dir, isPM, m)
+  const spinM = (dir: 1 | -1) => {
+    const idx = MINUTES.indexOf(m)
+    emit(h12, isPM, MINUTES[(idx + dir + MINUTES.length) % MINUTES.length])
+  }
+  const toggleAMPM = () => emit(h12, !isPM, m)
+
+  const btnCls = 'flex items-center justify-center w-7 h-5 text-white/30 hover:text-[#C9A84C] transition select-none'
+  const valCls = 'text-white text-base font-semibold w-8 text-center leading-none'
+
   return (
-    <select value={value} onChange={e => onChange(e.target.value)} className={inputCls}>
-      {options.map(o => <option key={o.val} value={o.val}>{o.label}</option>)}
-    </select>
+    <div className="flex items-center gap-1 bg-white/5 border border-white/10 rounded-lg px-3 py-1.5">
+      {/* Hours */}
+      <div className="flex flex-col items-center gap-0.5">
+        <button type="button" onClick={() => spinH(1)} className={btnCls}>▲</button>
+        <span className={valCls}>{h12}</span>
+        <button type="button" onClick={() => spinH(-1)} className={btnCls}>▼</button>
+      </div>
+
+      <span className="text-white/40 font-bold mb-0.5">:</span>
+
+      {/* Minutes */}
+      <div className="flex flex-col items-center gap-0.5">
+        <button type="button" onClick={() => spinM(1)} className={btnCls}>▲</button>
+        <span className={valCls}>{String(m).padStart(2,'0')}</span>
+        <button type="button" onClick={() => spinM(-1)} className={btnCls}>▼</button>
+      </div>
+
+      {/* AM/PM */}
+      <button type="button" onClick={toggleAMPM}
+        className="ml-1 text-xs font-bold text-[#C9A84C] bg-[#C9A84C]/10 border border-[#C9A84C]/30 rounded px-1.5 py-1 hover:bg-[#C9A84C]/20 transition min-w-[34px]">
+        {isPM ? 'PM' : 'AM'}
+      </button>
+    </div>
   )
 }
 
@@ -231,7 +265,7 @@ export default function CalendarBlocks({ orgId, staff }: Props) {
                   <input type="date" value={formStart.split('T')[0] || ''}
                     onChange={e => setFormStart(e.target.value + 'T' + (formStart.split('T')[1] || '09:00'))}
                     className={inputCls} />
-                  <TimeSelect value={formStart.split('T')[1] || '09:00'}
+                  <TimePicker value={formStart.split('T')[1] || '09:00'}
                     onChange={v => setFormStart((formStart.split('T')[0] || '') + 'T' + v)} />
                 </div>
               </div>
@@ -241,7 +275,7 @@ export default function CalendarBlocks({ orgId, staff }: Props) {
                   <input type="date" value={formEnd.split('T')[0] || ''}
                     onChange={e => setFormEnd(e.target.value + 'T' + (formEnd.split('T')[1] || '18:00'))}
                     className={inputCls} />
-                  <TimeSelect value={formEnd.split('T')[1] || '18:00'}
+                  <TimePicker value={formEnd.split('T')[1] || '18:00'}
                     onChange={v => setFormEnd((formEnd.split('T')[0] || '') + 'T' + v)} />
                 </div>
               </div>
