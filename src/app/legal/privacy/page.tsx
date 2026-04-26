@@ -52,10 +52,54 @@ export default function PrivacyPolicy() {
         </Section>
 
         <Section title="4. SMS Communications">
-          <p>We send SMS messages only to clients who have explicitly opted in during the booking process. Message frequency is limited to appointment reminders (typically 1 message per booking, sent 2 hours before the appointment).</p>
-          <p className="mt-2"><strong>Message and data rates may apply.</strong> Carriers are not liable for delayed or undelivered messages.</p>
-          <p className="mt-2">To opt out, reply <strong>STOP</strong> to any SMS message. To get help, reply <strong>HELP</strong> or contact us at {EMAIL}.</p>
-          <p className="mt-2">We do not sell or share phone numbers with third parties for marketing purposes.</p>
+          <p>
+            This section describes how {COMPANY} collects and uses mobile phone numbers in connection with the <strong>Noble Appointment Reminder Program</strong>.
+          </p>
+
+          <p><strong>How We Obtain Consent (Opt-In)</strong></p>
+          <p>
+            We send SMS appointment reminders only to clients who have provided explicit, verifiable consent. Consent is obtained during the online booking process as follows:
+          </p>
+          <ul>
+            <li>The client enters their mobile phone number in the designated phone number field on the booking form.</li>
+            <li>A consent checkbox (not pre-checked) is displayed with language that clearly identifies the program, the sender, the message type, and that message and data rates may apply.</li>
+            <li>The client must actively check the checkbox to opt in. Checking the box constitutes explicit written consent to receive SMS messages at the specific mobile number provided.</li>
+            <li>Consent is not a condition of making a booking or purchasing any service.</li>
+            <li>Consent records — including the phone number, timestamp, and booking reference — are stored securely and retained for compliance purposes.</li>
+          </ul>
+
+          <p><strong>Message Type and Frequency</strong></p>
+          <p>
+            All SMS messages sent through this program are strictly <strong>transactional</strong>. We do not send promotional, marketing, or advertising SMS messages of any kind. Messages are limited to appointment reminders and booking-related notifications directly resulting from the client's booking action.
+          </p>
+          <p>
+            <strong>Message frequency varies.</strong> Clients typically receive 1 SMS message per booking — a reminder sent approximately 2 hours before the scheduled appointment. Additional messages may be sent in connection with appointment reschedules or cancellations.
+          </p>
+
+          <p><strong>Message and Data Rates</strong></p>
+          <p>
+            <strong>Message and data rates may apply.</strong> Charges depend on the client's mobile carrier and service plan. {COMPANY} does not charge clients separately for SMS messages.
+          </p>
+
+          <p><strong>How to Opt Out — Reply STOP</strong></p>
+          <p>
+            Clients may opt out of SMS messages at any time by replying <strong>STOP</strong> to any message received from the program. After a STOP request is received, no further SMS messages will be sent to that number. Opt-out requests are honored immediately and are permanent unless the client re-opts in during a future booking.
+          </p>
+
+          <p><strong>How to Get Help — Reply HELP</strong></p>
+          <p>
+            Clients may reply <strong>HELP</strong> to any SMS message to receive program support information. Clients may also contact us directly at <a href={`mailto:${EMAIL}`} className="text-[#C9A84C] hover:underline">{EMAIL}</a>.
+          </p>
+
+          <p><strong>Protection of Phone Numbers</strong></p>
+          <p>
+            Mobile phone numbers collected through the booking process and SMS consent are used solely to deliver the appointment reminders the client has consented to receive. We do not sell, rent, trade, or share phone numbers or SMS consent data with any third party for marketing, advertising, or any other purpose unrelated to appointment reminder delivery.
+          </p>
+
+          <p><strong>Carrier Disclaimer</strong></p>
+          <p>
+            SMS messages are delivered via Twilio, Inc. <strong>Carriers are not liable for delayed or undelivered messages.</strong> Delivery depends on the client's network coverage, device availability, and carrier policies.
+          </p>
         </Section>
 
         <Section title="5. Sharing of Information">
