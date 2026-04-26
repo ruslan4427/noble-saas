@@ -61,17 +61,56 @@ export default function TermsAndConditions() {
         </Section>
 
         <Section title="5. SMS Messaging Terms">
-          <p>The Platform sends SMS appointment reminders on behalf of salon owners. The following terms apply to all SMS communications:</p>
+          <p>
+            <strong>Program name: Noble Appointment Reminder Program.</strong> {COMPANY} sends transactional SMS appointment reminders on behalf of salon and barbershop owners who use the Platform. The following terms govern all SMS communications sent through this program.
+          </p>
+
+          <p><strong>5.1 How to Opt In</strong></p>
+          <p>
+            SMS reminders are sent exclusively to clients who provide explicit written consent. Consent is obtained as follows:
+          </p>
           <ul>
-            <li><strong>Opt-in:</strong> SMS messages are sent only to clients who have explicitly opted in during the booking process by checking the SMS consent checkbox.</li>
-            <li><strong>Message frequency:</strong> Typically 1 message per booking (a reminder sent approximately 2 hours before the appointment).</li>
-            <li><strong>Message and data rates may apply</strong> depending on the client's mobile carrier and plan.</li>
-            <li><strong>Opt-out:</strong> Clients may opt out at any time by replying <strong>STOP</strong> to any SMS message. After opting out, no further SMS messages will be sent.</li>
-            <li><strong>Help:</strong> Clients may reply <strong>HELP</strong> for assistance, or contact {EMAIL}.</li>
-            <li><strong>No marketing SMS:</strong> We do not send promotional or marketing SMS messages. All SMS messages are strictly transactional appointment reminders.</li>
-            <li><strong>No third-party sharing:</strong> Phone numbers collected for SMS reminders are never sold or shared with third parties for marketing purposes.</li>
-            <li>SMS delivery is provided by Twilio. Carriers are not liable for delayed or undelivered messages.</li>
+            <li>During the online booking process, a client enters their mobile phone number in the designated phone number field.</li>
+            <li>A required checkbox is displayed with the following or substantially similar language: <em>"By checking this box, I agree to receive SMS appointment reminders from [Salon Name] via Noble at the mobile number I provided. Consent is not a condition of purchase."</em></li>
+            <li>The checkbox must be actively checked by the client — it is not pre-checked.</li>
+            <li>Consent is tied to the specific mobile number entered and is recorded at the time of booking.</li>
+            <li>Clients who do not check the consent checkbox will not receive SMS messages.</li>
           </ul>
+
+          <p><strong>5.2 Message Frequency</strong></p>
+          <p>
+            Message frequency varies. Clients typically receive 1 SMS message per booking (a reminder sent approximately 2 hours before the appointment start time). Additional messages may be sent in connection with reschedules or booking updates. No promotional or marketing messages are ever sent.
+          </p>
+
+          <p><strong>5.3 Message and Data Rates</strong></p>
+          <p>
+            <strong>Message and data rates may apply.</strong> Charges depend on the client's mobile carrier and plan. {COMPANY} does not charge separately for SMS messages.
+          </p>
+
+          <p><strong>5.4 How to Opt Out (STOP)</strong></p>
+          <p>
+            Clients may opt out of SMS messages at any time by replying <strong>STOP</strong> to any message received from the program. Upon receipt of a STOP message, no further SMS messages will be sent to that number. Opt-out requests are processed immediately and are permanent unless the client re-opts in during a future booking.
+          </p>
+
+          <p><strong>5.5 Help and Support (HELP)</strong></p>
+          <p>
+            Clients may reply <strong>HELP</strong> to any SMS message to receive support information. Alternatively, clients may contact us directly at <a href={`mailto:${EMAIL}`} className="text-[#C9A84C] hover:underline">{EMAIL}</a>. We respond to support inquiries within 2 business days.
+          </p>
+
+          <p><strong>5.6 Transactional Nature — No Marketing SMS</strong></p>
+          <p>
+            All SMS messages sent through the Noble Appointment Reminder Program are strictly transactional in nature. We do not send promotional, marketing, or advertising SMS messages. Messages are limited to appointment reminders and booking-related notifications directly requested by the client's booking action.
+          </p>
+
+          <p><strong>5.7 No Third-Party Sharing</strong></p>
+          <p>
+            Mobile phone numbers collected for the purpose of SMS appointment reminders are never sold, rented, or shared with third parties for marketing or promotional purposes. Numbers are used solely to deliver the appointment reminders the client consented to receive.
+          </p>
+
+          <p><strong>5.8 Carrier Disclaimer</strong></p>
+          <p>
+            SMS delivery is facilitated by Twilio, Inc. as the messaging service provider. <strong>Carriers are not liable for delayed or undelivered messages.</strong> Delivery is subject to the client's network coverage, carrier policies, and device availability.
+          </p>
         </Section>
 
         <Section title="6. Acceptable Use">
