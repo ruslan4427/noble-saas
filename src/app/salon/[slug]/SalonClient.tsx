@@ -43,9 +43,10 @@ function isSlotBlocked(dateStr: string, slotMin: number, slotEndMin: number, sta
     if (b.type === 'full_day') return false
     if (b.staff_id !== null && b.staff_id !== staffId) return false
     const bs = new Date(b.start_time); const be = new Date(b.end_time)
-    // Use UTC hours to avoid timezone mismatch between admin and client browsers
-    const bsMin = bs.getUTCHours() * 60 + bs.getUTCMinutes()
-    const beMin = be.getUTCHours() * 60 + be.getUTCMinutes()
+    // Date check uses UTC (BUG-05). Time check uses LOCAL hours — slot times come from
+    // local work schedule strings ("09:00"), so comparing against UTC hours would be wrong.
+    const bsMin = bs.getHours() * 60 + bs.getMinutes()
+    const beMin = be.getHours() * 60 + be.getMinutes()
     const bd = `${bs.getUTCFullYear()}-${String(bs.getUTCMonth()+1).padStart(2,'0')}-${String(bs.getUTCDate()).padStart(2,'0')}`
     return bd === dateStr && slotMin < beMin && slotEndMin > bsMin
   })
