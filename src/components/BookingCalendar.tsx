@@ -132,11 +132,15 @@ function BookingCard({ booking, staffColor, onDragStart, onBookingClick, isDragg
   booking:Booking; staffColor:typeof STAFF_COLORS[0]
   onDragStart:(b:Booking)=>void; onBookingClick:(b:Booking)=>void; isDragging:boolean
 }) {
+  const isCancelled = booking.status === 'cancelled'
   const statusCfg=STATUS_CONFIG[booking.status]; const useStatus=booking.status!=='confirmed'&&booking.status!=='pending'
   const bg=useStatus?statusCfg.cardBg:staffColor.bg; const border=useStatus?statusCfg.cardBorder:staffColor.border; const text=useStatus?statusCfg.cardText:staffColor.text
   return (
-    <div draggable onDragStart={e=>{e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('bookingId',booking.id);onDragStart(booking)}} onClick={()=>onBookingClick(booking)} role="button" tabIndex={0}
-      className={`relative z-10 w-full text-left rounded px-1.5 py-1 mb-0.5 border-l-2 cursor-grab active:cursor-grabbing transition select-none ${bg} ${border} ${isDragging?'opacity-40 scale-95':'hover:brightness-125'}`}>
+    <div
+      draggable={!isCancelled}
+      onDragStart={isCancelled?undefined:e=>{e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('bookingId',booking.id);onDragStart(booking)}}
+      onClick={()=>onBookingClick(booking)} role="button" tabIndex={0}
+      className={`relative z-10 w-full text-left rounded px-1.5 py-1 mb-0.5 border-l-2 transition select-none ${bg} ${border} ${isCancelled?'opacity-40 cursor-default line-through':isDragging?'opacity-40 scale-95 cursor-grab':'cursor-grab active:cursor-grabbing hover:brightness-125'}`}>
       <p className={`text-xs font-semibold truncate ${text}`}>{booking.client_name}</p>
       <div className="flex items-center gap-1">
         <p className="text-white/40 text-[10px] truncate flex-1">{booking.service_name}</p>
@@ -230,9 +234,13 @@ function DayView({ date, bookings, blocks, staffColorMap, staff, onBookingClick,
                 {slotBookings.map(b=>{
                   const sc=staffColorMap.get(b.master_id)||STAFF_COLORS[0]; const s=STATUS_CONFIG[b.status]; const us=b.status!=='confirmed'&&b.status!=='pending'
                   const bg=us?s?.cardBg:sc.bg; const border=us?s?.cardBorder:sc.border; const text=us?s?.cardText:sc.text
+                  const isCancelled = b.status === 'cancelled'
                   return(
-                    <div key={b.id} draggable onDragStart={e=>{e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('bookingId',b.id);onDragStart(b)}} onClick={()=>onBookingClick(b)} role="button" tabIndex={0}
-                      className={`relative z-10 w-full text-left rounded-lg px-3 py-2 border-l-2 cursor-grab active:cursor-grabbing select-none transition ${bg} ${border} ${dragState?.bookingId===b.id?'opacity-40 scale-95':'hover:brightness-125'}`}>
+                    <div key={b.id}
+                      draggable={!isCancelled}
+                      onDragStart={isCancelled?undefined:e=>{e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('bookingId',b.id);onDragStart(b)}}
+                      onClick={()=>onBookingClick(b)} role="button" tabIndex={0}
+                      className={`relative z-10 w-full text-left rounded-lg px-3 py-2 border-l-2 select-none transition ${bg} ${border} ${isCancelled?'opacity-40 cursor-default':dragState?.bookingId===b.id?'opacity-40 scale-95 cursor-grab':'cursor-grab active:cursor-grabbing hover:brightness-125'}`}>
                       <div className="flex items-center justify-between gap-2">
                         <div className="min-w-0"><p className={`text-sm font-semibold truncate ${text}`}>{b.client_name}</p><p className="text-white/50 text-xs">{b.service_name} · {toAmPm(b.time_slot)}</p></div>
                         <div className="flex items-center gap-1.5 flex-none">{us&&s&&<span className={`text-xs font-semibold px-2 py-0.5 rounded-full border capitalize ${s.badge}`}>{s.label}</span>}<span className="text-white/30 text-xs">${(b.price_cents/100).toFixed(0)}</span></div>
@@ -261,6 +269,7 @@ export default function BookingCalendar({ orgId, orgTimezone, staff }: Props) {
   const [dragState, setDragState] = useState<DragState|null>(null)
   const [rescheduleConfirm, setRescheduleConfirm] = useState<RescheduleConfirm|null>(null)
   const [saving, setSaving] = useState(false)
+  const [showCancelled, setShowCancelled] = useState(false)
   const supabase = createClient()
 
   const staffColorMap = new Map(staff.map((s,i) => [s.id, getStaffColor(i)]))
@@ -325,6 +334,9 @@ export default function BookingCalendar({ orgId, orgTimezone, staff }: Props) {
     setSaving(false); setRescheduleConfirm(null)
   }
 
+  const displayedBookings = showCancelled ? bookings : bookings.filter(b => b.status !== 'cancelled')
+  const cancelledCount = bookings.filter(b => b.status === 'cancelled').length
+
   const headerLabel = view==='week' ? `${formatDate(weekStart)} — ${formatDate(addDays(weekStart,6))}` : formatDate(currentDate)
   const isToday = view==='day' && isSameDay(currentDate, new Date())
   const isCurrentWeek = view==='week' && isSameDay(weekStart, startOfWeek(new Date()))
@@ -388,12 +400,21 @@ export default function BookingCalendar({ orgId, orgTimezone, staff }: Props) {
         </div>
       )}
 
-      {bookings.length > 0 && <p className="text-white/20 text-xs">Drag to reschedule · Click to view & update status</p>}
+      <div className="flex items-center justify-between">
+        {bookings.length > 0 && <p className="text-white/20 text-xs">Drag to reschedule · Click to view & update status</p>}
+        {cancelledCount > 0 && (
+          <button onClick={() => setShowCancelled(v => !v)}
+            className={`ml-auto flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full border transition ${showCancelled ? 'bg-red-500/20 border-red-500/40 text-red-400' : 'border-white/10 text-white/30 hover:text-white/50'}`}>
+            <span className={`w-2 h-2 rounded-full ${showCancelled ? 'bg-red-400' : 'bg-white/20'}`} />
+            {showCancelled ? `Hide cancelled (${cancelledCount})` : `Show cancelled (${cancelledCount})`}
+          </button>
+        )}
+      </div>
 
       <div className="bg-white/5 border border-white/10 rounded-xl p-4 relative min-h-[400px]">
         {loading && <div className="absolute inset-0 flex items-center justify-center bg-[#0F0A00]/50 rounded-xl z-10"><svg className="animate-spin w-5 h-5 text-[#C9A84C]" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" strokeDasharray="30 70"/></svg></div>}
-        {view==='week' && <WeekView weekStart={weekStart} bookings={bookings} blocks={blocks} staffColorMap={staffColorMap} staff={staff} onBookingClick={setSelectedBooking} dragState={dragState} onDragStart={handleDragStart} onDrop={handleDrop}/>}
-        {view==='day' && <DayView date={currentDate} bookings={bookings} blocks={blocks} staffColorMap={staffColorMap} staff={staff} onBookingClick={setSelectedBooking} dragState={dragState} onDragStart={handleDragStart} onDrop={handleDrop}/>}
+        {view==='week' && <WeekView weekStart={weekStart} bookings={displayedBookings} blocks={blocks} staffColorMap={staffColorMap} staff={staff} onBookingClick={setSelectedBooking} dragState={dragState} onDragStart={handleDragStart} onDrop={handleDrop}/>}
+        {view==='day' && <DayView date={currentDate} bookings={displayedBookings} blocks={blocks} staffColorMap={staffColorMap} staff={staff} onBookingClick={setSelectedBooking} dragState={dragState} onDragStart={handleDragStart} onDrop={handleDrop}/>}
       </div>
 
       {orgTimezone && <p className="text-white/20 text-xs text-right">Timezone: {orgTimezone}</p>}
