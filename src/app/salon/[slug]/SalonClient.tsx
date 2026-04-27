@@ -245,13 +245,13 @@ function Spinner({ className = 'w-5 h-5' }: { className?: string }) {
 
 function LangToggle({ lang, onChange }: { lang: Lang; onChange: (l: Lang) => void }) {
   return (
-    <div className="flex items-center bg-white/10 rounded-full p-0.5 gap-0.5">
+    <div className="fixed top-4 right-4 z-50 flex items-center bg-[#1a1208] border border-white/20 rounded-full p-0.5 gap-0.5 shadow-lg">
       {(['en', 'es'] as Lang[]).map(l => (
         <button
           key={l}
           onClick={() => onChange(l)}
-          className={`px-2.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-wide transition min-h-[28px] ${
-            lang === l ? 'bg-[#C9A84C] text-black' : 'text-white/50 hover:text-white'
+          className={`px-3 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-wide transition min-h-[32px] min-w-[36px] ${
+            lang === l ? 'bg-[#C9A84C] text-black' : 'text-white/60 hover:text-white'
           }`}>
           {l}
         </button>
@@ -619,9 +619,6 @@ export default function SalonClient({ org, staff, services }: Props) {
       <div className={`bg-[#1a1208] text-white transition-all ${isHero ? 'px-6 pt-14 pb-24' : 'px-6 py-5'}`}>
         {isHero ? (
           <div className="max-w-lg mx-auto">
-            <div className="flex justify-end mb-4">
-              <LangToggle lang={lang} onChange={setLang} />
-            </div>
             <div className="text-center">
             <div className="inline-flex items-center gap-2 bg-white/10 text-[#C9A84C] text-xs font-medium px-3.5 py-1.5 rounded-full mb-5">
               <span className="w-1.5 h-1.5 bg-[#C9A84C] rounded-full animate-pulse"/>
@@ -655,7 +652,7 @@ export default function SalonClient({ org, staff, services }: Props) {
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="15 18 9 12 15 6"/></svg>
             </button>
             <p className="font-serif text-[#C9A84C] font-bold tracking-wide">✂ {org.name}</p>
-            <LangToggle lang={lang} onChange={setLang} />
+            <div className="w-10"/>
           </div>
         )}
       </div>
