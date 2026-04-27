@@ -614,6 +614,7 @@ export default function SalonClient({ org, staff, services }: Props) {
 
   return (
     <main className="min-h-screen bg-[#f5f0e8] flex flex-col">
+      <LangToggle lang={lang} onChange={setLang} />
 
       {/* ─── Header ─────────────────────────────────────────────────────── */}
       <div className={`bg-[#1a1208] text-white transition-all ${isHero ? 'px-6 pt-14 pb-24' : 'px-6 py-5'}`}>
