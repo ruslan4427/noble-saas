@@ -618,10 +618,11 @@ export default function SalonClient({ org, staff, services }: Props) {
       {/* ─── Header ─────────────────────────────────────────────────────── */}
       <div className={`bg-[#1a1208] text-white transition-all ${isHero ? 'px-6 pt-14 pb-24' : 'px-6 py-5'}`}>
         {isHero ? (
-          <div className="text-center max-w-lg mx-auto relative">
-            <div className="absolute right-0 top-0">
+          <div className="max-w-lg mx-auto">
+            <div className="flex justify-end mb-4">
               <LangToggle lang={lang} onChange={setLang} />
             </div>
+            <div className="text-center">
             <div className="inline-flex items-center gap-2 bg-white/10 text-[#C9A84C] text-xs font-medium px-3.5 py-1.5 rounded-full mb-5">
               <span className="w-1.5 h-1.5 bg-[#C9A84C] rounded-full animate-pulse"/>
               {t.onlineBooking}
@@ -644,6 +645,7 @@ export default function SalonClient({ org, staff, services }: Props) {
                 {t.bookOnline}
               </button>
             )}
+            </div>
           </div>
         ) : (
           <div className="flex items-center justify-between max-w-lg mx-auto">
