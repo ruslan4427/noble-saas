@@ -359,24 +359,22 @@ export default function Dashboard() {
 
   async function handleAddStaff() {
     if (!newStaffName.trim() || !org) return
-    if (staff.length >= (PLAN_STAFF_LIMIT[org.plan_id] ?? 5)) return
     setStaffSaving(true)
-    const { data: inserted } = await supabase.from('staff').insert({ org_id: org.id, name: newStaffName.trim(), role: newStaffRole.trim() }).select('id').single()
-    if (inserted?.id) {
-      if (newStaffAvatarUrl) await supabase.from('staff').update({ avatar_url: newStaffAvatarUrl }).eq('id', inserted.id)
-      // Create default weekly schedule using org working hours
-      const workStart = org.work_start || '09:00'
-      const workEnd = org.work_end || '19:00'
-      const scheduleRows = Array.from({ length: 7 }, (_, dow) => ({
-        staff_id: inserted.id, org_id: org.id, day_of_week: dow,
-        is_day_off: false,
-        work_start: workStart, work_end: workEnd,
-        break_start: '13:00', break_end: '14:00',
-      }))
-      await supabase.from('staff_schedule').upsert(scheduleRows, { onConflict: 'staff_id,day_of_week' })
+    const { data: { session } } = await supabase.auth.getSession()
+    const res = await fetch('/api/staff', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session?.access_token}` },
+      body: JSON.stringify({ org_id: org.id, name: newStaffName.trim(), role: newStaffRole.trim(), avatar_url: newStaffAvatarUrl || undefined }),
+    })
+    const json = await res.json()
+    setStaffSaving(false)
+    if (!res.ok) {
+      if (res.status === 403) showToast(t.staff.limitReached)
+      else showToast(json.error ?? 'Something went wrong')
+      return
     }
     const { data } = await supabase.from('staff').select('*').eq('org_id', org.id).eq('is_active', true)
-    setStaff(data || []); setNewStaffName(''); setNewStaffRole(''); setNewStaffAvatarUrl(''); setShowAddStaff(false); setStaffSaving(false)
+    setStaff(data || []); setNewStaffName(''); setNewStaffRole(''); setNewStaffAvatarUrl(''); setShowAddStaff(false)
     showToast(t.staff.toastAdded)
   }
 
