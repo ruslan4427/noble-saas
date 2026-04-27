@@ -47,6 +47,7 @@ const DT = {
       scheduleBtn: 'Schedule', editBtn: 'Edit', removeBtn: 'Remove',
       toastAdded: 'Staff member added!', toastUpdated: 'Staff member updated!', toastRemoved: 'Staff member removed.',
       confirmRemove: 'Remove this staff member? Their bookings will remain.',
+      limitReached: 'Starter plan allows up to 5 staff members.', upgradeCta: 'Upgrade →',
     },
     services: {
       title: 'Services', addBtn: '+ Add service',
@@ -107,6 +108,7 @@ const DT = {
       scheduleBtn: 'Horario', editBtn: 'Editar', removeBtn: 'Eliminar',
       toastAdded: '¡Miembro agregado!', toastUpdated: '¡Miembro actualizado!', toastRemoved: 'Miembro eliminado.',
       confirmRemove: '¿Eliminar este miembro? Sus reservas se mantendrán.',
+      limitReached: 'El plan Starter permite hasta 5 miembros.', upgradeCta: 'Mejorar →',
     },
     services: {
       title: 'Servicios', addBtn: '+ Agregar servicio',
@@ -260,6 +262,8 @@ function generateSlug(name: string) {
   return name.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '').slice(0, 32)
 }
 
+const PLAN_STAFF_LIMIT: Record<string, number> = { starter: 5, pro: Infinity, business: Infinity }
+
 const COPIED_LINK_KEY = 'noble_onboarding_copied_link'
 const TABS = ['overview', 'calendar', 'staff', 'services', 'settings'] as const
 type Tab = typeof TABS[number]
@@ -355,6 +359,7 @@ export default function Dashboard() {
 
   async function handleAddStaff() {
     if (!newStaffName.trim() || !org) return
+    if (staff.length >= (PLAN_STAFF_LIMIT[org.plan_id] ?? 5)) return
     setStaffSaving(true)
     const { data: inserted } = await supabase.from('staff').insert({ org_id: org.id, name: newStaffName.trim(), role: newStaffRole.trim() }).select('id').single()
     if (inserted?.id) {
@@ -464,6 +469,8 @@ export default function Dashboard() {
 
   const days = trialDaysLeft()
   const bookingUrl = `${APP_URL}/salon/${org?.slug}`
+  const staffLimit = PLAN_STAFF_LIMIT[org?.plan_id ?? 'starter'] ?? 5
+  const atStaffLimit = staff.length >= staffLimit
 
   if (loading) return (
     <main className="min-h-screen bg-[#0F0A00] flex items-center justify-center">
@@ -569,9 +576,17 @@ export default function Dashboard() {
             <div className="flex items-center justify-between">
               <h2 className="font-semibold text-lg">{t.staff.title}</h2>
               {staffTab === 'members' && !editingStaff && (
-                <button onClick={() => { setShowAddStaff(true); setEditingStaff(null) }} className="bg-[#C9A84C] text-black text-sm font-bold px-4 py-2 rounded hover:bg-[#e8d08a] transition">{t.staff.addBtn}</button>
+                atStaffLimit
+                  ? <span className="text-xs text-white/40">{staff.length}/{staffLimit === Infinity ? '∞' : staffLimit} staff</span>
+                  : <button onClick={() => { setShowAddStaff(true); setEditingStaff(null) }} className="bg-[#C9A84C] text-black text-sm font-bold px-4 py-2 rounded hover:bg-[#e8d08a] transition">{t.staff.addBtn}</button>
               )}
             </div>
+            {staffTab === 'members' && atStaffLimit && staffLimit !== Infinity && (
+              <div className="flex items-center justify-between bg-amber-500/10 border border-amber-500/30 text-amber-300 text-sm px-4 py-3 rounded-xl">
+                <span>{t.staff.limitReached}</span>
+                <Link href="/billing" className="text-xs font-bold text-[#C9A84C] hover:underline whitespace-nowrap ml-3">{t.staff.upgradeCta}</Link>
+              </div>
+            )}
             <div className="flex gap-1 bg-white/5 rounded-lg p-1 w-fit">
               {STAFF_TABS.map(st => (
                 <button key={st} onClick={() => setStaffTab(st)}

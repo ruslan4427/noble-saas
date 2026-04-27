@@ -16,7 +16,7 @@ interface Org {
 }
 
 const PLANS = [
-  { id: 'starter', name: 'Starter', price: 19, desc: 'Up to 2 staff', features: ['Online booking', 'Up to 2 staff', 'Email notifications'], highlight: false },
+  { id: 'starter', name: 'Starter', price: 15, desc: 'Up to 5 staff', features: ['Online booking', 'Up to 5 staff', 'Calendar & reschedule', 'Email notifications'], highlight: false },
   { id: 'pro', name: 'Pro', price: 39, desc: 'Up to 5 staff', features: ['Everything in Starter', 'SMS reminders', 'Analytics'], highlight: true },
   { id: 'business', name: 'Business', price: 79, desc: 'Unlimited staff', features: ['Everything in Pro', 'Google Calendar', 'Priority support'], highlight: false },
 ]
