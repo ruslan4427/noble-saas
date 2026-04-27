@@ -178,12 +178,7 @@ function SalonFooter({ org }: { org: Org }) {
             )}
           </div>
         )}
-        <div className="flex items-center justify-center gap-4">
-          <a href="/legal/privacy" target="_blank" rel="noopener noreferrer" className="text-[#b5a898] hover:text-[#6b5744] text-[10px] transition">Privacy Policy</a>
-          <span className="text-[#d4c9b8] text-[10px]">·</span>
-          <a href="/legal/terms" target="_blank" rel="noopener noreferrer" className="text-[#b5a898] hover:text-[#6b5744] text-[10px] transition">Terms & Conditions</a>
-        </div>
-        <p className="text-[#b5a898] text-[10px] tracking-widest uppercase">Powered by Noble</p>
+<p className="text-[#b5a898] text-[10px] tracking-widest uppercase">Powered by Noble</p>
       </div>
     </footer>
   )
