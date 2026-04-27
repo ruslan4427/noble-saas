@@ -245,14 +245,25 @@ function Spinner({ className = 'w-5 h-5' }: { className?: string }) {
 
 function LangToggle({ lang, onChange }: { lang: Lang; onChange: (l: Lang) => void }) {
   return (
-    <div className="fixed top-4 right-4 z-50 flex items-center bg-[#1a1208] border border-white/20 rounded-full p-0.5 gap-0.5 shadow-lg">
+    <div style={{ position: 'fixed', top: 16, right: 16, zIndex: 9999, display: 'flex', alignItems: 'center', background: '#1a1208', border: '1px solid rgba(255,255,255,0.25)', borderRadius: 999, padding: 3, gap: 2, boxShadow: '0 2px 12px rgba(0,0,0,0.4)' }}>
       {(['en', 'es'] as Lang[]).map(l => (
         <button
           key={l}
           onClick={() => onChange(l)}
-          className={`px-3 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-wide transition min-h-[32px] min-w-[36px] ${
-            lang === l ? 'bg-[#C9A84C] text-black' : 'text-white/60 hover:text-white'
-          }`}>
+          style={{
+            padding: '6px 12px',
+            borderRadius: 999,
+            fontSize: 11,
+            fontWeight: 700,
+            letterSpacing: 1,
+            textTransform: 'uppercase',
+            border: 'none',
+            cursor: 'pointer',
+            minHeight: 32,
+            minWidth: 36,
+            background: lang === l ? '#C9A84C' : 'transparent',
+            color: lang === l ? '#000' : 'rgba(255,255,255,0.6)',
+          }}>
           {l}
         </button>
       ))}
