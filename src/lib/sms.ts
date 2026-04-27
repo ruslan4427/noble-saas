@@ -4,11 +4,12 @@
 //   TWILIO_AUTH_TOKEN
 //   TWILIO_PHONE_NUMBER
 
-export const SMS_ENABLED = false
+const TWILIO_SID   = process.env.TWILIO_ACCOUNT_SID ?? ''
+const TWILIO_TOKEN = process.env.TWILIO_AUTH_TOKEN ?? ''
+const TWILIO_FROM  = process.env.TWILIO_PHONE_NUMBER ?? ''
 
-const TWILIO_SID   = process.env.TWILIO_ACCOUNT_SID!
-const TWILIO_TOKEN = process.env.TWILIO_AUTH_TOKEN!
-const TWILIO_FROM  = process.env.TWILIO_PHONE_NUMBER!
+// Auto-enables when all three Twilio env vars are set in Vercel
+export const SMS_ENABLED = !!(TWILIO_SID && TWILIO_TOKEN && TWILIO_FROM)
 
 // ── Core send ──────────────────────────────────────────────────────────────
 export async function sendSMS(to: string, body: string): Promise<{ sid: string } | null> {
