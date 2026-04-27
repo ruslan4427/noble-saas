@@ -4,22 +4,48 @@ import { useEffect, useState, Suspense } from 'react'
 import { createClient } from '@/lib/supabase'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
+import LangToggle, { type Lang } from '@/components/LangToggle'
 
 interface Org {
-  id: string
-  name: string
-  plan_id: string
-  sub_status: string
-  trial_ends_at: string | null
-  stripe_customer_id: string | null
-  stripe_subscription_id: string | null
+  id: string; name: string; plan_id: string; sub_status: string
+  trial_ends_at: string | null; stripe_customer_id: string | null; stripe_subscription_id: string | null
 }
 
-const PLANS = [
-  { id: 'starter', name: 'Starter', price: 15, desc: 'Up to 5 staff', features: ['Online booking', 'Up to 5 staff', 'Calendar & reschedule', 'Email notifications', 'SMS reminders'], highlight: true },
-]
+const T = {
+  en: {
+    back: '← Back to dashboard',
+    trialExpired: '⚠️ Your free trial has expired. Choose a plan to continue.',
+    paymentSuccess: '✓ Payment successful! Your plan is now active.',
+    currentSub: 'Current subscription',
+    stats: ['Plan', 'Status', 'Trial days left', 'Auto-renews'],
+    yesNo: ['No', 'Yes'],
+    choosePlan: 'Choose a plan',
+    currentPlan: '✓ Current plan',
+    upgrade: (name: string) => `Start ${name} →`,
+    loading: 'Loading...',
+    footer: 'Payments secured by Stripe. Cancel anytime.',
+    planDesc: 'Up to 5 staff',
+    features: ['Online booking', 'Up to 5 staff', 'Calendar & reschedule', 'Email notifications', 'SMS reminders'],
+  },
+  es: {
+    back: '← Volver al panel',
+    trialExpired: '⚠️ Tu prueba gratuita expiró. Elige un plan para continuar.',
+    paymentSuccess: '✓ ¡Pago exitoso! Tu plan ya está activo.',
+    currentSub: 'Suscripción actual',
+    stats: ['Plan', 'Estado', 'Días de prueba restantes', 'Renovación automática'],
+    yesNo: ['No', 'Sí'],
+    choosePlan: 'Elige un plan',
+    currentPlan: '✓ Plan actual',
+    upgrade: (name: string) => `Activar ${name} →`,
+    loading: 'Cargando...',
+    footer: 'Pagos protegidos por Stripe. Cancela cuando quieras.',
+    planDesc: 'Hasta 5 empleados',
+    features: ['Reservas online', 'Hasta 5 empleados', 'Calendario y reagendamiento', 'Notificaciones por email', 'Recordatorios SMS'],
+  },
+}
 
-function BillingContent() {
+function BillingContent({ lang }: { lang: Lang }) {
+  const t = T[lang]
   const [org, setOrg] = useState<Org | null>(null)
   const [loading, setLoading] = useState(true)
   const [checkoutLoading, setCheckoutLoading] = useState<string | null>(null)
@@ -35,8 +61,7 @@ function BillingContent() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { router.push('/login'); return }
       const { data } = await supabase.from('organizations').select('*').eq('owner_id', user.id).single()
-      setOrg(data)
-      setLoading(false)
+      setOrg(data); setLoading(false)
     }
     load()
   }, [])
@@ -45,8 +70,7 @@ function BillingContent() {
     setCheckoutLoading(planId)
     try {
       const res = await fetch('/api/stripe/checkout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ org_id: org?.id, plan: planId }),
       })
       const data = await res.json()
@@ -60,36 +84,30 @@ function BillingContent() {
 
   function trialDaysLeft() {
     if (!org?.trial_ends_at) return null
-    const diff = new Date(org.trial_ends_at).getTime() - Date.now()
-    return Math.max(0, Math.ceil(diff / 86400000))
+    return Math.max(0, Math.ceil((new Date(org.trial_ends_at).getTime() - Date.now()) / 86400000))
   }
 
   const days = trialDaysLeft()
+  const isCurrent = org?.plan_id === 'starter' && org?.sub_status === 'active'
 
-  if (loading) {
-    return <div className="flex items-center justify-center min-h-screen"><div className="text-[#C9A84C] font-serif text-lg">Loading...</div></div>
-  }
+  if (loading) return <div className="flex items-center justify-center min-h-screen"><div className="text-[#C9A84C] font-serif text-lg">{t.loading}</div></div>
 
   return (
-    <div className="max-w-4xl mx-auto px-6 py-12">
+    <div className="max-w-lg mx-auto px-6 py-12">
       {reason === 'trial_expired' && (
-        <div className="bg-red-500/10 border border-red-500/30 text-red-400 px-4 py-3 rounded-xl mb-8">
-          ⚠️ Your free trial has expired. Choose a plan to continue.
-        </div>
+        <div className="bg-red-500/10 border border-red-500/30 text-red-400 px-4 py-3 rounded-xl mb-8">{t.trialExpired}</div>
       )}
       {success && (
-        <div className="bg-green-500/10 border border-green-500/30 text-green-400 px-4 py-3 rounded-xl mb-8">
-          ✓ Payment successful! Your plan is now active.
-        </div>
+        <div className="bg-green-500/10 border border-green-500/30 text-green-400 px-4 py-3 rounded-xl mb-8">{t.paymentSuccess}</div>
       )}
       <div className="bg-white/5 border border-white/10 rounded-xl p-6 mb-8">
-        <h2 className="font-semibold mb-4">Current subscription</h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <h2 className="font-semibold mb-4">{t.currentSub}</h2>
+        <div className="grid grid-cols-2 gap-4">
           {[
-            { label: 'Plan', value: org?.plan_id },
-            { label: 'Status', value: org?.sub_status },
-            { label: 'Trial days left', value: days ?? '—' },
-            { label: 'Auto-renews', value: org?.stripe_subscription_id ? 'Yes' : 'No' },
+            { label: t.stats[0], value: org?.plan_id },
+            { label: t.stats[1], value: org?.sub_status },
+            { label: t.stats[2], value: days ?? '—' },
+            { label: t.stats[3], value: org?.stripe_subscription_id ? t.yesNo[1] : t.yesNo[0] },
           ].map(s => (
             <div key={s.label}>
               <div className="text-white/40 text-xs mb-1">{s.label}</div>
@@ -98,49 +116,46 @@ function BillingContent() {
           ))}
         </div>
       </div>
-      <h2 className="font-semibold text-xl mb-6">Choose a plan</h2>
-      <div className="grid max-w-sm gap-6 mb-8">
-        {PLANS.map(plan => {
-          const isCurrent = org?.plan_id === plan.id && org?.sub_status === 'active'
-          return (
-            <div key={plan.id} className={`rounded-xl p-6 border flex flex-col ${plan.highlight ? 'border-[#C9A84C] bg-[#C9A84C]/5' : 'border-white/10 bg-white/5'}`}>
-              {plan.highlight && <div className="text-[#C9A84C] text-xs font-bold uppercase tracking-wider mb-3">Most popular</div>}
-              <div className="text-xl font-bold mb-1">{plan.name}</div>
-              <div className="text-white/50 text-sm mb-3">{plan.desc}</div>
-              <div className="text-3xl font-bold mb-4">${plan.price}<span className="text-sm font-normal text-white/40">/mo</span></div>
-              <ul className="space-y-2 mb-6 flex-1">
-                {plan.features.map(f => (
-                  <li key={f} className="flex items-center gap-2 text-sm text-white/70">
-                    <span className="text-[#C9A84C]">✓</span> {f}
-                  </li>
-                ))}
-              </ul>
-              {isCurrent ? (
-                <div className="w-full text-center py-2 rounded text-sm border border-green-500/30 text-green-400">✓ Current plan</div>
-              ) : (
-                <button onClick={() => handleCheckout(plan.id)} disabled={!!checkoutLoading}
-                  className={`w-full py-2 rounded font-semibold text-sm transition ${plan.highlight ? 'bg-[#C9A84C] text-black hover:bg-[#e8d08a]' : 'border border-white/20 text-white hover:border-white/40'} disabled:opacity-40`}>
-                  {checkoutLoading === plan.id ? 'Loading...' : `Upgrade to ${plan.name} →`}
-                </button>
-              )}
-            </div>
-          )
-        })}
+      <h2 className="font-semibold text-xl mb-6">{t.choosePlan}</h2>
+      <div className="rounded-xl p-6 border border-[#C9A84C] bg-[#C9A84C]/5 flex flex-col mb-8">
+        <div className="text-xl font-bold mb-1">Starter</div>
+        <div className="text-white/50 text-sm mb-3">{t.planDesc}</div>
+        <div className="text-3xl font-bold mb-4">$15<span className="text-sm font-normal text-white/40">/mo</span></div>
+        <ul className="space-y-2 mb-6 flex-1">
+          {t.features.map(f => (
+            <li key={f} className="flex items-center gap-2 text-sm text-white/70">
+              <span className="text-[#C9A84C]">✓</span> {f}
+            </li>
+          ))}
+        </ul>
+        {isCurrent ? (
+          <div className="w-full text-center py-2 rounded text-sm border border-green-500/30 text-green-400">{t.currentPlan}</div>
+        ) : (
+          <button onClick={() => handleCheckout('starter')} disabled={!!checkoutLoading}
+            className="w-full py-2 rounded font-semibold text-sm bg-[#C9A84C] text-black hover:bg-[#e8d08a] transition disabled:opacity-40">
+            {checkoutLoading === 'starter' ? '...' : t.upgrade('Starter')}
+          </button>
+        )}
       </div>
-      <p className="text-white/30 text-xs text-center">Payments secured by Stripe. Cancel anytime.</p>
+      <p className="text-white/30 text-xs text-center">{t.footer}</p>
     </div>
   )
 }
 
 export default function Billing() {
+  const [lang, setLang] = useState<Lang>('en')
+  const t = T[lang]
   return (
     <main className="min-h-screen bg-[#0F0A00] text-white">
       <nav className="flex items-center justify-between px-6 py-4 border-b border-white/10 sticky top-0 bg-[#0F0A00]/95 backdrop-blur z-50">
         <Link href="/dashboard" className="font-serif text-[#C9A84C] text-lg">✂ Noble</Link>
-        <Link href="/dashboard" className="text-sm text-white/50 hover:text-white transition">← Back to dashboard</Link>
+        <div className="flex items-center gap-4">
+          <LangToggle lang={lang} onChange={setLang} />
+          <Link href="/dashboard" className="text-sm text-white/50 hover:text-white transition">{t.back}</Link>
+        </div>
       </nav>
-      <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="text-[#C9A84C]">Loading...</div></div>}>
-        <BillingContent />
+      <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="text-[#C9A84C]">...</div></div>}>
+        <BillingContent lang={lang} />
       </Suspense>
     </main>
   )
