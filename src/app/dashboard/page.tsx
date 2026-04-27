@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import TrialBanner from '@/components/TrialBanner'
+import CapacityWidget from '@/components/CapacityWidget'
 import BookingCalendar from '@/components/BookingCalendar'
 import StaffSchedule from '@/components/StaffSchedule'
 import RecentBookings from '@/components/RecentBookings'
@@ -532,6 +533,20 @@ export default function Dashboard() {
               ))}
             </div>
             {org && <RecentBookings orgId={org.id} staff={staff} />}
+            {org && ['pro', 'business'].includes(org.plan_id) ? (
+              <CapacityWidget orgId={org.id} />
+            ) : (
+              <div className="bg-white/5 border border-white/10 rounded-xl p-6 flex items-center justify-between gap-4">
+                <div className="flex items-center gap-4">
+                  <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center flex-none text-xl">📊</div>
+                  <div>
+                    <p className="font-semibold text-white text-sm">Advanced analytics</p>
+                    <p className="text-white/40 text-xs mt-0.5">Capacity, revenue & staff utilization — Pro feature</p>
+                  </div>
+                </div>
+                <Link href="/billing" className="flex-none text-xs font-bold text-black bg-[#C9A84C] hover:bg-[#e8d08a] transition px-4 py-2 rounded-lg whitespace-nowrap">Upgrade →</Link>
+              </div>
+            )}
             <div className="bg-white/5 border border-white/10 rounded-xl p-6">
               <h3 className="font-semibold mb-1">{t.overview.bookingPage}</h3>
               <p className="text-white/40 text-xs mb-3">{t.overview.bookingPageSub}</p>
