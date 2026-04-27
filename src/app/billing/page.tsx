@@ -16,9 +16,7 @@ interface Org {
 }
 
 const PLANS = [
-  { id: 'starter', name: 'Starter', price: 15, desc: 'Up to 5 staff', features: ['Online booking', 'Up to 5 staff', 'Calendar & reschedule', 'Email notifications'], highlight: false },
-  { id: 'pro', name: 'Pro', price: 39, desc: 'Up to 5 staff', features: ['Everything in Starter', 'SMS reminders', 'Analytics'], highlight: true },
-  { id: 'business', name: 'Business', price: 79, desc: 'Unlimited staff', features: ['Everything in Pro', 'Google Calendar', 'Priority support'], highlight: false },
+  { id: 'starter', name: 'Starter', price: 15, desc: 'Up to 5 staff', features: ['Online booking', 'Up to 5 staff', 'Calendar & reschedule', 'Email notifications', 'SMS reminders'], highlight: true },
 ]
 
 function BillingContent() {
@@ -101,7 +99,7 @@ function BillingContent() {
         </div>
       </div>
       <h2 className="font-semibold text-xl mb-6">Choose a plan</h2>
-      <div className="grid md:grid-cols-3 gap-6 mb-8">
+      <div className="grid max-w-sm gap-6 mb-8">
         {PLANS.map(plan => {
           const isCurrent = org?.plan_id === plan.id && org?.sub_status === 'active'
           return (
