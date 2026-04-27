@@ -22,6 +22,7 @@ const DT = {
     calTabs: { bookings: '📅 Bookings', blocks: '🚫 Blocks' },
     staffTabs: { members: 'Members', schedule: 'Schedule' },
     signOut: 'Sign out',
+    smsBanner: 'SMS notifications are being enabled. Email notifications are active.',
     overview: {
       statsLabels: ['Staff members', 'Services', 'Status', 'Trial days left'],
       bookingPage: 'Your booking page',
@@ -79,6 +80,7 @@ const DT = {
     loading: 'Loading...',
   },
   es: {
+    smsBanner: 'Las notificaciones SMS están siendo habilitadas. Las notificaciones por email están activas.',
     tabs: { overview: 'Resumen', calendar: 'Calendario', staff: 'Personal', services: 'Servicios', settings: 'Ajustes' },
     calTabs: { bookings: '📅 Reservas', blocks: '🚫 Bloqueos' },
     staffTabs: { members: 'Miembros', schedule: 'Horario' },
@@ -517,6 +519,10 @@ export default function Dashboard() {
         {/* ── Overview ── */}
         {activeTab === 'overview' && (
           <div className="space-y-6">
+            <div className="flex items-center gap-3 bg-blue-500/10 border border-blue-500/20 text-blue-300 text-sm px-4 py-3 rounded-xl">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="flex-none"><path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+              <span>{t.smsBanner}</span>
+            </div>
             <OnboardingChecklist
               hasService={services.length > 0} hasStaff={staff.length > 0} hasCopiedLink={hasCopiedLink}
               onAddService={() => { setActiveTab('services'); setShowAddService(true) }}

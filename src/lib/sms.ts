@@ -4,12 +4,15 @@
 //   TWILIO_AUTH_TOKEN
 //   TWILIO_PHONE_NUMBER
 
+export const SMS_ENABLED = false
+
 const TWILIO_SID   = process.env.TWILIO_ACCOUNT_SID!
 const TWILIO_TOKEN = process.env.TWILIO_AUTH_TOKEN!
 const TWILIO_FROM  = process.env.TWILIO_PHONE_NUMBER!
 
 // ── Core send ──────────────────────────────────────────────────────────────
 export async function sendSMS(to: string, body: string): Promise<{ sid: string } | null> {
+  if (!SMS_ENABLED) return null
   if (!TWILIO_SID || !TWILIO_TOKEN || !TWILIO_FROM) {
     console.warn('SMS skipped: Twilio env vars not set')
     return null

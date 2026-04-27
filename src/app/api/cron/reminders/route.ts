@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { sendBookingReminder } from '@/lib/email'
-import { sendSMS, smsReminder } from '@/lib/sms'
+import { sendSMS, smsReminder, SMS_ENABLED } from '@/lib/sms'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -64,8 +64,8 @@ export async function GET(req: Request) {
           emailSent++
         }
 
-        // SMS reminder — check client_phone column
-        if (booking.client_phone) {
+        // SMS reminder — disabled until SMS_ENABLED = true
+        if (SMS_ENABLED && booking.client_phone) {
           const { data: consent } = await supabase
             .from('sms_consent')
             .select('consented')

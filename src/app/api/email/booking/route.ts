@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { sendBookingConfirmation, sendBookingNotification } from '@/lib/email'
-import { sendSMS, smsConfirmation } from '@/lib/sms'
+import { sendSMS, smsConfirmation, SMS_ENABLED } from '@/lib/sms'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -52,8 +52,8 @@ export async function POST(req: NextRequest) {
       results.ownerEmail = res.data?.id ?? 'sent'
     }
 
-    // 3. SMS confirmation — check client_phone column
-    if (client_phone) {
+    // 3. SMS confirmation — disabled until SMS_ENABLED = true
+    if (SMS_ENABLED && client_phone) {
       const { data: consent } = await supabase
         .from('sms_consent')
         .select('consented')

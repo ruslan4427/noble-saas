@@ -62,6 +62,7 @@ const TRANSLATIONS = {
     phonePlaceholder: '+1 (555) 000-0000',
     emailPlaceholder: 'your@email.com',
     smsConsent: 'I agree to receive SMS reminders about my appointment. Reply STOP to opt out.',
+    emailNotice: 'You will receive a confirmation by email. SMS notifications coming soon.',
     confirmBtn: 'Confirm booking →',
     bookingProgress: 'Booking…',
     youreBooked: "You're booked!",
@@ -117,6 +118,7 @@ const TRANSLATIONS = {
     phonePlaceholder: '+1 (555) 000-0000',
     emailPlaceholder: 'tu@email.com',
     smsConsent: 'Acepto recibir recordatorios por SMS sobre mi cita. Responde STOP para cancelar.',
+    emailNotice: 'Recibirás una confirmación por correo. Las notificaciones SMS estarán disponibles pronto.',
     confirmBtn: 'Confirmar reserva →',
     bookingProgress: 'Reservando…',
     youreBooked: '¡Reservado!',
@@ -514,7 +516,7 @@ export default function SalonClient({ org, staff, services }: Props) {
       const [h, m] = selectedTime.split(':').map(Number)
       const startDate = new Date(`${ds}T${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:00`)
       const reminderAt = new Date(startDate.getTime() - 2*60*60*1000)
-      if (smsConsent && phone) await fetch('/api/sms/consent', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ org_id:org.id, client_phone:phone, client_name:name, consented:true }) })
+      // SMS consent collection disabled while SMS_ENABLED = false
       const { data: newBooking, error: bookingError } = await supabase.from('bookings').insert({
         org_id:org.id, master_id:selectedStaff.id, date:ds, time_slot:selectedTime,
         start_time:startDate.toISOString(), reminder_at:reminderAt.toISOString(), reminder_sent:false,
@@ -1024,17 +1026,10 @@ export default function SalonClient({ org, staff, services }: Props) {
                   />
                 </div>
 
-                <label className="flex items-start gap-3 py-1 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={smsConsent}
-                    onChange={e => setSmsConsent(e.target.checked)}
-                    className="mt-0.5 w-4 h-4 accent-[#C9A84C] flex-none"
-                  />
-                  <span className="text-xs text-[#9c8b7a] leading-relaxed">
-                    {t.smsConsent}
-                  </span>
-                </label>
+                <div className="flex items-center gap-2 text-xs text-[#9c8b7a] bg-[#f5f0e8] border border-[#e8dfc9] rounded-xl px-3 py-2.5">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" strokeWidth="2" className="flex-none"><path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                  <span>{t.emailNotice}</span>
+                </div>
               </div>
 
               <div role="alert" aria-live="assertive">
