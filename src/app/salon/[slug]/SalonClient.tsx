@@ -18,6 +18,121 @@ interface DaySchedule {
 interface CalendarBlock { staff_id: string | null; start_time: string; end_time: string; type?: string }
 interface Props { org: Org; staff: Staff[]; services: Service[] }
 
+const TRANSLATIONS = {
+  en: {
+    onlineBooking: 'Online booking',
+    salonSetup: 'This salon is still getting set up. Check back soon.',
+    bookOnline: 'Book online →',
+    services: 'Services',
+    min: 'min',
+    moreServices: (n: number) => `+${n} more services →`,
+    ourTeam: 'Our team',
+    noStaff: 'No staff added yet',
+    noServices: 'No services added yet',
+    ownerWillAdd: 'The salon owner will add information soon.',
+    chooseService: 'Choose a service',
+    serviceSubtitle: 'What can we do for you today?',
+    chooseSpecialist: 'Choose a specialist',
+    specialistSubtitle: "Pick who you'd like to work with",
+    pickDateTime: 'Pick a date & time',
+    withSpecialist: (name: string) => `with ${name}`,
+    chooseWhen: 'Choose when to come in',
+    today: 'TODAY',
+    selectDate: 'Select a date to see available times',
+    loadingAvail: 'Loading availability…',
+    noOpenings: 'No openings this day',
+    tryDifferent: 'Try a different date or specialist',
+    openings: (n: number) => `${n} ${n === 1 ? 'opening' : 'openings'} available`,
+    allTaken: 'All slots are taken — try another date',
+    unavailable: 'Unavailable',
+    back: '← Back',
+    continue: 'Continue →',
+    confirmBooking: 'Confirm your booking',
+    confirmSubtitle: 'Almost done — just a few details',
+    specialist: 'Specialist',
+    service: 'Service',
+    price: 'Price',
+    date: 'Date',
+    time: 'Time',
+    yourName: 'Your name',
+    phone: 'Phone',
+    email: 'Email',
+    emailOptional: 'optional — for confirmation',
+    namePlaceholder: 'John Smith',
+    phonePlaceholder: '+1 (555) 000-0000',
+    emailPlaceholder: 'your@email.com',
+    smsConsent: 'I agree to receive SMS reminders about my appointment. Reply STOP to opt out.',
+    confirmBtn: 'Confirm booking →',
+    bookingProgress: 'Booking…',
+    youreBooked: "You're booked!",
+    lookForward: 'We look forward to seeing you',
+    confirmationSent: (email: string) => `Confirmation sent to ${email}`,
+    bookAnother: 'Book another appointment',
+    fillRequired: 'Please fill in all required fields',
+    invalidPhone: 'Please enter a valid phone number',
+    slotTaken: 'This slot was just taken. Please choose another time.',
+    somethingWrong: 'Something went wrong. Please try again.',
+    locale: 'en-US',
+  },
+  es: {
+    onlineBooking: 'Reserva en línea',
+    salonSetup: 'El salón está configurándose. Vuelve pronto.',
+    bookOnline: 'Reservar →',
+    services: 'Servicios',
+    min: 'min',
+    moreServices: (n: number) => `+${n} más servicios →`,
+    ourTeam: 'Nuestro equipo',
+    noStaff: 'Sin personal aún',
+    noServices: 'Sin servicios aún',
+    ownerWillAdd: 'El dueño del salón agregará información pronto.',
+    chooseService: 'Elige un servicio',
+    serviceSubtitle: '¿Qué podemos hacer por ti hoy?',
+    chooseSpecialist: 'Elige un especialista',
+    specialistSubtitle: 'Selecciona con quién te gustaría trabajar',
+    pickDateTime: 'Elige fecha y hora',
+    withSpecialist: (name: string) => `con ${name}`,
+    chooseWhen: 'Elige cuándo venir',
+    today: 'HOY',
+    selectDate: 'Selecciona una fecha para ver los horarios disponibles',
+    loadingAvail: 'Cargando disponibilidad…',
+    noOpenings: 'Sin disponibilidad este día',
+    tryDifferent: 'Prueba otra fecha o especialista',
+    openings: (n: number) => `${n} ${n === 1 ? 'horario disponible' : 'horarios disponibles'}`,
+    allTaken: 'Todos los horarios están ocupados — prueba otra fecha',
+    unavailable: 'No disponible',
+    back: '← Volver',
+    continue: 'Continuar →',
+    confirmBooking: 'Confirma tu reserva',
+    confirmSubtitle: 'Casi listo — solo unos datos',
+    specialist: 'Especialista',
+    service: 'Servicio',
+    price: 'Precio',
+    date: 'Fecha',
+    time: 'Hora',
+    yourName: 'Tu nombre',
+    phone: 'Teléfono',
+    email: 'Email',
+    emailOptional: 'opcional — para confirmación',
+    namePlaceholder: 'Juan García',
+    phonePlaceholder: '+1 (555) 000-0000',
+    emailPlaceholder: 'tu@email.com',
+    smsConsent: 'Acepto recibir recordatorios por SMS sobre mi cita. Responde STOP para cancelar.',
+    confirmBtn: 'Confirmar reserva →',
+    bookingProgress: 'Reservando…',
+    youreBooked: '¡Reservado!',
+    lookForward: 'Esperamos verte pronto',
+    confirmationSent: (email: string) => `Confirmación enviada a ${email}`,
+    bookAnother: 'Hacer otra reserva',
+    fillRequired: 'Por favor completa todos los campos requeridos',
+    invalidPhone: 'Por favor ingresa un número de teléfono válido',
+    slotTaken: 'Este horario acaba de ser tomado. Por favor elige otro.',
+    somethingWrong: 'Algo salió mal. Por favor intenta de nuevo.',
+    locale: 'es-ES',
+  },
+} as const
+
+type Lang = keyof typeof TRANSLATIONS
+
 // BUG-15 FIX: Use UTC-based date string to avoid timezone drift
 function toDateStr(d: Date): string {
   return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`
@@ -128,6 +243,23 @@ function Spinner({ className = 'w-5 h-5' }: { className?: string }) {
   )
 }
 
+function LangToggle({ lang, onChange }: { lang: Lang; onChange: (l: Lang) => void }) {
+  return (
+    <div className="flex items-center bg-white/10 rounded-full p-0.5 gap-0.5">
+      {(['en', 'es'] as Lang[]).map(l => (
+        <button
+          key={l}
+          onClick={() => onChange(l)}
+          className={`px-2.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-wide transition min-h-[28px] ${
+            lang === l ? 'bg-[#C9A84C] text-black' : 'text-white/50 hover:text-white'
+          }`}>
+          {l}
+        </button>
+      ))}
+    </div>
+  )
+}
+
 function SalonFooter({ org }: { org: Org }) {
   const instagram = org.instagram?.trim()
   const tiktok = org.tiktok?.trim()
@@ -178,7 +310,7 @@ function SalonFooter({ org }: { org: Org }) {
             )}
           </div>
         )}
-<p className="text-[#b5a898] text-[10px] tracking-widest uppercase">Powered by Noble</p>
+        <p className="text-[#b5a898] text-[10px] tracking-widest uppercase">Powered by Noble</p>
       </div>
     </footer>
   )
@@ -231,7 +363,10 @@ export default function SalonClient({ org, staff, services }: Props) {
   // BUG-01 + BUG-02 FIX: null = in-flight, string[] = loaded. Always re-fetch on new date select.
   const [bookedSlotsMap, setBookedSlotsMap] = useState<SlotCache>({})
   const [blocks, setBlocks] = useState<CalendarBlock[]>([])
+  const [lang, setLang] = useState<Lang>('en')
   const supabase = createClient()
+
+  const t = TRANSLATIONS[lang]
 
   useEffect(() => { const t = setTimeout(() => setPageLoading(false), 300); return () => clearTimeout(t) }, [])
 
@@ -345,10 +480,10 @@ export default function SalonClient({ org, staff, services }: Props) {
 
   async function handleConfirm() {
     if (!selectedStaff || !selectedService || !selectedDate || !selectedTime || !name || !phone) {
-      setError('Please fill in all required fields'); return
+      setError(t.fillRequired); return
     }
     // BUG-13 FIX: phone validation
-    if (!isValidPhone(phone)) { setPhoneError('Please enter a valid phone number'); return }
+    if (!isValidPhone(phone)) { setPhoneError(t.invalidPhone); return }
     setPhoneError('')
     setSubmitting(true); setError('')
     try {
@@ -358,7 +493,7 @@ export default function SalonClient({ org, staff, services }: Props) {
         .select('id').eq('master_id', selectedStaff.id).eq('date', ds)
         .eq('time_slot', selectedTime).neq('status', 'cancelled').maybeSingle()
       if (existing) {
-        setError('This slot was just taken. Please choose another time.')
+        setError(t.slotTaken)
         const key = `${selectedStaff.id}_${ds}`
         const { data } = await supabase.from('bookings').select('time_slot')
           .eq('master_id', selectedStaff.id).eq('date', ds).neq('status', 'cancelled')
@@ -380,7 +515,7 @@ export default function SalonClient({ org, staff, services }: Props) {
       if (bookingError) {
         // BUG-03: handle DB unique constraint violation
         if (bookingError.code === '23505') {
-          setError('This slot was just taken. Please choose another time.')
+          setError(t.slotTaken)
           const key = `${selectedStaff.id}_${ds}`
           const { data } = await supabase.from('bookings').select('time_slot')
             .eq('master_id', selectedStaff.id).eq('date', ds).neq('status', 'cancelled')
@@ -402,7 +537,7 @@ export default function SalonClient({ org, staff, services }: Props) {
         [bookedKey]: [...((prev[bookedKey] as string[]) || []), selectedTime]
       }))
       setStep('done')
-    } catch (e) { setError(e instanceof Error ? e.message : 'Something went wrong. Please try again.') }
+    } catch (e) { setError(e instanceof Error ? e.message : t.somethingWrong) }
     finally { setSubmitting(false) }
   }
 
@@ -430,44 +565,44 @@ export default function SalonClient({ org, staff, services }: Props) {
           <div className="w-20 h-20 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-5">
             <svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2"><polyline points="20 6 9 17 4 12"/></svg>
           </div>
-          <h1 className="text-2xl font-bold text-[#1a1208] mb-1">You&apos;re booked!</h1>
-          <p className="text-[#6b5744] text-sm mb-6">We look forward to seeing you</p>
+          <h1 className="text-2xl font-bold text-[#1a1208] mb-1">{t.youreBooked}</h1>
+          <p className="text-[#6b5744] text-sm mb-6">{t.lookForward}</p>
 
           <div className="bg-[#f5f0e8] rounded-2xl p-5 text-sm text-left space-y-3 mb-6">
             <div className="flex justify-between items-center">
-              <span className="text-[#6b5744]">Specialist</span>
+              <span className="text-[#6b5744]">{t.specialist}</span>
               <span className="font-semibold text-[#1a1208]">{selectedStaff?.name}</span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-[#6b5744]">Service</span>
+              <span className="text-[#6b5744]">{t.service}</span>
               <span className="font-semibold text-[#1a1208]">{selectedService?.name}</span>
             </div>
             <div className="h-px bg-[#e8dfc9]"/>
             <div className="flex justify-between items-center">
-              <span className="text-[#6b5744]">Date</span>
+              <span className="text-[#6b5744]">{t.date}</span>
               <span className="font-semibold text-[#1a1208]">
-                {selectedDate?.toLocaleDateString('en-US',{weekday:'short',day:'numeric',month:'long'})}
+                {selectedDate?.toLocaleDateString(t.locale, {weekday:'short',day:'numeric',month:'long'})}
               </span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-[#6b5744]">Time</span>
+              <span className="text-[#6b5744]">{t.time}</span>
               <span className="font-bold text-[#C9A84C] text-base">{toAmPm(selectedTime ?? '')}</span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-[#6b5744]">Price</span>
+              <span className="text-[#6b5744]">{t.price}</span>
               <span className="font-bold text-[#1a1208]">${((selectedService?.price_cents ?? 0)/100).toFixed(0)}</span>
             </div>
           </div>
 
           {clientEmail && (
             <p className="text-[#6b5744] text-xs mb-5 bg-[#f5f0e8] rounded-xl px-4 py-2.5">
-              Confirmation sent to {clientEmail}
+              {t.confirmationSent(clientEmail)}
             </p>
           )}
           <button
             onClick={resetBooking}
             className="w-full bg-[#1a1208] text-[#C9A84C] font-bold py-3.5 rounded-2xl hover:bg-[#2d1f0d] transition min-h-[52px] text-sm tracking-wide active:scale-[0.98]">
-            Book another appointment
+            {t.bookAnother}
           </button>
         </div>
       </div>
@@ -483,10 +618,13 @@ export default function SalonClient({ org, staff, services }: Props) {
       {/* ─── Header ─────────────────────────────────────────────────────── */}
       <div className={`bg-[#1a1208] text-white transition-all ${isHero ? 'px-6 pt-14 pb-24' : 'px-6 py-5'}`}>
         {isHero ? (
-          <div className="text-center max-w-lg mx-auto">
+          <div className="text-center max-w-lg mx-auto relative">
+            <div className="absolute right-0 top-0">
+              <LangToggle lang={lang} onChange={setLang} />
+            </div>
             <div className="inline-flex items-center gap-2 bg-white/10 text-[#C9A84C] text-xs font-medium px-3.5 py-1.5 rounded-full mb-5">
               <span className="w-1.5 h-1.5 bg-[#C9A84C] rounded-full animate-pulse"/>
-              Online booking
+              {t.onlineBooking}
             </div>
             <h1 className="font-serif text-4xl sm:text-5xl font-bold mb-3 leading-tight">{org.name}</h1>
             {org.address?.trim() && (
@@ -497,13 +635,13 @@ export default function SalonClient({ org, staff, services }: Props) {
             )}
             {!hasStaff || !hasServices ? (
               <div className="mt-6 bg-white/10 text-white/50 text-sm px-5 py-3.5 rounded-2xl inline-block">
-                This salon is still getting set up. Check back soon.
+                {t.salonSetup}
               </div>
             ) : (
               <button
                 onClick={handleBookCTA}
                 className="mt-6 bg-[#C9A84C] text-black font-bold px-10 py-4 rounded-2xl hover:bg-[#e8d08a] transition text-base min-h-[56px] shadow-lg shadow-[#C9A84C]/30 active:scale-[0.97]">
-                Book online →
+                {t.bookOnline}
               </button>
             )}
           </div>
@@ -515,7 +653,7 @@ export default function SalonClient({ org, staff, services }: Props) {
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="15 18 9 12 15 6"/></svg>
             </button>
             <p className="font-serif text-[#C9A84C] font-bold tracking-wide">✂ {org.name}</p>
-            <div className="w-10"/>
+            <LangToggle lang={lang} onChange={setLang} />
           </div>
         )}
       </div>
@@ -527,7 +665,7 @@ export default function SalonClient({ org, staff, services }: Props) {
           {/* Services preview */}
           <div className="bg-white rounded-3xl shadow-md border border-[#e8dfc9] overflow-hidden">
             <div className="px-5 pt-5 pb-3 border-b border-[#f0e8dc]">
-              <p className="text-[11px] font-bold text-[#9c8b7a] uppercase tracking-widest">Services</p>
+              <p className="text-[11px] font-bold text-[#9c8b7a] uppercase tracking-widest">{t.services}</p>
             </div>
             <div className="divide-y divide-[#f5f0e8]">
               {services.slice(0,5).map(s => (
@@ -537,7 +675,7 @@ export default function SalonClient({ org, staff, services }: Props) {
                   className="w-full flex items-center justify-between px-5 py-4 hover:bg-[#faf7f2] transition text-left active:bg-[#f5f0e8]">
                   <div>
                     <div className="font-semibold text-[#1a1208] text-sm">{s.name}</div>
-                    <div className="text-[#9c8b7a] text-xs mt-0.5">{s.duration_min} min</div>
+                    <div className="text-[#9c8b7a] text-xs mt-0.5">{s.duration_min} {t.min}</div>
                   </div>
                   <div className="flex items-center gap-3 flex-none">
                     <span className="font-bold text-[#1a1208]">${(s.price_cents/100).toFixed(0)}</span>
@@ -549,7 +687,7 @@ export default function SalonClient({ org, staff, services }: Props) {
                 <button
                   onClick={handleBookCTA}
                   className="w-full px-5 py-3.5 text-sm text-[#C9A84C] font-semibold hover:bg-[#faf7f2] transition text-center">
-                  +{services.length - 5} more services →
+                  {t.moreServices(services.length - 5)}
                 </button>
               )}
             </div>
@@ -559,7 +697,7 @@ export default function SalonClient({ org, staff, services }: Props) {
           {staff.length > 0 && (
             <div className="bg-white rounded-3xl shadow-md border border-[#e8dfc9] overflow-hidden">
               <div className="px-5 pt-5 pb-3 border-b border-[#f0e8dc]">
-                <p className="text-[11px] font-bold text-[#9c8b7a] uppercase tracking-widest">Our team</p>
+                <p className="text-[11px] font-bold text-[#9c8b7a] uppercase tracking-widest">{t.ourTeam}</p>
               </div>
               <div className="flex gap-5 px-5 py-5 overflow-x-auto">
                 {staff.map(m => (
@@ -584,8 +722,8 @@ export default function SalonClient({ org, staff, services }: Props) {
       {isHero && (!hasStaff || !hasServices) && (
         <div className="max-w-lg mx-auto w-full px-4 -mt-10 pb-10">
           <div className="bg-white rounded-3xl shadow-md border border-[#e8dfc9] p-10 text-center">
-            <p className="font-semibold text-[#1a1208] mb-1">{!hasStaff ? 'No staff added yet' : 'No services added yet'}</p>
-            <p className="text-[#9c8b7a] text-sm">The salon owner will add information soon.</p>
+            <p className="font-semibold text-[#1a1208] mb-1">{!hasStaff ? t.noStaff : t.noServices}</p>
+            <p className="text-[#9c8b7a] text-sm">{t.ownerWillAdd}</p>
           </div>
         </div>
       )}
@@ -623,7 +761,7 @@ export default function SalonClient({ org, staff, services }: Props) {
                 <span className="text-[#6b5744]">· {selectedStaff.name}</span>
               )}
               {selectedDate && selectedTime && (
-                <span className="text-[#6b5744]">· <strong className="text-[#1a1208]">{selectedDate.toLocaleDateString('en-US',{day:'numeric',month:'short'})} at {toAmPm(selectedTime)}</strong></span>
+                <span className="text-[#6b5744]">· <strong className="text-[#1a1208]">{selectedDate.toLocaleDateString(t.locale,{day:'numeric',month:'short'})} at {toAmPm(selectedTime)}</strong></span>
               )}
             </div>
           )}
@@ -632,8 +770,8 @@ export default function SalonClient({ org, staff, services }: Props) {
           {step === 'service' && (
             <section>
               <div className="mb-5">
-                <h2 className="text-xl font-bold text-[#1a1208]">Choose a service</h2>
-                <p className="text-sm text-[#9c8b7a] mt-0.5">What can we do for you today?</p>
+                <h2 className="text-xl font-bold text-[#1a1208]">{t.chooseService}</h2>
+                <p className="text-sm text-[#9c8b7a] mt-0.5">{t.serviceSubtitle}</p>
               </div>
               <div className="space-y-2">
                 {services.map(s => (
@@ -643,7 +781,7 @@ export default function SalonClient({ org, staff, services }: Props) {
                     className="w-full bg-white rounded-2xl px-5 py-4 flex items-center justify-between border-2 border-transparent hover:border-[#C9A84C] shadow-sm hover:shadow-md transition active:scale-[0.99]">
                     <div className="text-left">
                       <div className="font-semibold text-[#1a1208]">{s.name}</div>
-                      <div className="text-[#9c8b7a] text-xs mt-0.5">{s.duration_min} min</div>
+                      <div className="text-[#9c8b7a] text-xs mt-0.5">{s.duration_min} {t.min}</div>
                     </div>
                     <div className="flex items-center gap-3 flex-none">
                       <span className="font-bold text-[#1a1208] text-base">${(s.price_cents/100).toFixed(0)}</span>
@@ -655,7 +793,7 @@ export default function SalonClient({ org, staff, services }: Props) {
               <button
                 onClick={resetBooking}
                 className="mt-5 text-sm text-[#9c8b7a] hover:text-[#1a1208] transition px-1 py-2 min-h-[44px]">
-                ← Back
+                {t.back}
               </button>
             </section>
           )}
@@ -664,8 +802,8 @@ export default function SalonClient({ org, staff, services }: Props) {
           {step === 'staff' && (
             <section>
               <div className="mb-5">
-                <h2 className="text-xl font-bold text-[#1a1208]">Choose a specialist</h2>
-                <p className="text-sm text-[#9c8b7a] mt-0.5">Pick who you&apos;d like to work with</p>
+                <h2 className="text-xl font-bold text-[#1a1208]">{t.chooseSpecialist}</h2>
+                <p className="text-sm text-[#9c8b7a] mt-0.5">{t.specialistSubtitle}</p>
               </div>
               <div className="space-y-2">
                 {staff.map(m => (
@@ -688,7 +826,7 @@ export default function SalonClient({ org, staff, services }: Props) {
               <button
                 onClick={() => setStep('service')}
                 className="mt-5 text-sm text-[#9c8b7a] hover:text-[#1a1208] transition px-1 py-2 min-h-[44px]">
-                ← Back
+                {t.back}
               </button>
             </section>
           )}
@@ -697,9 +835,9 @@ export default function SalonClient({ org, staff, services }: Props) {
           {step === 'time' && (
             <section>
               <div className="mb-5">
-                <h2 className="text-xl font-bold text-[#1a1208]">Pick a date & time</h2>
+                <h2 className="text-xl font-bold text-[#1a1208]">{t.pickDateTime}</h2>
                 <p className="text-sm text-[#9c8b7a] mt-0.5">
-                  {selectedStaff ? `with ${selectedStaff.name}` : 'Choose when to come in'}
+                  {selectedStaff ? t.withSpecialist(selectedStaff.name) : t.chooseWhen}
                 </p>
               </div>
 
@@ -722,10 +860,10 @@ export default function SalonClient({ org, staff, services }: Props) {
                             : 'border-[#d4c9b8] bg-white text-[#1a1208] hover:border-[#C9A84C] shadow-sm'
                       }`}>
                       <span className={`text-[10px] font-semibold uppercase tracking-wide ${isSel ? 'text-[#C9A84C]' : 'text-[#9c8b7a]'}`}>
-                        {d.toLocaleDateString('en-US',{weekday:'short'})}
+                        {d.toLocaleDateString(t.locale, {weekday:'short'})}
                       </span>
                       <span className="font-bold text-sm mt-0.5">{d.getDate()}</span>
-                      {isToday && !isSel && <span className="text-[8px] text-[#C9A84C] font-semibold mt-0.5">TODAY</span>}
+                      {isToday && !isSel && <span className="text-[8px] text-[#C9A84C] font-semibold mt-0.5">{t.today}</span>}
                     </button>
                   )
                 })}
@@ -734,24 +872,22 @@ export default function SalonClient({ org, staff, services }: Props) {
               {/* Slot area */}
               {!selectedDate ? (
                 <div className="bg-white rounded-2xl p-6 text-center shadow-sm border border-[#e8dfc9]">
-                  <p className="text-sm text-[#9c8b7a]">Select a date to see available times</p>
+                  <p className="text-sm text-[#9c8b7a]">{t.selectDate}</p>
                 </div>
               ) : slotsLoading ? (
                 <div className="bg-white rounded-2xl p-8 text-center shadow-sm border border-[#e8dfc9]">
                   <Spinner className="w-6 h-6 mx-auto" />
-                  <p className="text-xs text-[#9c8b7a] mt-3">Loading availability…</p>
+                  <p className="text-xs text-[#9c8b7a] mt-3">{t.loadingAvail}</p>
                 </div>
               ) : allSlots.length === 0 ? (
                 <div className="bg-white rounded-2xl p-6 text-center shadow-sm border border-[#e8dfc9] space-y-1">
-                  <p className="font-semibold text-[#1a1208] text-sm">No openings this day</p>
-                  <p className="text-xs text-[#9c8b7a]">Try a different date or specialist</p>
+                  <p className="font-semibold text-[#1a1208] text-sm">{t.noOpenings}</p>
+                  <p className="text-xs text-[#9c8b7a]">{t.tryDifferent}</p>
                 </div>
               ) : (
                 <>
                   <p className="text-xs text-[#9c8b7a] mb-3 font-medium">
-                    {freeCount > 0
-                      ? `${freeCount} ${freeCount === 1 ? 'opening' : 'openings'} available`
-                      : 'All slots are taken — try another date'}
+                    {freeCount > 0 ? t.openings(freeCount) : t.allTaken}
                   </p>
                   <div className="grid grid-cols-4 gap-2">
                     {allSlots.map(({ time, available }) => (
@@ -768,7 +904,7 @@ export default function SalonClient({ org, staff, services }: Props) {
                               : 'border-[#d4c9b8] bg-white text-[#1a1208] hover:border-[#C9A84C] shadow-sm active:scale-[0.96]'
                         }`}>
                         <span className={!available ? 'line-through' : ''}>{toAmPm(time)}</span>
-                        {!available && <span className="text-[10px] font-normal tracking-wide leading-none">Unavailable</span>}
+                        {!available && <span className="text-[10px] font-normal tracking-wide leading-none">{t.unavailable}</span>}
                       </button>
                     ))}
                   </div>
@@ -779,13 +915,13 @@ export default function SalonClient({ org, staff, services }: Props) {
                 <button
                   onClick={() => setStep(staff.length === 1 ? 'service' : 'staff')}
                   className="text-sm text-[#9c8b7a] hover:text-[#1a1208] transition px-1 py-2 min-h-[44px]">
-                  ← Back
+                  {t.back}
                 </button>
                 {selectedDate && selectedTime && !slotsLoading && (
                   <button
                     onClick={() => setStep('confirm')}
                     className="bg-[#C9A84C] text-black font-bold px-7 py-3 rounded-2xl hover:bg-[#e8d08a] transition min-h-[44px] shadow-md shadow-[#C9A84C]/20 active:scale-[0.97]">
-                    Continue →
+                    {t.continue}
                   </button>
                 )}
               </div>
@@ -796,34 +932,34 @@ export default function SalonClient({ org, staff, services }: Props) {
           {step === 'confirm' && (
             <section>
               <div className="mb-5">
-                <h2 className="text-xl font-bold text-[#1a1208]">Confirm your booking</h2>
-                <p className="text-sm text-[#9c8b7a] mt-0.5">Almost done — just a few details</p>
+                <h2 className="text-xl font-bold text-[#1a1208]">{t.confirmBooking}</h2>
+                <p className="text-sm text-[#9c8b7a] mt-0.5">{t.confirmSubtitle}</p>
               </div>
 
               {/* Booking summary card */}
               <div className="bg-white rounded-2xl border border-[#e8dfc9] shadow-sm p-5 mb-5">
                 <div className="space-y-3 text-sm">
                   <div className="flex justify-between items-center">
-                    <span className="text-[#9c8b7a]">Specialist</span>
+                    <span className="text-[#9c8b7a]">{t.specialist}</span>
                     <span className="font-semibold text-[#1a1208]">{selectedStaff?.name}</span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-[#9c8b7a]">Service</span>
+                    <span className="text-[#9c8b7a]">{t.service}</span>
                     <span className="font-semibold text-[#1a1208]">{selectedService?.name}</span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-[#9c8b7a]">Price</span>
+                    <span className="text-[#9c8b7a]">{t.price}</span>
                     <span className="font-bold text-[#1a1208]">${((selectedService?.price_cents ?? 0)/100).toFixed(0)}</span>
                   </div>
                   <div className="h-px bg-[#f0e8dc]"/>
                   <div className="flex justify-between items-center">
-                    <span className="text-[#9c8b7a]">Date</span>
+                    <span className="text-[#9c8b7a]">{t.date}</span>
                     <span className="font-semibold text-[#1a1208]">
-                      {selectedDate?.toLocaleDateString('en-US',{weekday:'short',day:'numeric',month:'long'})}
+                      {selectedDate?.toLocaleDateString(t.locale, {weekday:'short',day:'numeric',month:'long'})}
                     </span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-[#9c8b7a]">Time</span>
+                    <span className="text-[#9c8b7a]">{t.time}</span>
                     <span className="font-bold text-[#C9A84C] text-base">{toAmPm(selectedTime ?? '')}</span>
                   </div>
                 </div>
@@ -833,7 +969,7 @@ export default function SalonClient({ org, staff, services }: Props) {
               <div className="space-y-4 mb-5">
                 <div>
                   <label htmlFor="client-name" className="block text-sm font-semibold text-[#1a1208] mb-2">
-                    Your name <span className="text-red-500 font-normal">*</span>
+                    {t.yourName} <span className="text-red-500 font-normal">*</span>
                   </label>
                   <input
                     id="client-name"
@@ -841,13 +977,13 @@ export default function SalonClient({ org, staff, services }: Props) {
                     value={name}
                     onChange={e => setName(e.target.value)}
                     autoComplete="name"
-                    placeholder="John Smith"
+                    placeholder={t.namePlaceholder}
                     className="w-full border border-[#c8bfb0] rounded-2xl px-4 py-3.5 text-sm text-[#1a1208] outline-none focus:border-[#C9A84C] focus:ring-2 focus:ring-[#C9A84C]/15 bg-white placeholder-[#b5a898] min-h-[52px] transition"
                   />
                 </div>
                 <div>
                   <label htmlFor="client-phone" className="block text-sm font-semibold text-[#1a1208] mb-2">
-                    Phone <span className="text-red-500 font-normal">*</span>
+                    {t.phone} <span className="text-red-500 font-normal">*</span>
                   </label>
                   <input
                     id="client-phone"
@@ -855,7 +991,7 @@ export default function SalonClient({ org, staff, services }: Props) {
                     value={phone}
                     onChange={e => { setPhone(e.target.value); if (phoneError) setPhoneError('') }}
                     autoComplete="tel"
-                    placeholder="+1 (555) 000-0000"
+                    placeholder={t.phonePlaceholder}
                     className={`w-full border rounded-2xl px-4 py-3.5 text-sm text-[#1a1208] outline-none focus:ring-2 focus:ring-[#C9A84C]/15 bg-white placeholder-[#b5a898] min-h-[52px] transition ${
                       phoneError ? 'border-red-400 focus:border-red-400' : 'border-[#c8bfb0] focus:border-[#C9A84C]'
                     }`}
@@ -864,7 +1000,7 @@ export default function SalonClient({ org, staff, services }: Props) {
                 </div>
                 <div>
                   <label htmlFor="client-email" className="block text-sm font-semibold text-[#1a1208] mb-2">
-                    Email <span className="text-[#9c8b7a] font-normal text-xs">optional — for confirmation</span>
+                    {t.email} <span className="text-[#9c8b7a] font-normal text-xs">{t.emailOptional}</span>
                   </label>
                   <input
                     id="client-email"
@@ -872,7 +1008,7 @@ export default function SalonClient({ org, staff, services }: Props) {
                     value={clientEmail}
                     onChange={e => setClientEmail(e.target.value)}
                     autoComplete="email"
-                    placeholder="your@email.com"
+                    placeholder={t.emailPlaceholder}
                     className="w-full border border-[#c8bfb0] rounded-2xl px-4 py-3.5 text-sm text-[#1a1208] outline-none focus:border-[#C9A84C] focus:ring-2 focus:ring-[#C9A84C]/15 bg-white placeholder-[#b5a898] min-h-[52px] transition"
                   />
                 </div>
@@ -885,7 +1021,7 @@ export default function SalonClient({ org, staff, services }: Props) {
                     className="mt-0.5 w-4 h-4 accent-[#C9A84C] flex-none"
                   />
                   <span className="text-xs text-[#9c8b7a] leading-relaxed">
-                    I agree to receive SMS reminders about my appointment. Reply STOP to opt out.
+                    {t.smsConsent}
                   </span>
                 </label>
               </div>
@@ -904,13 +1040,13 @@ export default function SalonClient({ org, staff, services }: Props) {
                   disabled={submitting}
                   className="w-full bg-[#C9A84C] text-black font-bold py-4 rounded-2xl hover:bg-[#e8d08a] transition min-h-[56px] text-base disabled:opacity-50 active:scale-[0.98] shadow-lg shadow-[#C9A84C]/20">
                   {submitting
-                    ? <span className="flex items-center justify-center gap-2"><Spinner className="w-4 h-4" />Booking…</span>
-                    : 'Confirm booking →'}
+                    ? <span className="flex items-center justify-center gap-2"><Spinner className="w-4 h-4" />{t.bookingProgress}</span>
+                    : t.confirmBtn}
                 </button>
                 <button
                   onClick={() => setStep('time')}
                   className="w-full text-sm text-[#9c8b7a] hover:text-[#1a1208] py-2 min-h-[44px] transition hover:underline">
-                  ← Back
+                  {t.back}
                 </button>
               </div>
             </section>
