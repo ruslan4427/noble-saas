@@ -1,7 +1,14 @@
 'use client'
 import { useState, useEffect, useMemo } from 'react'
+import Image from 'next/image'
 import { createClient } from '@/lib/supabase'
 import { toAmPm } from '@/lib/time'
+
+function avatarUrl(url: string, size = 128): string {
+  // Use Supabase image transformation to resize + compress on-the-fly
+  return url.replace('/storage/v1/object/public/', '/storage/v1/render/image/public/')
+    + (url.includes('?') ? '&' : '?') + `width=${size}&quality=75&format=webp`
+}
 
 interface Org {
   id: string; name: string; slug: string
@@ -719,7 +726,7 @@ export default function SalonClient({ org, staff, services }: Props) {
                     onClick={() => { handleSelectService(services[0] ?? services[0]); }}
                     className="flex flex-col items-center gap-2 flex-none focus:outline-none">
                     {m.avatar_url
-                      ? <img src={m.avatar_url} alt={m.name} className="w-16 h-16 rounded-full object-cover border-2 border-[#e8dfc9]" />
+                      ? <Image src={avatarUrl(m.avatar_url)} alt={m.name} width={64} height={64} className="w-16 h-16 rounded-full object-cover border-2 border-[#e8dfc9]" />
                       : <AvatarPlaceholder size={64} />
                     }
                     <span className="text-xs font-semibold text-[#1a1208] whitespace-nowrap">{m.name.split(' ')[0]}</span>
@@ -825,7 +832,7 @@ export default function SalonClient({ org, staff, services }: Props) {
                     onClick={() => handleSelectStaff(m)}
                     className="w-full bg-white rounded-2xl px-5 py-4 flex items-center gap-4 border-2 border-transparent hover:border-[#C9A84C] shadow-sm hover:shadow-md transition active:scale-[0.99]">
                     {m.avatar_url
-                      ? <img src={m.avatar_url} alt={m.name} className="w-14 h-14 rounded-full object-cover flex-none border-2 border-[#e8dfc9]" />
+                      ? <Image src={avatarUrl(m.avatar_url)} alt={m.name} width={56} height={56} className="w-14 h-14 rounded-full object-cover flex-none border-2 border-[#e8dfc9]" />
                       : <AvatarPlaceholder size={56} />
                     }
                     <div className="flex-1 text-left">
