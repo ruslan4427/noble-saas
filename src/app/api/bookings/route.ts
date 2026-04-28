@@ -32,12 +32,19 @@ const ERROR_STATUS: Record<string, number> = {
 }
 
 function parseDbError(err: unknown): { code: string; message: string; status: number } {
-  const msg = err instanceof Error ? err.message : String(err)
+  // Supabase wraps PL/pgSQL RAISE EXCEPTION in {message, code, details, hint}
+  const e = err as Record<string, unknown>
+  const msg     = (typeof e?.message === 'string' ? e.message : String(err)).toUpperCase()
+  const details = typeof e?.details === 'string' ? e.details.toUpperCase() : ''
+  const hint    = typeof e?.hint    === 'string' ? e.hint.toUpperCase()    : ''
+  const pgCode  = typeof e?.code    === 'string' ? e.code : ''
 
-  if (msg.includes('SLOT_OCCUPIED')) {
+  const haystack = msg + details + hint
+
+  if (haystack.includes('SLOT_OCCUPIED') || pgCode === '23P01') {
     return { code: 'SLOT_OCCUPIED', message: 'This time slot is already booked.', status: 409 }
   }
-  if (msg.includes('CLIENT_OVERLAP')) {
+  if (haystack.includes('CLIENT_OVERLAP')) {
     return { code: 'CLIENT_OVERLAP', message: 'You already have a booking at this time.', status: 409 }
   }
   return { code: 'SERVER_ERROR', message: 'Booking could not be created. Please try again.', status: 500 }
