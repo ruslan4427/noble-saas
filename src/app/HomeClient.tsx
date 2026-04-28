@@ -225,8 +225,8 @@ export default function HomeClient() {
             <p className="text-white/50 mb-8">{t.pricing.sub}</p>
             <div className="flex justify-center gap-4">
               {t.pricing.plans.map(p => (
-                <div key={p.plan} className={`w-72 rounded-xl p-6 border ${'highlight' in p && p.highlight ? 'border-[#C9A84C] bg-[#C9A84C]/10' : 'border-[#C9A84C] bg-[#C9A84C]/10'}`}>
-                  {'highlight' in p && p.highlight && <div className="text-xs text-[#C9A84C] font-bold mb-2 uppercase tracking-wide">{t.pricing.popular}</div>}
+                <div key={p.plan} className="w-72 rounded-xl p-6 border border-[#C9A84C] bg-[#C9A84C]/10">
+
                   <div className="font-serif text-xl text-white font-bold">{p.plan}</div>
                   <div className="text-3xl font-bold text-[#C9A84C] my-2">{p.price}<span className="text-sm text-white/40">{t.pricing.mo}</span></div>
                   <div className="text-white/50 text-sm">{p.desc}</div>
