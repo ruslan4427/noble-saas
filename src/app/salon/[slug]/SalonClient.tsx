@@ -288,10 +288,10 @@ function SalonFooter({ org }: { org: Org }) {
         {hasContact && (
           <div className="flex flex-col items-center gap-2">
             {address && (
-              <span className="text-[#9c8b7a] text-xs flex items-center gap-1.5">
+              <a href={`https://maps.apple.com/?q=${encodeURIComponent(address)}`} target="_blank" rel="noopener noreferrer" className="text-[#9c8b7a] hover:text-[#1a1208] text-xs flex items-center gap-1.5 transition underline-offset-2 hover:underline">
                 <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
                 {address}
-              </span>
+              </a>
             )}
             {phone && (
               <a href={`tel:${phone}`} className="text-[#9c8b7a] hover:text-[#1a1208] text-xs flex items-center gap-1.5 transition">
@@ -640,10 +640,10 @@ export default function SalonClient({ org, staff, services }: Props) {
             </div>
             <h1 className="font-serif text-4xl sm:text-5xl font-bold mb-3 leading-tight">{org.name}</h1>
             {org.address?.trim() && (
-              <p className="text-white/40 text-sm mb-1 flex items-center justify-center gap-1.5">
+              <a href={`https://maps.apple.com/?q=${encodeURIComponent(org.address.trim())}`} target="_blank" rel="noopener noreferrer" className="text-white/40 hover:text-white/70 text-sm mb-1 flex items-center justify-center gap-1.5 transition underline-offset-2 hover:underline">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
                 {org.address.trim()}
-              </p>
+              </a>
             )}
             {!hasStaff || !hasServices ? (
               <div className="mt-6 bg-white/10 text-white/50 text-sm px-5 py-3.5 rounded-2xl inline-block">
