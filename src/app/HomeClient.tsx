@@ -46,9 +46,7 @@ const T = {
       sub: '14-day free trial, no credit card required. Cancel anytime.',
       popular: 'Most popular',
       plans: [
-        { plan: 'Starter', price: '$15', desc: '1 staff, unlimited bookings' },
-        { plan: 'Pro', price: '$39', desc: '3 staff, priority support', highlight: true },
-        { plan: 'Business', price: '$79', desc: 'Unlimited staff, custom domain' },
+        { plan: 'Starter', price: '$15', desc: '5 staff, unlimited bookings' },
       ],
       cta: 'See full pricing →',
       mo: '/mo',
@@ -101,9 +99,7 @@ const T = {
       sub: 'Prueba de 14 días, sin tarjeta de crédito. Cancela cuando quieras.',
       popular: 'Más popular',
       plans: [
-        { plan: 'Starter', price: '$15', desc: '1 empleado, reservas ilimitadas' },
-        { plan: 'Pro', price: '$39', desc: '3 empleados, soporte prioritario', highlight: true },
-        { plan: 'Business', price: '$79', desc: 'Empleados ilimitados, dominio personalizado' },
+        { plan: 'Starter', price: '$15', desc: '5 empleados, reservas ilimitadas' },
       ],
       cta: 'Ver precios completos →',
       mo: '/mes',
@@ -227,9 +223,9 @@ export default function HomeClient() {
           <div className="max-w-3xl mx-auto text-center">
             <h2 id="pricing-preview" className="text-2xl font-serif font-bold text-white mb-4">{t.pricing.title}</h2>
             <p className="text-white/50 mb-8">{t.pricing.sub}</p>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="flex justify-center gap-4">
               {t.pricing.plans.map(p => (
-                <div key={p.plan} className={`rounded-xl p-6 border ${'highlight' in p && p.highlight ? 'border-[#C9A84C] bg-[#C9A84C]/10' : 'border-white/10 bg-white/5'}`}>
+                <div key={p.plan} className={`w-72 rounded-xl p-6 border ${'highlight' in p && p.highlight ? 'border-[#C9A84C] bg-[#C9A84C]/10' : 'border-[#C9A84C] bg-[#C9A84C]/10'}`}>
                   {'highlight' in p && p.highlight && <div className="text-xs text-[#C9A84C] font-bold mb-2 uppercase tracking-wide">{t.pricing.popular}</div>}
                   <div className="font-serif text-xl text-white font-bold">{p.plan}</div>
                   <div className="text-3xl font-bold text-[#C9A84C] my-2">{p.price}<span className="text-sm text-white/40">{t.pricing.mo}</span></div>
