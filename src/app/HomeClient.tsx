@@ -46,8 +46,8 @@ const T = {
       sub: '14-day free trial, no credit card required. Cancel anytime.',
       popular: 'Most popular',
       plans: [
-        { plan: 'Starter', price: '$19', desc: '1 staff, unlimited bookings' },
-        { plan: 'Pro', price: '$39', desc: '5 staff, priority support', highlight: true },
+        { plan: 'Starter', price: '$15', desc: '1 staff, unlimited bookings' },
+        { plan: 'Pro', price: '$39', desc: '3 staff, priority support', highlight: true },
         { plan: 'Business', price: '$79', desc: 'Unlimited staff, custom domain' },
       ],
       cta: 'See full pricing →',
@@ -101,8 +101,8 @@ const T = {
       sub: 'Prueba de 14 días, sin tarjeta de crédito. Cancela cuando quieras.',
       popular: 'Más popular',
       plans: [
-        { plan: 'Starter', price: '$19', desc: '1 empleado, reservas ilimitadas' },
-        { plan: 'Pro', price: '$39', desc: '5 empleados, soporte prioritario', highlight: true },
+        { plan: 'Starter', price: '$15', desc: '1 empleado, reservas ilimitadas' },
+        { plan: 'Pro', price: '$39', desc: '3 empleados, soporte prioritario', highlight: true },
         { plan: 'Business', price: '$79', desc: 'Empleados ilimitados, dominio personalizado' },
       ],
       cta: 'Ver precios completos →',
