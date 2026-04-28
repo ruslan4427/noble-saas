@@ -98,9 +98,9 @@ export default function SlotPicker({ orgId, staffId, duration, onBooked }: Props
 
     if (!res.ok) {
       const msgs: Record<string, string> = {
-        SLOT_OCCUPIED:  'На жаль, цей час щойно забронювали. Оберіть інший.',
-        CLIENT_OVERLAP: 'У вас вже є бронювання на цей час.',
-        INVALID_DATA:   'Перевірте введені дані та спробуйте ще раз.',
+        SLOT_OCCUPIED:  'This slot was just taken. Please pick another time.',
+        CLIENT_OVERLAP: 'You already have a booking at this time.',
+        INVALID_DATA:   'Please check your details and try again.',
       }
       setBookingError(msgs[json.code] ?? 'Something went wrong. Please try again.')
       return
