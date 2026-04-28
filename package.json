@@ -9,16 +9,21 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@hookform/resolvers": "^5.2.2",
     "@sentry/nextjs": "^10.50.0",
     "@stripe/stripe-js": "^9.1.0",
     "@supabase/ssr": "^0.10.2",
     "@supabase/supabase-js": "^2.102.1",
+    "google-auth-library": "^10.6.2",
+    "googleapis": "^171.4.0",
     "next": "16.2.3",
     "react": "19.2.4",
     "react-dom": "19.2.4",
+    "react-hook-form": "^7.74.0",
     "resend": "^6.10.0",
     "stripe": "^22.0.1",
-    "twilio": "^5.13.1"
+    "twilio": "^5.13.1",
+    "zod": "^4.3.6"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

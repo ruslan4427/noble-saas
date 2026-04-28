@@ -11,6 +11,7 @@ import StaffSchedule from '@/components/StaffSchedule'
 import RecentBookings from '@/components/RecentBookings'
 import CalendarBlocks from '@/components/CalendarBlocks'
 import TimePicker from '@/components/TimePicker'
+import FeedbackButton from '@/components/FeedbackButton'
 
 const APP_URL = 'https://www.noblelink.app'
 const SUPABASE_URL = 'https://ecszrloosntejjawlalv.supabase.co'
@@ -807,6 +808,7 @@ export default function Dashboard() {
           </div>
         )}
       </div>
+      <FeedbackButton />
     </main>
   )
 }
