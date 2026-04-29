@@ -1,9 +1,9 @@
 'use client'
 export const dynamic = 'force-dynamic'
-import { useState } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { createClient } from '@/lib/supabase'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import LangToggle, { type Lang } from '@/components/LangToggle'
 
 const T = {
@@ -23,25 +23,69 @@ const T = {
   },
 }
 
-export default function Login() {
-  const [lang, setLang] = useState<Lang>('en')
+function NoticeBar() {
+  const searchParams = useSearchParams()
+  const notice = searchParams.get('notice') === 'already_registered'
+    ? 'This email is already registered. Please sign in to your existing account.'
+    : null
+  if (!notice) return null
+  return (
+    <div className="bg-[#C9A84C]/10 border border-[#C9A84C]/30 text-[#C9A84C] text-sm px-3 py-2 rounded">
+      {notice}
+    </div>
+  )
+}
+
+function LoginForm({ lang }: { lang: Lang }) {
   const t = T[lang]
-  const [email, setEmail] = useState('')
+  const [email, setEmail]     = useState('')
   const [password, setPassword] = useState('')
-  const [error, setError] = useState('')
+  const [error, setError]     = useState('')
   const [loading, setLoading] = useState(false)
-  const router = useRouter()
+  const router  = useRouter()
   const supabase = createClient()
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault()
-    setLoading(true)
-    setError('')
+    setLoading(true); setError('')
     const { data, error } = await supabase.auth.signInWithPassword({ email, password })
     if (error) { setError(error.message); setLoading(false); return }
     if (!data.user?.email_confirmed_at) { router.push('/verify-email'); return }
     router.push('/dashboard')
   }
+
+  return (
+    <form onSubmit={handleLogin} className="bg-white/5 border border-white/10 rounded-xl p-6 space-y-4">
+      <Suspense fallback={null}>
+        <NoticeBar />
+      </Suspense>
+      {error && <div className="bg-red-500/10 border border-red-500/30 text-red-400 text-sm px-3 py-2 rounded">{error}</div>}
+      <div>
+        <label className="text-sm text-white/60 mb-1 block">{t.email}</label>
+        <input type="email" value={email} onChange={e => setEmail(e.target.value)}
+          className="w-full bg-white/10 border border-white/20 rounded px-3 py-2 text-white text-sm outline-none focus:border-[#C9A84C]"
+          placeholder="you@example.com" required />
+      </div>
+      <div>
+        <div className="flex items-center justify-between mb-1">
+          <label className="text-sm text-white/60">{t.password}</label>
+          <Link href="/forgot-password" className="text-xs text-[#C9A84C] hover:underline">{t.forgot}</Link>
+        </div>
+        <input type="password" value={password} onChange={e => setPassword(e.target.value)}
+          className="w-full bg-white/10 border border-white/20 rounded px-3 py-2 text-white text-sm outline-none focus:border-[#C9A84C]"
+          placeholder="••••••••" required />
+      </div>
+      <button type="submit" disabled={loading}
+        className="w-full bg-[#C9A84C] text-black font-bold py-2 rounded hover:bg-[#e8d08a] transition disabled:opacity-50">
+        {loading ? t.loading : t.submit}
+      </button>
+    </form>
+  )
+}
+
+export default function Login() {
+  const [lang, setLang] = useState<Lang>('en')
+  const t = T[lang]
 
   return (
     <main className="min-h-screen bg-[#0F0A00] flex items-center justify-center px-4">
@@ -51,28 +95,7 @@ export default function Login() {
           <Link href="/" className="font-serif text-2xl text-[#C9A84C]">✂ Noble</Link>
           <p className="text-white/50 text-sm mt-2">{t.sub}</p>
         </div>
-        <form onSubmit={handleLogin} className="bg-white/5 border border-white/10 rounded-xl p-6 space-y-4">
-          {error && <div className="bg-red-500/10 border border-red-500/30 text-red-400 text-sm px-3 py-2 rounded">{error}</div>}
-          <div>
-            <label className="text-sm text-white/60 mb-1 block">{t.email}</label>
-            <input type="email" value={email} onChange={e => setEmail(e.target.value)}
-              className="w-full bg-white/10 border border-white/20 rounded px-3 py-2 text-white text-sm outline-none focus:border-[#C9A84C]"
-              placeholder="you@example.com" required />
-          </div>
-          <div>
-            <div className="flex items-center justify-between mb-1">
-              <label className="text-sm text-white/60">{t.password}</label>
-              <Link href="/forgot-password" className="text-xs text-[#C9A84C] hover:underline">{t.forgot}</Link>
-            </div>
-            <input type="password" value={password} onChange={e => setPassword(e.target.value)}
-              className="w-full bg-white/10 border border-white/20 rounded px-3 py-2 text-white text-sm outline-none focus:border-[#C9A84C]"
-              placeholder="••••••••" required />
-          </div>
-          <button type="submit" disabled={loading}
-            className="w-full bg-[#C9A84C] text-black font-bold py-2 rounded hover:bg-[#e8d08a] transition disabled:opacity-50">
-            {loading ? t.loading : t.submit}
-          </button>
-        </form>
+        <LoginForm lang={lang} />
         <p className="text-center text-white/40 text-sm mt-4">
           {t.noAccount} <Link href="/signup" className="text-[#C9A84C] hover:underline">{t.trial}</Link>
         </p>

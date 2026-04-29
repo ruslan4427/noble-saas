@@ -123,6 +123,12 @@ export default function Signup() {
       body: JSON.stringify({ email, userId: uid }),
     })
     const json = await res.json()
+    if (res.status === 409) {
+      // Email already confirmed — push to login with a clear message
+      setLoading(false)
+      router.push('/login?notice=already_registered')
+      return
+    }
     if (!res.ok) { setError(json.error || 'Failed to send code'); setLoading(false); return }
     setLoading(false); setStep('verify'); setCooldown(60)
   }
@@ -131,7 +137,7 @@ export default function Signup() {
     setVerifying(true); setError('')
     const res = await fetch('/api/auth/verify-otp', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, code, userId }),
+      body: JSON.stringify({ email, code }),
     })
     const json = await res.json()
     if (!res.ok) { setError(json.error || 'Invalid code'); setVerifying(false); return }
