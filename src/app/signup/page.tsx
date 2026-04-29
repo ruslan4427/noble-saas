@@ -115,9 +115,16 @@ export default function Signup() {
     setLoading(true); setError('')
     const { data, error } = await supabase.auth.signUp({ email, password, options: { data: { full_name: name } } })
     const uid = data.user?.id
-    // If no user was created it's a real error. If user exists but Supabase
-    // failed to send its own confirmation email — that's fine, we use our OTP.
     if (!uid) { setError(error?.message || 'Signup failed. Try again.'); setLoading(false); return }
+
+    // When Supabase "Confirm email" is OFF — user is auto-confirmed, session exists.
+    // Skip OTP and go straight to onboarding.
+    if (data.session) {
+      router.push('/onboarding')
+      return
+    }
+
+    // "Confirm email" is ON — send our custom OTP.
     setUserId(uid)
     const res = await fetch('/api/auth/send-otp', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -125,7 +132,6 @@ export default function Signup() {
     })
     const json = await res.json()
     if (res.status === 409) {
-      // Email already confirmed — push to login with a clear message
       setLoading(false)
       router.push('/login?notice=already_registered')
       return
