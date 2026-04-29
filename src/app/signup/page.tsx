@@ -137,7 +137,7 @@ export default function Signup() {
     setVerifying(true); setError('')
     const res = await fetch('/api/auth/verify-otp', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, code }),
+      body: JSON.stringify({ email, code, userId }),
     })
     const json = await res.json()
     if (!res.ok) { setError(json.error || 'Invalid code'); setVerifying(false); return }

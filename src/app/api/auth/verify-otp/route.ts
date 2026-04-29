@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase-server'
 
 export async function POST(req: NextRequest) {
-  const { email, code } = await req.json()
+  const { email, code, userId } = await req.json()
   if (!email || !code) return NextResponse.json({ error: 'Missing fields' }, { status: 400 })
 
   // Use maybeSingle + order so stale duplicate rows don't cause a failure.
@@ -21,8 +21,9 @@ export async function POST(req: NextRequest) {
   }
   if (data.code !== code) return NextResponse.json({ error: 'Invalid code' }, { status: 400 })
 
-  // Use user_id from the DB record — never trust client-supplied userId.
-  const uid: string = data.user_id
+  // Prefer user_id from DB; fall back to client-supplied userId.
+  // DB field may be NULL if email_otps table was created without the user_id column.
+  const uid: string = data.user_id || userId
   if (!uid) return NextResponse.json({ error: 'User not found. Please sign up again.' }, { status: 400 })
 
   const { error: adminError } = await supabaseAdmin.auth.admin.updateUserById(uid, {
