@@ -114,9 +114,10 @@ export default function Signup() {
     e.preventDefault()
     setLoading(true); setError('')
     const { data, error } = await supabase.auth.signUp({ email, password, options: { data: { full_name: name } } })
-    if (error) { setError(error.message); setLoading(false); return }
     const uid = data.user?.id
-    if (!uid) { setError('Signup failed. Try again.'); setLoading(false); return }
+    // If no user was created it's a real error. If user exists but Supabase
+    // failed to send its own confirmation email — that's fine, we use our OTP.
+    if (!uid) { setError(error?.message || 'Signup failed. Try again.'); setLoading(false); return }
     setUserId(uid)
     const res = await fetch('/api/auth/send-otp', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
