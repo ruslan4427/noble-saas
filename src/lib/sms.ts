@@ -87,21 +87,21 @@ interface BookingParams {
 
 export function smsConfirmation(p: BookingParams): string {
   const when = formatDateInTZ(p.date, p.time, p.timezone)
-  return `${p.salonName}: Zapys pidtverdzheno!\nKlient: ${p.clientName}\nMayster: ${p.masterName}\nPosluha: ${p.serviceName}\nChas: ${when}\nSTOP - vidpysatys.`
+  return `${p.salonName}: Appointment confirmed!\nClient: ${p.clientName}\nWith: ${p.masterName}\nService: ${p.serviceName}\nWhen: ${when}\nReply STOP to unsubscribe.`
 }
 
 export function smsReminder(p: BookingParams): string {
   const when = formatDateInTZ(p.date, p.time, p.timezone)
-  return `${p.salonName}: Nagaduvannya! Vash zapys cherez 2 hodyny.\nMayster: ${p.masterName}\nPosluha: ${p.serviceName}\nChas: ${when}\nSTOP - vidpysatys.`
+  return `${p.salonName}: Reminder! Your appointment is in 2 hours.\nWith: ${p.masterName}\nService: ${p.serviceName}\nWhen: ${when}\nReply STOP to unsubscribe.`
 }
 
 export function smsCancellation(p: BookingParams): string {
   const when = formatDateInTZ(p.date, p.time, p.timezone)
-  return `${p.salonName}: Vash zapys skasovano.\nMayster: ${p.masterName}\nPosluha: ${p.serviceName}\nChas: ${when}\nZapysatys: noblelink.app\nSTOP - vidpysatys.`
+  return `${p.salonName}: Your appointment has been cancelled.\nWith: ${p.masterName}\nService: ${p.serviceName}\nWhen: ${when}\nBook again: noblelink.app\nReply STOP to unsubscribe.`
 }
 
 export function smsReschedule(p: BookingParams & { oldDate: string; oldTime: string }): string {
   const newWhen = formatDateInTZ(p.date, p.time, p.timezone)
   const oldWhen = formatDateInTZ(p.oldDate, p.oldTime, p.timezone)
-  return `${p.salonName}: Zapys pereneseno.\nBulo: ${oldWhen}\nTeper: ${newWhen}\nMayster: ${p.masterName}\nPosluha: ${p.serviceName}\nSTOP - vidpysatys.`
+  return `${p.salonName}: Appointment rescheduled.\nFrom: ${oldWhen}\nTo: ${newWhen}\nWith: ${p.masterName}\nService: ${p.serviceName}\nReply STOP to unsubscribe.`
 }
