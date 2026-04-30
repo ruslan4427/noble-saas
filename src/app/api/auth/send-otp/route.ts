@@ -11,12 +11,6 @@ export async function POST(req: NextRequest) {
   const code = String(Math.floor(100000 + Math.random() * 900000))
   const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString()
 
-  // If the user is already confirmed, they should log in instead of re-verifying.
-  const { data: existingUser } = await supabaseAdmin.auth.admin.getUserById(userId)
-  if (existingUser.user?.email_confirmed_at) {
-    return NextResponse.json({ error: 'already_confirmed' }, { status: 409 })
-  }
-
   // Delete any existing code for this email first, then insert fresh.
   await supabaseAdmin.from('email_otps').delete().eq('email', email)
 

@@ -21,9 +21,10 @@ export async function POST(req: NextRequest) {
   }
   if (data.code !== code) return NextResponse.json({ error: 'Invalid code' }, { status: 400 })
 
-  // Prefer user_id from DB; fall back to client-supplied userId.
-  // DB field may be NULL if email_otps table was created without the user_id column.
-  const uid: string = data.user_id || userId
+  // Find the real user ID by email — avoids all user_id storage/retrieval issues.
+  const { data: listData } = await supabaseAdmin.auth.admin.listUsers({ perPage: 1000 })
+  const foundUser = listData?.users?.find((u: { email?: string }) => u.email === email)
+  const uid: string = foundUser?.id || data.user_id || userId
   if (!uid) return NextResponse.json({ error: 'User not found. Please sign up again.' }, { status: 400 })
 
   const { error: adminError } = await supabaseAdmin.auth.admin.updateUserById(uid, {
