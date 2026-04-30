@@ -26,7 +26,7 @@ const T = {
 function NoticeBar() {
   const searchParams = useSearchParams()
   const notice = searchParams.get('notice') === 'already_registered'
-    ? 'This email is already registered. Please sign in to your existing account.'
+    ? 'A salon is already registered with this email. Sign in to access your account.'
     : null
   const errorParam = searchParams.get('error')
   const errorMsg = errorParam === 'verification_failed'

@@ -118,11 +118,16 @@ export default function Signup() {
     if (!uid) { setError(error?.message || 'Signup failed. Try again.'); setLoading(false); return }
 
     // When Supabase "Confirm email" is OFF — user is auto-confirmed, session exists.
-    // Check if this user already has an org — if so, send to dashboard, not onboarding.
+    // Check if this user already has an org — show error and redirect to login.
     if (data.session) {
       const { data: existingOrg } = await supabase
         .from('organizations').select('id').eq('owner_id', uid).maybeSingle()
-      router.push(existingOrg ? '/dashboard' : '/onboarding')
+      if (existingOrg) {
+        await supabase.auth.signOut()
+        router.push('/login?notice=already_registered')
+        return
+      }
+      router.push('/onboarding')
       return
     }
 
