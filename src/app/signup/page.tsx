@@ -113,41 +113,27 @@ export default function Signup() {
   async function handleSignup(e: React.FormEvent) {
     e.preventDefault()
     setLoading(true); setError('')
-    const { data, error } = await supabase.auth.signUp({ email, password, options: { data: { full_name: name } } })
-    const uid = data.user?.id
-    if (!uid) { setError(error?.message || 'Signup failed. Try again.'); setLoading(false); return }
 
-    // Supabase returns identities:[] for an already-registered email (account enumeration guard).
-    // Redirect to login with notice instead of proceeding to OTP.
-    if (Array.isArray(data.user?.identities) && data.user.identities.length === 0) {
-      setLoading(false)
-      router.push('/login?notice=already_registered')
-      return
-    }
+    // Use server-side signup to avoid Supabase sending its own confirmation emails.
+    const signupRes = await fetch('/api/auth/signup', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password, name }),
+    })
+    const signupJson = await signupRes.json()
+    if (signupRes.status === 409) { router.push('/login?notice=already_registered'); return }
+    if (!signupRes.ok) { setError(signupJson.error || 'Signup failed. Try again.'); setLoading(false); return }
 
-    // When Supabase "Confirm email" is OFF — user is auto-confirmed, session exists.
-    // Check if this user already has an org — show error and redirect to login.
-    if (data.session) {
-      const { data: existingOrg } = await supabase
-        .from('organizations').select('id').eq('owner_id', uid).maybeSingle()
-      if (existingOrg) {
-        await supabase.auth.signOut()
-        router.push('/login?notice=already_registered')
-        return
-      }
-      router.push('/onboarding')
-      return
-    }
+    const uid: string = signupJson.userId
 
-    // "Confirm email" is ON — send our custom OTP.
+    // Send our custom OTP.
     setUserId(uid)
-    const res = await fetch('/api/auth/send-otp', {
+    const otpRes = await fetch('/api/auth/send-otp', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, userId: uid }),
     })
-    const json = await res.json()
-    if (res.status === 409) { router.push('/login?notice=already_registered'); return }
-    if (!res.ok) { setError(json.error || 'Failed to send code'); setLoading(false); return }
+    const otpJson = await otpRes.json()
+    if (otpRes.status === 409) { router.push('/login?notice=already_registered'); return }
+    if (!otpRes.ok) { setError(otpJson.error || 'Failed to send code'); setLoading(false); return }
     setLoading(false); setStep('verify'); setCooldown(60)
   }
 
