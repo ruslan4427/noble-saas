@@ -118,9 +118,11 @@ export default function Signup() {
     if (!uid) { setError(error?.message || 'Signup failed. Try again.'); setLoading(false); return }
 
     // When Supabase "Confirm email" is OFF — user is auto-confirmed, session exists.
-    // Skip OTP and go straight to onboarding.
+    // Check if this user already has an org — if so, send to dashboard, not onboarding.
     if (data.session) {
-      router.push('/onboarding')
+      const { data: existingOrg } = await supabase
+        .from('organizations').select('id').eq('owner_id', uid).maybeSingle()
+      router.push(existingOrg ? '/dashboard' : '/onboarding')
       return
     }
 

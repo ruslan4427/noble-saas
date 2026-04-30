@@ -88,6 +88,11 @@ export default function Onboarding() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { router.push('/login'); return }
       if (!user.email_confirmed_at) { router.push('/verify-email'); return }
+      // Guard: if org already exists for this user, skip insert and go to dashboard.
+      const { data: existing } = await supabase
+        .from('organizations').select('id').eq('owner_id', user.id).maybeSingle()
+      if (existing) { router.push('/dashboard'); return }
+
       const { error: orgError } = await supabase.from('organizations').insert({
         slug: data.slug, name: data.name, owner_id: user.id,
         timezone: data.timezone, business_category: data.category,
