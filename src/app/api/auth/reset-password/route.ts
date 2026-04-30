@@ -11,7 +11,9 @@ export async function POST(req: NextRequest) {
     .select('*')
     .eq('email', email)
     .eq('code', token)
-    .single()
+    .order('expires_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
 
   if (error || !data) return NextResponse.json({ error: 'Invalid or expired link' }, { status: 400 })
   if (new Date(data.expires_at) < new Date()) {

@@ -26,7 +26,7 @@ export default function PrivacyPolicy() {
         </div>
 
         <Section title="1. Who We Are">
-          <p>{COMPANY} ("we", "us", "our") operates the booking platform at {SITE}. This Privacy Policy explains how we collect, use, and protect information about salon owners and their clients.</p>
+          <p>{COMPANY} (&quot;we&quot;, &quot;us&quot;, &quot;our&quot;) operates the booking platform at {SITE}. This Privacy Policy explains how we collect, use, and protect information about salon owners and their clients.</p>
         </Section>
 
         <Section title="2. Information We Collect">

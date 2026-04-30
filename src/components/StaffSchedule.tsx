@@ -85,7 +85,9 @@ export default function StaffSchedule({ orgId, staff }: Props) {
     setLoading(false)
   }, [])
 
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => { if (selectedStaffId) load(selectedStaffId) }, [selectedStaffId, load])
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   function updateDay(dow: number, field: keyof DaySchedule, value: string | boolean) {
     setSaveError('')

@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase-server'
-import { APP_URL } from '@/constants'
 import { logger } from '@/lib/logger'
 import { validateBookingSlot } from '@/lib/booking-validation'
+import { sendBookingConfirmation, sendBookingNotification } from '@/lib/email'
 
 export async function POST(req: NextRequest) {
   const body = await req.json()
@@ -77,23 +77,44 @@ export async function POST(req: NextRequest) {
     durationMin: resolvedDuration,
   })
 
-  // Fire email + SMS notification (non-blocking)
-  const { data: staffData } = await supabaseAdmin
-    .from('staff')
-    .select('name')
-    .eq('id', master_id)
-    .single()
+  // Fetch org + staff for email
+  const [{ data: org }, { data: staffData }] = await Promise.all([
+    supabaseAdmin.from('organizations').select('name, owner_id').eq('id', org_id).single(),
+    supabaseAdmin.from('staff').select('name').eq('id', master_id).single(),
+  ])
 
-  fetch(`${APP_URL}/api/email/booking`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      org_id, client_name, client_phone, client_email,
-      master_name: staffData?.name ?? '',
-      service_name, date, time: time_slot, price_cents,
-      booking_id: booking.id,
-    }),
-  }).catch(err => console.error('Notification failed (non-fatal):', err))
+  const salonName  = org?.name ?? ''
+  const masterName = staffData?.name ?? ''
+  const price      = Math.round((price_cents || 0) / 100)
+
+  // Email to client (required — blocking)
+  if (client_email) {
+    try {
+      await sendBookingConfirmation({
+        to: client_email, clientName: client_name, salonName,
+        masterName, serviceName: service_name, date, time: time_slot, price,
+      })
+    } catch (err) {
+      logger.error({ event: 'booking_email_client_failed', bookingId: booking.id, err })
+    }
+  }
+
+  // Email to owner (required — blocking)
+  if (org?.owner_id) {
+    try {
+      const { data: userData } = await supabaseAdmin.auth.admin.getUserById(org.owner_id)
+      const ownerEmail = userData?.user?.email
+      if (ownerEmail) {
+        await sendBookingNotification({
+          to: ownerEmail, salonName, clientName: client_name,
+          clientPhone: client_phone || '—', masterName,
+          serviceName: service_name, date, time: time_slot, price,
+        })
+      }
+    } catch (err) {
+      logger.error({ event: 'booking_email_owner_failed', bookingId: booking.id, err })
+    }
+  }
 
   return NextResponse.json({ id: booking.id })
 }

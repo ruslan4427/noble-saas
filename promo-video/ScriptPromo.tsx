@@ -569,7 +569,7 @@ function OrganizedScene() {
         {/* Today header */}
         <div style={{ opacity: showRows ? 1 : 0, transition: 'opacity 0.4s ease' }}>
           <div style={{ padding: '5px 0', borderBottom: `1px solid ${W10}` }}>
-            <span style={{ fontSize: 10.5, fontWeight: 600, color: G, textTransform: 'uppercase', letterSpacing: '0.07em' }}>Today's bookings</span>
+            <span style={{ fontSize: 10.5, fontWeight: 600, color: G, textTransform: 'uppercase', letterSpacing: '0.07em' }}>Today&apos;s bookings</span>
           </div>
         </div>
 

@@ -1,6 +1,6 @@
 'use client'
 export const dynamic = 'force-dynamic'
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Suspense } from 'react'
@@ -61,9 +61,7 @@ function ResetForm({ lang }: { lang: Lang }) {
   const [done, setDone] = useState(false)
   const router = useRouter()
 
-  useEffect(() => {
-    if (!token || !email) setError(t.invalidLink)
-  }, [token, email, lang])
+  const linkError = (!token || !email) ? t.invalidLink : ''
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -96,9 +94,9 @@ function ResetForm({ lang }: { lang: Lang }) {
 
   return (
     <form onSubmit={handleSubmit} className="bg-white/5 border border-white/10 rounded-xl p-6 space-y-4">
-      {error && (
+      {(error || linkError) && (
         <div className="bg-red-500/10 border border-red-500/30 text-red-400 text-sm px-3 py-2 rounded">
-          {error}
+          {error || linkError}
           {(!token || !email) && <span> <Link href="/forgot-password" className="underline">{t.requestNew}</Link></span>}
         </div>
       )}

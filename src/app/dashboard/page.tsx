@@ -1,6 +1,6 @@
 'use client'
 export const dynamic = 'force-dynamic'
-import { useEffect, useState, useCallback, useRef } from 'react'
+import { useEffect, useState, useCallback, useRef, useMemo } from 'react'
 import { createClient } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
@@ -337,7 +337,9 @@ export default function Dashboard() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { router.push('/login'); return }
       if (!user.email_confirmed_at) { router.push('/verify-email'); return }
-      const { data: orgData } = await supabase.from('organizations').select('*').eq('owner_id', user.id).single()
+      const { data: orgData, error: orgError } = await supabase.from('organizations').select('*').eq('owner_id', user.id).maybeSingle()
+      // PGRST116 = no rows — genuine new user. Any other error = RLS or DB issue, don't silently redirect.
+      if (orgError) { console.error('[dashboard] org query error:', orgError); setLoading(false); return }
       if (!orgData) { router.push('/onboarding'); return }
       setOrg(orgData)
       setSettingsName(orgData.name); setSettingsSlug(orgData.slug)
@@ -464,12 +466,11 @@ export default function Dashboard() {
 
   async function handleLogout() { await supabase.auth.signOut(); router.push('/') }
 
-  function trialDaysLeft() {
+  const days = useMemo(() => {
     if (!org?.trial_ends_at) return null
+    // eslint-disable-next-line react-hooks/purity
     return Math.max(0, Math.ceil((new Date(org.trial_ends_at).getTime() - Date.now()) / 86400000))
-  }
-
-  const days = trialDaysLeft()
+  }, [org?.trial_ends_at])
   const bookingUrl = `${APP_URL}/salon/${org?.slug}`
   const staffLimit = PLAN_STAFF_LIMIT[org?.plan_id ?? 'starter'] ?? 5
   const atStaffLimit = staff.length >= staffLimit

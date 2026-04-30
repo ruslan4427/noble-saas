@@ -11,16 +11,18 @@ export async function POST(req: NextRequest) {
   if (!email) return NextResponse.json({ error: 'Email required' }, { status: 400 })
 
   // Look up user — always return success to avoid leaking account existence
-  const { data: { users } } = await supabaseAdmin.auth.admin.listUsers()
+  const { data: { users } } = await supabaseAdmin.auth.admin.listUsers({ perPage: 1000 })
   const user = users.find(u => u.email === email)
   if (!user) return NextResponse.json({ success: true })
 
   const token = randomBytes(32).toString('hex')
   const expiresAt = new Date(Date.now() + 60 * 60 * 1000).toISOString() // 1h
 
+  await supabaseAdmin.from('email_otps').delete().eq('email', email)
+
   const { error: dbError } = await supabaseAdmin
     .from('email_otps')
-    .upsert({ email, code: token, user_id: user.id, expires_at: expiresAt })
+    .insert({ email, code: token, user_id: user.id, expires_at: expiresAt })
 
   if (dbError) return NextResponse.json({ success: true }) // silent fail
 

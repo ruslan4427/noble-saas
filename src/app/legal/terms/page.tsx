@@ -26,8 +26,8 @@ export default function TermsAndConditions() {
         </div>
 
         <Section title="1. Acceptance of Terms">
-          <p>By accessing or using {COMPANY} ("the Platform") at {SITE}, you agree to be bound by these Terms and Conditions. If you do not agree, do not use the Platform.</p>
-          <p>These Terms apply to both salon owners ("Users") and their end clients ("Clients") who interact with booking pages hosted on the Platform.</p>
+          <p>By accessing or using {COMPANY} (&quot;the Platform&quot;) at {SITE}, you agree to be bound by these Terms and Conditions. If you do not agree, do not use the Platform.</p>
+          <p>These Terms apply to both salon owners (&quot;Users&quot;) and their end clients (&quot;Clients&quot;) who interact with booking pages hosted on the Platform.</p>
         </Section>
 
         <Section title="2. Description of Service">
@@ -56,7 +56,7 @@ export default function TermsAndConditions() {
             <li>New accounts receive a free trial period as stated at signup.</li>
             <li>After the trial, a paid subscription is required to continue using the Platform.</li>
             <li>You may cancel at any time. Cancellation takes effect at the end of the current billing period — no partial refunds.</li>
-            <li>We reserve the right to change pricing with 30 days' notice.</li>
+            <li>We reserve the right to change pricing with 30 days&apos; notice.</li>
           </ul>
         </Section>
 
@@ -71,7 +71,7 @@ export default function TermsAndConditions() {
           </p>
           <ul>
             <li>During the online booking process, a client enters their mobile phone number in the designated phone number field.</li>
-            <li>A required checkbox is displayed with the following or substantially similar language: <em>"By checking this box, I agree to receive SMS appointment reminders from [Salon Name] via Noble at the mobile number I provided. Consent is not a condition of purchase."</em></li>
+            <li>A required checkbox is displayed with the following or substantially similar language: <em>&quot;By checking this box, I agree to receive SMS appointment reminders from [Salon Name] via Noble at the mobile number I provided. Consent is not a condition of purchase.&quot;</em></li>
             <li>The checkbox must be actively checked by the client — it is not pre-checked.</li>
             <li>Consent is tied to the specific mobile number entered and is recorded at the time of booking.</li>
             <li>Clients who do not check the consent checkbox will not receive SMS messages.</li>
@@ -85,7 +85,7 @@ export default function TermsAndConditions() {
 
           <p><strong>5.3 Message and Data Rates</strong></p>
           <p>
-            <strong>Message and data rates may apply.</strong> Msg &amp; Data rates may apply. Charges depend on the client's mobile carrier and plan. {COMPANY} does not charge separately for SMS messages.
+            <strong>Message and data rates may apply.</strong> Msg &amp; Data rates may apply. Charges depend on the client&apos;s mobile carrier and plan. {COMPANY} does not charge separately for SMS messages.
           </p>
 
           <p><strong>5.4 How to Opt Out (STOP)</strong></p>
@@ -100,7 +100,7 @@ export default function TermsAndConditions() {
 
           <p><strong>5.6 Transactional Nature — No Marketing SMS</strong></p>
           <p>
-            All SMS messages sent through the Noble Appointment Reminder Program are strictly transactional in nature. We do not send promotional, marketing, or advertising SMS messages. Messages are limited to appointment reminders and booking-related notifications directly requested by the client's booking action.
+            All SMS messages sent through the Noble Appointment Reminder Program are strictly transactional in nature. We do not send promotional, marketing, or advertising SMS messages. Messages are limited to appointment reminders and booking-related notifications directly requested by the client&apos;s booking action.
           </p>
 
           <p><strong>5.7 No Third-Party Sharing</strong></p>
@@ -110,7 +110,7 @@ export default function TermsAndConditions() {
 
           <p><strong>5.8 Carrier Disclaimer</strong></p>
           <p>
-            SMS delivery is facilitated by Twilio, Inc. as the messaging service provider. <strong>Carriers are not liable for delayed or undelivered messages.</strong> Delivery is subject to the client's network coverage, carrier policies, and device availability.
+            SMS delivery is facilitated by Twilio, Inc. as the messaging service provider. <strong>Carriers are not liable for delayed or undelivered messages.</strong> Delivery is subject to the client&apos;s network coverage, carrier policies, and device availability.
           </p>
         </Section>
 
@@ -137,11 +137,11 @@ export default function TermsAndConditions() {
         </Section>
 
         <Section title="9. Disclaimers">
-          <p>The Platform is provided "as is" without warranties of any kind. We do not guarantee uninterrupted or error-free operation. We are not responsible for missed appointments, lost revenue, or client disputes arising from use of the Platform.</p>
+          <p>The Platform is provided &quot;as is&quot; without warranties of any kind. We do not guarantee uninterrupted or error-free operation. We are not responsible for missed appointments, lost revenue, or client disputes arising from use of the Platform.</p>
         </Section>
 
         <Section title="10. Limitation of Liability">
-          <p>To the maximum extent permitted by law, {COMPANY}'s total liability to you for any claim arising from use of the Platform shall not exceed the amount you paid us in the 3 months preceding the claim.</p>
+          <p>To the maximum extent permitted by law, {COMPANY}&apos;s total liability to you for any claim arising from use of the Platform shall not exceed the amount you paid us in the 3 months preceding the claim.</p>
           <p>We are not liable for indirect, incidental, special, or consequential damages.</p>
         </Section>
 

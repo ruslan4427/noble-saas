@@ -44,7 +44,7 @@ export default function SmsConsentPage() {
               Actively <strong>check the SMS consent checkbox</strong> — it is{' '}
               <strong style={{ color: '#dc2626' }}>not pre-selected</strong>.
             </li>
-            <li>Click <strong>"Book Appointment"</strong>.</li>
+            <li>Click <strong>&quot;Book Appointment&quot;</strong>.</li>
           </ol>
           <p>
             The form cannot be submitted without checking the consent checkbox. Submission is blocked and
@@ -117,7 +117,7 @@ export default function SmsConsentPage() {
 
           <p style={{ marginTop: 20, fontSize: 13.5, color: '#6b5744' }}>
             ↑ The checkbox is <strong>not pre-checked</strong>. The user must actively check it.
-            Without checking, the "Book Appointment" button triggers a validation error.
+            Without checking, the &quot;Book Appointment&quot; button triggers a validation error.
           </p>
         </Section>
 
@@ -139,7 +139,7 @@ export default function SmsConsentPage() {
         {/* ── Section 5: Data handling ─────────────────────────────────── */}
         <Section title="5. Data Handling">
           <ul style={ulStyle}>
-            <li>Phone numbers are stored in Noble's database (Supabase) and never sold to third parties.</li>
+            <li>Phone numbers are stored in Noble&apos;s database (Supabase) and never sold to third parties.</li>
             <li>SMS messages are sent via Twilio on behalf of the salon.</li>
             <li>Consent is tied to the phone number submitted at the time of booking.</li>
             <li>Consent records are retained for compliance purposes.</li>

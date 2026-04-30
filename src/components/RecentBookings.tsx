@@ -187,6 +187,7 @@ export default function RecentBookings({ orgId, staff }: Props) {
     setLoading(false)
   }, [orgId, filter])
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { load() }, [load])
 
   async function handleStatusChange(bookingId: string, newStatus: string) {

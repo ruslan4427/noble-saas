@@ -50,6 +50,7 @@ export default function SlotPicker({ orgId, staffId, duration, onBooked }: Props
   })
 
   // Fetch slots when date changes
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     if (!selected) return
     setSlots(null)
@@ -62,6 +63,7 @@ export default function SlotPicker({ orgId, staffId, duration, onBooked }: Props
       .catch(() => setSlots([]))
       .finally(() => setLoading(false))
   }, [selected])
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   async function onConfirm(data: ConfirmData) {
     if (!selected || !pickedTime) return

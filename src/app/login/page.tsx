@@ -28,7 +28,16 @@ function NoticeBar() {
   const notice = searchParams.get('notice') === 'already_registered'
     ? 'This email is already registered. Please sign in to your existing account.'
     : null
-  if (!notice) return null
+  const errorParam = searchParams.get('error')
+  const errorMsg = errorParam === 'verification_failed'
+    ? 'Email verification failed. Please try signing in or request a new link.'
+    : null
+  if (!notice && !errorMsg) return null
+  if (errorMsg) return (
+    <div className="bg-red-500/10 border border-red-500/30 text-red-400 text-sm px-3 py-2 rounded">
+      {errorMsg}
+    </div>
+  )
   return (
     <div className="bg-[#C9A84C]/10 border border-[#C9A84C]/30 text-[#C9A84C] text-sm px-3 py-2 rounded">
       {notice}
@@ -51,7 +60,8 @@ function LoginForm({ lang }: { lang: Lang }) {
     const { data, error } = await supabase.auth.signInWithPassword({ email, password })
     if (error) { setError(error.message); setLoading(false); return }
     if (!data.user?.email_confirmed_at) { router.push('/verify-email'); return }
-    router.push('/dashboard')
+    const { data: orgData } = await supabase.from('organizations').select('id').eq('owner_id', data.user.id).maybeSingle()
+    router.push(orgData ? '/dashboard' : '/onboarding')
   }
 
   return (

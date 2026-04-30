@@ -10,6 +10,16 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+
+  /* ── Noble brand ── */
+  --color-noble-black:   #0F0A00;   /* landing dark bg */
+  --color-noble-dark:    #1a1208;   /* header, footer, primary text */
+  --color-noble-cream:   #f5f0e8;   /* booking page bg */
+  --color-noble-gold:    #C9A84C;   /* accent / CTA */
+  --color-noble-gold-hover: #e8d08a;
+  --color-noble-border:  #e8dfc9;   /* card borders */
+  --color-noble-text-secondary: #6b5744;
+  --color-noble-text-muted:     #9c8b7a;
 }
 
 @media (prefers-color-scheme: dark) {
