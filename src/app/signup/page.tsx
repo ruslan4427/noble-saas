@@ -117,6 +117,14 @@ export default function Signup() {
     const uid = data.user?.id
     if (!uid) { setError(error?.message || 'Signup failed. Try again.'); setLoading(false); return }
 
+    // If email is already confirmed (existing user), no session is returned.
+    // Redirect to login with notice instead of proceeding to OTP.
+    if (!data.session && data.user?.email_confirmed_at) {
+      setLoading(false)
+      router.push('/login?notice=already_registered')
+      return
+    }
+
     // When Supabase "Confirm email" is OFF — user is auto-confirmed, session exists.
     // Check if this user already has an org — show error and redirect to login.
     if (data.session) {
