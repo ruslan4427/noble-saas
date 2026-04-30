@@ -73,7 +73,7 @@ function LoginForm({ lang }: { lang: Lang }) {
       <div>
         <label className="text-sm text-white/60 mb-1 block">{t.email}</label>
         <input type="email" value={email} onChange={e => setEmail(e.target.value)}
-          className="w-full bg-white/10 border border-white/20 rounded px-3 py-2 text-white text-sm outline-none focus:border-[#C9A84C]"
+          className="w-full bg-white/10 border border-white/20 rounded px-3 py-2 text-white text-sm outline-none focus:border-[#C9A84C] min-h-[44px]"
           placeholder="you@example.com" required />
       </div>
       <div>
@@ -82,7 +82,7 @@ function LoginForm({ lang }: { lang: Lang }) {
           <Link href="/forgot-password" className="text-xs text-[#C9A84C] hover:underline">{t.forgot}</Link>
         </div>
         <input type="password" value={password} onChange={e => setPassword(e.target.value)}
-          className="w-full bg-white/10 border border-white/20 rounded px-3 py-2 text-white text-sm outline-none focus:border-[#C9A84C]"
+          className="w-full bg-white/10 border border-white/20 rounded px-3 py-2 text-white text-sm outline-none focus:border-[#C9A84C] min-h-[44px]"
           placeholder="••••••••" required />
       </div>
       <button type="submit" disabled={loading}
