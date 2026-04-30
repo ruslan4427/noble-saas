@@ -142,6 +142,7 @@ function LangToggle({ lang, onChange }: { lang: Lang; onChange: (l: Lang) => voi
 
 export default function HomeClient() {
   const [lang, setLang] = useState<Lang>('en')
+  const [menuOpen, setMenuOpen] = useState(false)
   const t = T[lang]
 
   return (
@@ -151,14 +152,45 @@ export default function HomeClient() {
         Skip to content
       </a>
 
-      <nav aria-label="Main navigation" className="flex items-center justify-between px-6 py-3 border-b border-white/10 sticky top-0 bg-[#0F0A00]/95 backdrop-blur z-50">
-        <Link href="/" className="font-serif text-xl text-[#C9A84C] tracking-wide" aria-label="Noble — home">✂ Noble</Link>
-        <div className="flex items-center gap-1">
-          <LangToggle lang={lang} onChange={setLang} />
-          <Link href="/pricing" className="text-sm text-white/60 hover:text-white transition px-4 py-3 min-h-[44px] flex items-center">{t.nav.pricing}</Link>
-          <Link href="/login" className="text-sm text-white/60 hover:text-white transition px-4 py-3 min-h-[44px] flex items-center">{t.nav.login}</Link>
-          <Link href="/signup" className="bg-[#C9A84C] text-black text-sm font-semibold px-5 py-3 rounded hover:bg-[#e8d08a] transition min-h-[44px] flex items-center">{t.nav.trial}</Link>
+      <nav aria-label="Main navigation" className="sticky top-0 bg-[#0F0A00]/95 backdrop-blur z-50 border-b border-white/10">
+        <div className="flex items-center justify-between px-6 py-3">
+          <Link href="/" className="font-serif text-xl text-[#C9A84C] tracking-wide" aria-label="Noble — home">✂ Noble</Link>
+
+          {/* Desktop nav */}
+          <div className="hidden md:flex items-center gap-1">
+            <LangToggle lang={lang} onChange={setLang} />
+            <Link href="/pricing" className="text-sm text-white/60 hover:text-white transition px-4 py-3 min-h-[44px] flex items-center">{t.nav.pricing}</Link>
+            <Link href="/login" className="text-sm text-white/60 hover:text-white transition px-4 py-3 min-h-[44px] flex items-center">{t.nav.login}</Link>
+            <Link href="/signup" className="bg-[#C9A84C] text-black text-sm font-semibold px-5 py-3 rounded hover:bg-[#e8d08a] transition min-h-[44px] flex items-center">{t.nav.trial}</Link>
+          </div>
+
+          {/* Mobile: lang toggle + burger */}
+          <div className="flex md:hidden items-center gap-3">
+            <LangToggle lang={lang} onChange={setLang} />
+            <button
+              onClick={() => setMenuOpen(o => !o)}
+              aria-label={menuOpen ? 'Close menu' : 'Open menu'}
+              aria-expanded={menuOpen}
+              className="flex flex-col justify-center items-center w-10 h-10 gap-[5px] rounded focus:outline-none"
+            >
+              <span className={`block w-6 h-[2px] bg-white/80 transition-all duration-200 ${menuOpen ? 'rotate-45 translate-y-[7px]' : ''}`} />
+              <span className={`block w-6 h-[2px] bg-white/80 transition-all duration-200 ${menuOpen ? 'opacity-0' : ''}`} />
+              <span className={`block w-6 h-[2px] bg-white/80 transition-all duration-200 ${menuOpen ? '-rotate-45 -translate-y-[7px]' : ''}`} />
+            </button>
+          </div>
         </div>
+
+        {/* Mobile dropdown menu */}
+        {menuOpen && (
+          <div className="md:hidden border-t border-white/10 bg-[#0F0A00] px-6 py-4 flex flex-col gap-1">
+            <Link href="/pricing" onClick={() => setMenuOpen(false)}
+              className="text-white/70 hover:text-white text-base py-3 border-b border-white/5 transition">{t.nav.pricing}</Link>
+            <Link href="/login" onClick={() => setMenuOpen(false)}
+              className="text-white/70 hover:text-white text-base py-3 border-b border-white/5 transition">{t.nav.login}</Link>
+            <Link href="/signup" onClick={() => setMenuOpen(false)}
+              className="mt-3 bg-[#C9A84C] text-black font-bold text-base py-3 rounded-xl text-center hover:bg-[#e8d08a] transition">{t.nav.trial}</Link>
+          </div>
+        )}
       </nav>
 
       <div id="main-content">
