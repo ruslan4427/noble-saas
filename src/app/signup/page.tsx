@@ -146,6 +146,7 @@ export default function Signup() {
       body: JSON.stringify({ email, userId: uid }),
     })
     const json = await res.json()
+    if (res.status === 409) { router.push('/login?notice=already_registered'); return }
     if (!res.ok) { setError(json.error || 'Failed to send code'); setLoading(false); return }
     setLoading(false); setStep('verify'); setCooldown(60)
   }

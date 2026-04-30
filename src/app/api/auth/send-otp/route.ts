@@ -8,6 +8,13 @@ export async function POST(req: NextRequest) {
   const { email, userId } = await req.json()
   if (!email || !userId) return NextResponse.json({ error: 'Missing fields' }, { status: 400 })
 
+  // Block if this user already has a registered organization.
+  const { data: existingOrg } = await supabaseAdmin
+    .from('organizations').select('id').eq('owner_id', userId).maybeSingle()
+  if (existingOrg) {
+    return NextResponse.json({ error: 'already_registered' }, { status: 409 })
+  }
+
   const code = String(Math.floor(100000 + Math.random() * 900000))
   const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString()
 
