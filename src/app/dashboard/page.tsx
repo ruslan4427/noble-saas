@@ -558,10 +558,12 @@ export default function Dashboard() {
             <div className="bg-white/5 border border-white/10 rounded-xl p-6">
               <h3 className="font-semibold mb-1">{t.overview.bookingPage}</h3>
               <p className="text-white/40 text-xs mb-3">{t.overview.bookingPageSub}</p>
-              <div className="flex items-center gap-3">
-                <code className="bg-black/30 px-3 py-2 rounded text-[#C9A84C] text-sm flex-1 break-all select-all">{bookingUrl}</code>
-                <button onClick={handleCopy} className="bg-[#C9A84C] text-black text-sm font-bold px-4 py-2 rounded hover:bg-[#e8d08a] transition whitespace-nowrap min-h-[36px]">{t.overview.copyLink}</button>
-                <a href={bookingUrl} target="_blank" rel="noopener noreferrer" className="border border-white/20 text-white/60 px-4 py-2 rounded text-sm hover:border-white/40 hover:text-white transition whitespace-nowrap min-h-[36px] flex items-center">{t.overview.open}</a>
+              <div className="flex flex-col gap-3">
+                <code className="bg-black/30 px-3 py-2 rounded text-[#C9A84C] text-sm break-all select-all">{bookingUrl}</code>
+                <div className="flex gap-3">
+                  <button onClick={handleCopy} className="bg-[#C9A84C] text-black text-sm font-bold px-4 py-2 rounded hover:bg-[#e8d08a] transition whitespace-nowrap min-h-[44px]">{t.overview.copyLink}</button>
+                  <a href={bookingUrl} target="_blank" rel="noopener noreferrer" className="border border-white/20 text-white/60 px-4 py-2 rounded text-sm hover:border-white/40 hover:text-white transition whitespace-nowrap min-h-[44px] flex items-center">{t.overview.open}</a>
+                </div>
               </div>
             </div>
             <div className="bg-white/5 border border-white/10 rounded-xl p-6">
