@@ -117,9 +117,9 @@ export default function Signup() {
     const uid = data.user?.id
     if (!uid) { setError(error?.message || 'Signup failed. Try again.'); setLoading(false); return }
 
-    // If email is already confirmed (existing user), no session is returned.
+    // Supabase returns identities:[] for an already-registered email (account enumeration guard).
     // Redirect to login with notice instead of proceeding to OTP.
-    if (!data.session && data.user?.email_confirmed_at) {
+    if (Array.isArray(data.user?.identities) && data.user.identities.length === 0) {
       setLoading(false)
       router.push('/login?notice=already_registered')
       return
