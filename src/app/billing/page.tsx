@@ -93,7 +93,7 @@ function BillingContent({ lang }: { lang: Lang }) {
   if (loading) return <div className="flex items-center justify-center min-h-screen"><div className="text-[#C9A84C] font-serif text-lg">{t.loading}</div></div>
 
   return (
-    <div className="max-w-lg mx-auto px-6 py-12">
+    <div className="max-w-lg mx-auto px-4 md:px-6 py-8 md:py-12">
       {reason === 'trial_expired' && (
         <div className="bg-red-500/10 border border-red-500/30 text-red-400 px-4 py-3 rounded-xl mb-8">{t.trialExpired}</div>
       )}
@@ -102,7 +102,7 @@ function BillingContent({ lang }: { lang: Lang }) {
       )}
       <div className="bg-white/5 border border-white/10 rounded-xl p-6 mb-8">
         <h2 className="font-semibold mb-4">{t.currentSub}</h2>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
           {[
             { label: t.stats[0], value: org?.plan_id },
             { label: t.stats[1], value: org?.sub_status },

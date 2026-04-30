@@ -114,7 +114,7 @@ function BookingRow({ booking, staffMap, onStatusChange }: {
       {expanded && (
         <div className="px-5 pb-4 pt-1 bg-white/3 border-t border-white/5">
           {/* Details */}
-          <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-xs mb-3 mt-1">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2 text-xs mb-3 mt-1">
             <div>
               <p className="text-white/30">Phone</p>
               <a href={`tel:${booking.client_phone}`} className="text-white/70 hover:text-white transition">{booking.client_phone}</a>

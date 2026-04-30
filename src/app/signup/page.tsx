@@ -78,11 +78,11 @@ function OtpInput({ onComplete }: { onComplete: (code: string) => void }) {
     if (pasted.length === 6) onComplete(pasted)
   }
   return (
-    <div className="flex gap-2 justify-center" onPaste={handlePaste}>
+    <div className="flex gap-1 sm:gap-2 justify-center" onPaste={handlePaste}>
       {digits.map((d, i) => (
         <input key={i} ref={el => { refs.current[i] = el }} type="text" inputMode="numeric" maxLength={1} value={d}
           onChange={e => handleChange(i, e.target.value)} onKeyDown={e => handleKeyDown(i, e)}
-          className={`w-11 h-14 text-center text-xl font-bold bg-white/10 border-2 rounded-xl text-white outline-none transition ${d ? 'border-[#C9A84C]' : 'border-white/20 focus:border-[#C9A84C]/60'}`} />
+          className={`w-9 h-12 sm:w-11 sm:h-14 text-center text-xl font-bold bg-white/10 border-2 rounded-xl text-white outline-none transition ${d ? 'border-[#C9A84C]' : 'border-white/20 focus:border-[#C9A84C]/60'}`} />
       ))}
     </div>
   )

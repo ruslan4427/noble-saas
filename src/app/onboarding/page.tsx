@@ -154,9 +154,9 @@ export default function Onboarding() {
               <div>
                 <label className="text-sm text-white/60 mb-1 block">{t.bookingUrl}</label>
                 <div className="flex items-center bg-white/10 border border-white/20 rounded overflow-hidden">
-                  <span className="text-white/40 text-sm px-3 py-2 border-r border-white/20">noblelink.app/salon/</span>
+                  <span className="text-white/40 text-xs sm:text-sm px-2 sm:px-3 py-2 border-r border-white/20 whitespace-nowrap">noblelink.app/salon/</span>
                   <input value={data.slug} onChange={e => update('slug', e.target.value)}
-                    className="flex-1 bg-transparent px-3 py-2 text-white text-sm outline-none font-mono"
+                    className="flex-1 min-w-0 bg-transparent px-2 sm:px-3 py-2 text-white text-sm outline-none font-mono"
                     placeholder="my-salon" />
                 </div>
               </div>

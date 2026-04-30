@@ -508,8 +508,8 @@ export default function Dashboard() {
         </div>
       </nav>
 
-      <div className="max-w-5xl mx-auto px-6 py-8">
-        <div className="flex gap-1 mb-8 bg-white/5 rounded-lg p-1 w-fit overflow-x-auto">
+      <div className="max-w-5xl mx-auto px-4 md:px-6 py-8">
+        <div className="flex gap-1 mb-8 bg-white/5 rounded-lg p-1 w-full md:w-fit overflow-x-auto">
           {TABS.map(tab => (
             <button key={tab} onClick={() => setActiveTab(tab)}
               className={`px-4 py-2 rounded text-sm font-medium transition whitespace-nowrap ${activeTab === tab ? 'bg-[#C9A84C] text-black' : 'text-white/50 hover:text-white'}`}>
@@ -680,7 +680,7 @@ export default function Dashboard() {
               <div className="bg-white/5 border border-[#C9A84C]/30 rounded-xl p-4 space-y-3">
                 <h3 className="text-sm font-semibold text-[#C9A84C]">{t.services.newService}</h3>
                 <input value={newServiceName} onChange={e => setNewServiceName(e.target.value)} className={inputCls} placeholder={t.services.namePh} />
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div><label className="text-xs text-white/50 mb-1 block">{t.services.priceLabel}</label><input value={newServicePrice} onChange={e => setNewServicePrice(e.target.value)} type="number" min="0" step="0.01" className={inputCls} placeholder="25" /></div>
                   <div><label className="text-xs text-white/50 mb-1 block">{t.services.durationLabel}</label><select value={newServiceDuration} onChange={e => setNewServiceDuration(e.target.value)} className={inputCls}>{[15,30,45,60,90,120].map(m=><option key={m} value={m}>{m} min</option>)}</select></div>
                 </div>
@@ -694,7 +694,7 @@ export default function Dashboard() {
               <div className="bg-white/5 border border-[#C9A84C]/30 rounded-xl p-4 space-y-3">
                 <h3 className="text-sm font-semibold text-[#C9A84C]">{t.services.editService}</h3>
                 <input value={editServiceName} onChange={e => setEditServiceName(e.target.value)} className={inputCls} placeholder={t.services.namePh} />
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div><label className="text-xs text-white/50 mb-1 block">{t.services.priceLabel}</label><input value={editServicePrice} onChange={e => setEditServicePrice(e.target.value)} type="number" min="0" step="0.01" className={inputCls} placeholder="25" /></div>
                   <div><label className="text-xs text-white/50 mb-1 block">{t.services.durationLabel}</label><select value={editServiceDuration} onChange={e => setEditServiceDuration(e.target.value)} className={inputCls}>{[15,30,45,60,90,120].map(m=><option key={m} value={m}>{m} min</option>)}</select></div>
                 </div>
@@ -738,8 +738,8 @@ export default function Dashboard() {
               <div>
                 <label className="text-sm text-white/60 mb-1 block">{t.settings.bookingUrl}</label>
                 <div className="flex items-center bg-white/10 border border-white/20 rounded overflow-hidden focus-within:border-[#C9A84C]">
-                  <span className="text-white/30 text-xs px-3 py-2 border-r border-white/10 whitespace-nowrap">noblelink.app/salon/</span>
-                  <input value={settingsSlug} onChange={e => setSettingsSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '-').replace(/-+/g, '-'))} className="flex-1 bg-transparent px-3 py-2 text-white text-sm outline-none font-mono" />
+                  <span className="text-white/30 text-xs px-2 sm:px-3 py-2 border-r border-white/10 whitespace-nowrap">noblelink.app/salon/</span>
+                  <input value={settingsSlug} onChange={e => setSettingsSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '-').replace(/-+/g, '-'))} className="flex-1 min-w-0 bg-transparent px-2 sm:px-3 py-2 text-white text-sm outline-none font-mono" />
                 </div>
                 <p className="text-white/30 text-xs mt-1">{t.settings.urlWarning}</p>
               </div>

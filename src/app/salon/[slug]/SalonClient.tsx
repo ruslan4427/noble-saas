@@ -719,7 +719,7 @@ export default function SalonClient({ org, staff, services }: Props) {
               <div className="px-5 pt-5 pb-3 border-b border-[#f0e8dc]">
                 <p className="text-[11px] font-bold text-[#9c8b7a] uppercase tracking-widest">{t.ourTeam}</p>
               </div>
-              <div className="flex gap-5 px-5 py-5 overflow-x-auto">
+              <div className="flex gap-3 md:gap-5 px-3 md:px-5 py-4 md:py-5 overflow-x-auto">
                 {staff.map(m => (
                   <button
                     key={m.id}
@@ -909,7 +909,7 @@ export default function SalonClient({ org, staff, services }: Props) {
                   <p className="text-xs text-[#9c8b7a] mb-3 font-medium">
                     {freeCount > 0 ? t.openings(freeCount) : t.allTaken}
                   </p>
-                  <div className="grid grid-cols-4 gap-2">
+                  <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
                     {allSlots.map(({ time, available }) => (
                       <button
                         key={time}
