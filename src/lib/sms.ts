@@ -2,19 +2,20 @@
 // Required env vars:
 //   TWILIO_ACCOUNT_SID
 //   TWILIO_AUTH_TOKEN
-//   TWILIO_PHONE_NUMBER
+//   TWILIO_PHONE_NUMBER  OR  TWILIO_MESSAGING_SERVICE_SID (preferred for A2P 10DLC)
 
-const TWILIO_SID   = process.env.TWILIO_ACCOUNT_SID ?? ''
-const TWILIO_TOKEN = process.env.TWILIO_AUTH_TOKEN ?? ''
-const TWILIO_FROM  = process.env.TWILIO_PHONE_NUMBER ?? ''
+const TWILIO_SID      = process.env.TWILIO_ACCOUNT_SID ?? ''
+const TWILIO_TOKEN    = process.env.TWILIO_AUTH_TOKEN ?? ''
+const TWILIO_FROM     = process.env.TWILIO_PHONE_NUMBER ?? ''
+const TWILIO_MSG_SVC  = process.env.TWILIO_MESSAGING_SERVICE_SID ?? ''
 
-// Auto-enables when all three Twilio env vars are set in Vercel
-export const SMS_ENABLED = !!(TWILIO_SID && TWILIO_TOKEN && TWILIO_FROM)
+// Auto-enables when account + token + (phone or messaging service) are set
+export const SMS_ENABLED = !!(TWILIO_SID && TWILIO_TOKEN && (TWILIO_FROM || TWILIO_MSG_SVC))
 
 // ── Core send ──────────────────────────────────────────────────────────────
 export async function sendSMS(to: string, body: string): Promise<{ sid: string } | null> {
   if (!SMS_ENABLED) return null
-  if (!TWILIO_SID || !TWILIO_TOKEN || !TWILIO_FROM) {
+  if (!TWILIO_SID || !TWILIO_TOKEN || (!TWILIO_FROM && !TWILIO_MSG_SVC)) {
     console.warn('SMS skipped: Twilio env vars not set')
     return null
   }
@@ -26,7 +27,10 @@ export async function sendSMS(to: string, body: string): Promise<{ sid: string }
   }
 
   const url = `https://api.twilio.com/2010-04-01/Accounts/${TWILIO_SID}/Messages.json`
-  const params = new URLSearchParams({ To: phone, From: TWILIO_FROM, Body: body })
+  // Prefer MessagingServiceSid (A2P 10DLC compliant) over From phone number
+  const params = new URLSearchParams({ To: phone, Body: body })
+  if (TWILIO_MSG_SVC) params.set('MessagingServiceSid', TWILIO_MSG_SVC)
+  else params.set('From', TWILIO_FROM)
 
   const res = await fetch(url, {
     method: 'POST',
