@@ -139,6 +139,10 @@ export default function DemoBookingPage() {
             {loading ? 'Booking…' : 'Book Appointment'}
           </button>
 
+          <p style={{ fontSize: 12, color: '#9c8b7a', textAlign: 'center', margin: 0 }}>
+            If you opt in, you will receive SMS confirmation after booking.
+          </p>
+
           {/* ── Legal links (visible below submit) ── */}
           <p style={{ fontSize: 12, color: '#9c8b7a', textAlign: 'center', margin: 0, lineHeight: 1.8 }}>
             By booking, you agree to our{' '}
