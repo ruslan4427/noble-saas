@@ -97,8 +97,9 @@ export default function DemoBookingPage() {
 
           {/* ── SMS Consent (optional) ── */}
           <div>
-            <p style={{ fontSize: 12, fontWeight: 600, color: '#9c8b7a', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 10 }}>
-              SMS Notifications — Optional
+            <p style={{ fontSize: 13, fontWeight: 700, color: '#1a1208', marginBottom: 10 }}>
+              SMS Notifications{' '}
+              <span style={{ fontWeight: 400, color: '#9c8b7a' }}>(Optional — not required to book)</span>
             </p>
 
             <label style={{ display: 'flex', alignItems: 'flex-start', gap: 12, cursor: 'pointer' }}>
@@ -117,9 +118,11 @@ export default function DemoBookingPage() {
               </span>
             </label>
 
-            {/* Twilio A2P 10DLC required disclaimer */}
             <p style={{ fontSize: 12, color: '#9c8b7a', marginTop: 10, paddingLeft: 30, lineHeight: 1.6 }}>
               Providing consent to receive SMS messages is not required to complete the booking.
+            </p>
+            <p style={{ fontSize: 12, color: '#9c8b7a', marginTop: 6, paddingLeft: 30 }}>
+              Message frequency varies.
             </p>
           </div>
 
