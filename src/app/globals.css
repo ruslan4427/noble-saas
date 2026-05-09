@@ -43,3 +43,16 @@ body {
 .animate-fade-in {
   animation: fade-in 0.2s ease-out;
 }
+
+/* Unavailable booking slots — !important overrides WebView (Instagram/Telegram) UA defaults */
+.slot-booked {
+  background: #c8bfb0 !important;
+  color: #8a8078 !important;
+  border-color: #b8b0a4 !important;
+  pointer-events: none !important;
+  cursor: default !important;
+  box-shadow: none !important;
+}
+.slot-booked > span:first-child {
+  text-decoration: line-through !important;
+}

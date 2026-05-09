@@ -958,10 +958,9 @@ export default function SalonClient({ org, staff, services }: Props) {
                         key={time}
                         onClick={() => available ? setSelectedTime(time) : undefined}
                         aria-disabled={!available}
-                        style={!available ? { background: 'repeating-linear-gradient(-45deg,#ddd6cb,#ddd6cb 4px,#ece7df 4px,#ece7df 10px)' } : undefined}
                         className={`flex flex-col items-center justify-center gap-0.5 py-2 rounded-xl text-sm font-semibold border transition min-h-[52px] ${
                           !available
-                            ? 'border-[#ccc5bc] text-[#9e9388] pointer-events-none'
+                            ? 'slot-booked'
                             : selectedTime === time
                               ? 'border-[#C9A84C] bg-[#C9A84C] text-black shadow-md active:scale-[0.96]'
                               : 'border-[#d4c9b8] bg-white text-[#1a1208] hover:border-[#C9A84C] shadow-sm active:scale-[0.96]'
