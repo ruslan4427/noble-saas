@@ -4,10 +4,8 @@ import Image from 'next/image'
 import { createClient } from '@/lib/supabase'
 import { toAmPm } from '@/lib/time'
 
-function avatarUrl(url: string, size = 128): string {
-  // Use Supabase image transformation to resize + compress on-the-fly
-  return url.replace('/storage/v1/object/public/', '/storage/v1/render/image/public/')
-    + (url.includes('?') ? '&' : '?') + `width=${size}&quality=75&format=webp`
+function avatarUrl(url: string): string {
+  return url
 }
 
 interface Org {
