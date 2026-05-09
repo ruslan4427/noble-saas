@@ -224,6 +224,40 @@ function isValidPhone(p: string): boolean {
   return p.replace(/\D/g, '').length >= 7
 }
 
+const COUNTRIES = [
+  { code: 'US', dial: '+1',   flag: '🇺🇸' },
+  { code: 'CA', dial: '+1',   flag: '🇨🇦' },
+  { code: 'GB', dial: '+44',  flag: '🇬🇧' },
+  { code: 'AU', dial: '+61',  flag: '🇦🇺' },
+  { code: 'UA', dial: '+380', flag: '🇺🇦' },
+  { code: 'DE', dial: '+49',  flag: '🇩🇪' },
+  { code: 'FR', dial: '+33',  flag: '🇫🇷' },
+  { code: 'ES', dial: '+34',  flag: '🇪🇸' },
+  { code: 'IT', dial: '+39',  flag: '🇮🇹' },
+  { code: 'PL', dial: '+48',  flag: '🇵🇱' },
+  { code: 'NL', dial: '+31',  flag: '🇳🇱' },
+  { code: 'PT', dial: '+351', flag: '🇵🇹' },
+  { code: 'MX', dial: '+52',  flag: '🇲🇽' },
+  { code: 'BR', dial: '+55',  flag: '🇧🇷' },
+  { code: 'AR', dial: '+54',  flag: '🇦🇷' },
+  { code: 'TR', dial: '+90',  flag: '🇹🇷' },
+  { code: 'AE', dial: '+971', flag: '🇦🇪' },
+  { code: 'SA', dial: '+966', flag: '🇸🇦' },
+  { code: 'IN', dial: '+91',  flag: '🇮🇳' },
+  { code: 'CN', dial: '+86',  flag: '🇨🇳' },
+  { code: 'JP', dial: '+81',  flag: '🇯🇵' },
+  { code: 'KR', dial: '+82',  flag: '🇰🇷' },
+  { code: 'ZA', dial: '+27',  flag: '🇿🇦' },
+  { code: 'NG', dial: '+234', flag: '🇳🇬' },
+]
+
+function detectCountryCode(): string {
+  try {
+    const country = (navigator.language || '').split('-')[1]?.toUpperCase() ?? ''
+    return COUNTRIES.find(c => c.code === country)?.code ?? 'US'
+  } catch { return 'US' }
+}
+
 function AvatarPlaceholder({ size = 48 }: { size?: number }) {
   return (
     <div style={{ width: size, height: size }} className="rounded-full bg-[#f5f0e8] border-2 border-[#e8dfc9] flex items-center justify-center flex-none">
@@ -369,7 +403,8 @@ export default function SalonClient({ org, staff, services }: Props) {
   const [selectedDate, setSelectedDate] = useState<Date | null>(null)
   const [selectedTime, setSelectedTime] = useState<string | null>(null)
   const [name, setName] = useState('')
-  const [phone, setPhone] = useState('')
+  const [phoneLocal, setPhoneLocal] = useState('')
+  const [countryCode, setCountryCode] = useState('US')
   const [phoneError, setPhoneError] = useState('')
   const [clientEmail, setClientEmail] = useState('')
   const [smsConsent, setSmsConsent] = useState(false)
@@ -387,6 +422,10 @@ export default function SalonClient({ org, staff, services }: Props) {
   const t = TRANSLATIONS[lang]
 
   useEffect(() => { const t = setTimeout(() => setPageLoading(false), 300); return () => clearTimeout(t) }, [])
+  useEffect(() => { setCountryCode(detectCountryCode()) }, [])
+
+  const countryDial = COUNTRIES.find(c => c.code === countryCode)?.dial ?? '+1'
+  const phone = countryDial + phoneLocal.replace(/\D/g, '')
 
   useEffect(() => {
     supabase.from('calendar_blocks').select('staff_id,start_time,end_time,type')
@@ -572,7 +611,7 @@ export default function SalonClient({ org, staff, services }: Props) {
     }
     setStep('hero'); setSelectedStaff(null); setSelectedService(null)
     setSelectedDate(null); setSelectedTime(null)
-    setName(''); setPhone(''); setPhoneError(''); setClientEmail(''); setSmsConsent(false); setError('')
+    setName(''); setPhoneLocal(''); setPhoneError(''); setClientEmail(''); setSmsConsent(false); setError('')
   }
 
   if (pageLoading) return <LoadingState />
@@ -1008,17 +1047,29 @@ export default function SalonClient({ org, staff, services }: Props) {
                   <label htmlFor="client-phone" className="block text-sm font-semibold text-[#1a1208] mb-2">
                     {t.phone} <span className="text-red-500 font-normal">*</span>
                   </label>
-                  <input
-                    id="client-phone"
-                    type="tel"
-                    value={phone}
-                    onChange={e => { setPhone(e.target.value); if (phoneError) setPhoneError('') }}
-                    autoComplete="tel"
-                    placeholder={t.phonePlaceholder}
-                    className={`w-full border rounded-2xl px-4 py-3.5 text-sm text-[#1a1208] outline-none focus:ring-2 focus:ring-[#C9A84C]/15 bg-white placeholder-[#b5a898] min-h-[52px] transition ${
-                      phoneError ? 'border-red-400 focus:border-red-400' : 'border-[#c8bfb0] focus:border-[#C9A84C]'
-                    }`}
-                  />
+                  <div className={`flex rounded-2xl border bg-white overflow-hidden transition ${
+                    phoneError ? 'border-red-400' : 'border-[#c8bfb0] focus-within:border-[#C9A84C] focus-within:ring-2 focus-within:ring-[#C9A84C]/15'
+                  }`}>
+                    <select
+                      value={countryCode}
+                      onChange={e => setCountryCode(e.target.value)}
+                      className="bg-[#f5f0e8] border-r border-[#e8dfc9] px-2.5 text-sm text-[#1a1208] outline-none cursor-pointer min-h-[52px] flex-none"
+                      aria-label="Country code"
+                    >
+                      {COUNTRIES.map(c => (
+                        <option key={c.code} value={c.code}>{c.flag} {c.dial}</option>
+                      ))}
+                    </select>
+                    <input
+                      id="client-phone"
+                      type="tel"
+                      value={phoneLocal}
+                      onChange={e => { setPhoneLocal(e.target.value); if (phoneError) setPhoneError('') }}
+                      autoComplete="tel-national"
+                      placeholder="555 000 0000"
+                      className="flex-1 px-4 py-3.5 text-sm text-[#1a1208] outline-none bg-transparent placeholder-[#b5a898] min-h-[52px]"
+                    />
+                  </div>
                   {phoneError && <p className="text-red-500 text-xs mt-1.5">{phoneError}</p>}
                 </div>
                 <div>
