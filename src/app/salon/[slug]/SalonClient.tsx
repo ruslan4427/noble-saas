@@ -425,7 +425,9 @@ export default function SalonClient({ org, staff, services }: Props) {
   useEffect(() => { setCountryCode(detectCountryCode()) }, [])
 
   const countryDial = COUNTRIES.find(c => c.code === countryCode)?.dial ?? '+1'
-  const phone = countryDial + phoneLocal.replace(/\D/g, '')
+  const localDigits = phoneLocal.replace(/\D/g, '')
+  // Strip trunk prefix 0 for non-US/CA numbers (e.g., UA 0671234567 + +380 → +380671234567, not +3800671234567)
+  const phone = countryDial + (countryDial !== '+1' && localDigits.startsWith('0') ? localDigits.slice(1) : localDigits)
 
   useEffect(() => {
     supabase.from('calendar_blocks').select('staff_id,start_time,end_time,type')

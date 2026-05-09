@@ -18,6 +18,7 @@ export async function POST(req: Request) {
     if (!booking) return NextResponse.json({ error: 'Booking not found' }, { status: 404 })
     const { data: consent } = await supabase
       .from('sms_consent').select('consented')
+      .eq('org_id', booking.org_id)
       .eq('phone', booking.client_phone).maybeSingle()
     if (!consent?.consented) return NextResponse.json({ ok: false, reason: 'no_consent' })
     const [{ data: org }, { data: master }] = await Promise.all([

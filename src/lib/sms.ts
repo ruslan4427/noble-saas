@@ -54,10 +54,10 @@ export async function sendSMS(to: string, body: string): Promise<{ sid: string }
 function normalisePhone(raw: string): string | null {
   if (/^\+\d{7,15}$/.test(raw)) return raw
   const digits = raw.replace(/\D/g, '')
+  if (digits.length === 10 && digits.startsWith('0')) return `+38${digits.slice(1)}`
   if (digits.length === 10) return `+1${digits}`
   if (digits.length === 11 && digits.startsWith('1')) return `+${digits}`
   if (digits.length === 12 && digits.startsWith('380')) return `+${digits}`
-  if (digits.length === 10 && digits.startsWith('0')) return `+38${digits}`
   return null
 }
 

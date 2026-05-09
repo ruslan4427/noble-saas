@@ -66,6 +66,7 @@ export async function POST(req: NextRequest) {
       const { data: consent } = await supabase
         .from('sms_consent')
         .select('consented')
+        .eq('org_id', org_id)
         .eq('phone', client_phone)
         .maybeSingle()
 
