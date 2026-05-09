@@ -13,6 +13,7 @@ export async function POST(req: NextRequest) {
     const {
       org_id, client_name, client_phone, client_email,
       master_name, service_name, date, time, price_cents, booking_id,
+      sms_consent,
     } = await req.json()
 
     if (!org_id || !client_name || !master_name || !service_name || !date || !time) {
@@ -52,8 +53,16 @@ export async function POST(req: NextRequest) {
       results.ownerEmail = res.data?.id ?? 'sent'
     }
 
-    // 3. SMS confirmation — disabled until SMS_ENABLED = true
+    // 3. SMS confirmation
     if (SMS_ENABLED && client_phone) {
+      // Save consent first if client opted in during booking
+      if (sms_consent) {
+        await supabase.from('sms_consent').upsert(
+          { client_phone, consented: true, updated_at: new Date().toISOString() },
+          { onConflict: 'client_phone' }
+        )
+      }
+
       const { data: consent } = await supabase
         .from('sms_consent')
         .select('consented')

@@ -589,13 +589,8 @@ export default function SalonClient({ org, staff, services }: Props) {
         master_name:selectedStaff.name, service_name:selectedService.name,
         date:selectedDate.toLocaleDateString('en-US',{day:'numeric',month:'long',year:'numeric'}),
         time:selectedTime, price_cents:selectedService.price_cents, booking_id:newBooking?.id,
+        sms_consent: smsConsent,
       }) }).catch(()=>{})
-      if (smsConsent && phone && newBooking?.id) {
-        fetch('/api/sms/consent', { method:'POST', headers:{'Content-Type':'application/json'},
-          body: JSON.stringify({ client_phone: phone, consented: true }) }).catch(()=>{})
-        fetch('/api/sms/send', { method:'POST', headers:{'Content-Type':'application/json'},
-          body: JSON.stringify({ type: 'confirmation', booking_id: newBooking.id }) }).catch(()=>{})
-      }
       // BUG-01 FIX: update cache immediately after booking so "Book again" shows correct state
       const bookedKey = `${selectedStaff.id}_${ds}`
       setBookedSlotsMap(prev => ({
