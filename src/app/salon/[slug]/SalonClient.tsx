@@ -559,10 +559,14 @@ export default function SalonClient({ org, staff, services }: Props) {
       }
       const [h, m] = selectedTime.split(':').map(Number)
       const startDate = new Date(`${ds}T${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:00`)
+      const durationMin = selectedService.duration_min ?? 30
+      const endDate = new Date(startDate.getTime() + durationMin * 60 * 1000)
       const reminderAt = new Date(startDate.getTime() - 2*60*60*1000)
       const { data: newBooking, error: bookingError } = await supabase.from('bookings').insert({
         org_id:org.id, master_id:selectedStaff.id, date:ds, time_slot:selectedTime,
-        start_time:startDate.toISOString(), reminder_at:reminderAt.toISOString(), reminder_sent:false,
+        start_time:startDate.toISOString(), end_time:endDate.toISOString(),
+        duration_min:durationMin,
+        reminder_at:reminderAt.toISOString(), reminder_sent:false,
         client_name:name, client_phone:phone,
         // BUG-14 FIX: only store email if it looks valid
         client_email: clientEmail && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(clientEmail) ? clientEmail : null,
