@@ -69,7 +69,7 @@ export async function GET(req: Request) {
           const { data: consent } = await supabase
             .from('sms_consent')
             .select('consented')
-            .eq('client_phone', booking.client_phone)
+            .eq('phone', booking.client_phone)
             .maybeSingle()
 
           if (consent?.consented) {

@@ -20,8 +20,7 @@ export async function POST(req: Request) {
     if (isStop || isStart) {
       await supabase.from('sms_consent').update({
         consented: isStart,
-        opted_out_at: isStop ? new Date().toISOString() : null,
-      }).eq('client_phone', from)
+      }).eq('phone', from)
     }
     return new Response('<?xml version="1.0" encoding="UTF-8"?><Response></Response>', {
       headers: { 'Content-Type': 'text/xml' },

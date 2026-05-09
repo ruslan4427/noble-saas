@@ -58,15 +58,15 @@ export async function POST(req: NextRequest) {
       // Save consent first if client opted in during booking
       if (sms_consent) {
         await supabase.from('sms_consent').upsert(
-          { client_phone, consented: true, updated_at: new Date().toISOString() },
-          { onConflict: 'client_phone' }
+          { org_id, phone: client_phone, consented: true },
+          { onConflict: 'org_id,phone' }
         )
       }
 
       const { data: consent } = await supabase
         .from('sms_consent')
         .select('consented')
-        .eq('client_phone', client_phone)
+        .eq('phone', client_phone)
         .maybeSingle()
 
       if (consent?.consented) {
