@@ -54,24 +54,21 @@ export async function POST(req: NextRequest) {
     }
 
     // 3. SMS confirmation
-    console.log('[SMS]', { SMS_ENABLED, client_phone, sms_consent, org_id })
     if (SMS_ENABLED && client_phone) {
       if (sms_consent) {
-        const { error: upsertErr } = await supabase.from('sms_consent').upsert(
+        await supabase.from('sms_consent').upsert(
           { org_id, phone: client_phone, consented: true },
           { onConflict: 'org_id,phone' }
         )
-        console.log('[SMS] upsert:', upsertErr ?? 'ok')
       }
 
-      const { data: consent, error: consentErr } = await supabase
+      const { data: consent } = await supabase
         .from('sms_consent')
         .select('consented')
         .eq('org_id', org_id)
         .eq('phone', client_phone)
         .maybeSingle()
 
-      console.log('[SMS] consent:', consent, consentErr ?? '')
       if (consent?.consented) {
         // Fetch exact YYYY-MM-DD date string if booking_id provided
         let dateStr = date
