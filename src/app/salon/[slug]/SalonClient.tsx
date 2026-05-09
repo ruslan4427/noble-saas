@@ -953,22 +953,29 @@ export default function SalonClient({ org, staff, services }: Props) {
                     {freeCount > 0 ? t.openings(freeCount) : t.allTaken}
                   </p>
                   <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
-                    {allSlots.map(({ time, available }) => (
-                      <button
-                        key={time}
-                        onClick={() => available ? setSelectedTime(time) : undefined}
-                        aria-disabled={!available}
-                        className={`flex flex-col items-center justify-center gap-0.5 py-2 rounded-xl text-sm font-semibold border transition min-h-[52px] ${
-                          !available
-                            ? 'slot-booked'
-                            : selectedTime === time
+                    {allSlots.map(({ time, available }) =>
+                      !available ? (
+                        <div
+                          key={time}
+                          aria-disabled="true"
+                          style={{ background:'#c8bfb0', color:'#8a8078', borderColor:'#b8b0a4', boxShadow:'none' }}
+                          className="flex flex-col items-center justify-center gap-0.5 py-2 rounded-xl text-sm font-semibold border min-h-[52px] select-none">
+                          <span style={{ textDecoration:'line-through' }}>{toAmPm(time)}</span>
+                          <span style={{ fontSize:'10px', fontWeight:'400', letterSpacing:'0.05em', lineHeight:'1' }}>{t.unavailable}</span>
+                        </div>
+                      ) : (
+                        <button
+                          key={time}
+                          onClick={() => setSelectedTime(time)}
+                          className={`flex flex-col items-center justify-center gap-0.5 py-2 rounded-xl text-sm font-semibold border transition min-h-[52px] ${
+                            selectedTime === time
                               ? 'border-[#C9A84C] bg-[#C9A84C] text-black shadow-md active:scale-[0.96]'
                               : 'border-[#d4c9b8] bg-white text-[#1a1208] hover:border-[#C9A84C] shadow-sm active:scale-[0.96]'
-                        }`}>
-                        <span className={!available ? 'line-through' : ''}>{toAmPm(time)}</span>
-                        {!available && <span className="text-[10px] font-normal tracking-wide leading-none">{t.unavailable}</span>}
-                      </button>
-                    ))}
+                          }`}>
+                          <span>{toAmPm(time)}</span>
+                        </button>
+                      )
+                    )}
                   </div>
                 </>
               )}
