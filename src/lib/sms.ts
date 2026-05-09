@@ -101,7 +101,7 @@ export function smsReminder(p: BookingParams): string {
 
 export function smsCancellation(p: BookingParams): string {
   const when = formatDateInTZ(p.date, p.time, p.timezone)
-  return `${p.salonName}: Your appointment has been cancelled.\nWith: ${p.masterName}\nService: ${p.serviceName}\nWhen: ${when}\nBook again: noblelink.app\nReply STOP to unsubscribe.`
+  return `${p.salonName}: Your appointment has been cancelled.\nWith: ${p.masterName}\nService: ${p.serviceName}\nWhen: ${when}\nReply STOP to unsubscribe.`
 }
 
 export function smsReschedule(p: BookingParams & { oldDate: string; oldTime: string }): string {
