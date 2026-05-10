@@ -461,15 +461,29 @@ export default function SalonClient({ org, staff, services }: Props) {
     // Only skip if currently in-flight (null)
     if (bookedSlotsMap[key] === null) return
 
-    // Always fetch fresh on date/staff change
+    // Fetch fresh — bypass Supabase JS client to prevent WebView HTTP caching.
+    // Timestamp in URL guarantees cache-miss in all browsers/WebViews.
     setBookedSlotsMap(prev => ({ ...prev, [key]: null }))
-    supabase.from('bookings').select('time_slot')
-      .eq('master_id', sid).eq('date', ds).neq('status', 'cancelled')
-      .then(({ data }) => {
+    const url = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/rest/v1/bookings` +
+      `?select=time_slot&master_id=eq.${sid}&date=eq.${ds}&status=neq.cancelled&_t=${Date.now()}`
+    fetch(url, {
+      headers: {
+        apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+        Authorization: `Bearer ${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!}`,
+        'Cache-Control': 'no-cache, no-store',
+        Pragma: 'no-cache',
+      },
+      cache: 'no-store',
+    })
+      .then(r => r.ok ? r.json() : [])
+      .then((data: Array<{ time_slot: string }>) => {
         setBookedSlotsMap(prev => ({
           ...prev,
-          [key]: (data || []).map((b: { time_slot: string }) => b.time_slot)
+          [key]: Array.isArray(data) ? data.map(b => b.time_slot) : []
         }))
+      })
+      .catch(() => {
+        setBookedSlotsMap(prev => ({ ...prev, [key]: [] }))
       })
   }, [selectedStaff, selectedDate])
 
