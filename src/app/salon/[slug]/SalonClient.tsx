@@ -461,26 +461,18 @@ export default function SalonClient({ org, staff, services }: Props) {
     // Only skip if currently in-flight (null)
     if (bookedSlotsMap[key] === null) return
 
-    // Fetch fresh — bypass Supabase JS client to prevent WebView HTTP caching.
-    // Timestamp in URL guarantees cache-miss in all browsers/WebViews.
+    // Route through server-side API so response has Cache-Control: no-store,
+    // which WebViews (Instagram/Telegram) must respect — unlike request-side hints.
     setBookedSlotsMap(prev => ({ ...prev, [key]: null }))
-    const url = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/rest/v1/bookings` +
-      `?select=time_slot&master_id=eq.${sid}&date=eq.${ds}&status=neq.cancelled&_t=${Date.now()}`
-    fetch(url, {
-      headers: {
-        apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-        Authorization: `Bearer ${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!}`,
-        'Cache-Control': 'no-cache, no-store',
-        Pragma: 'no-cache',
-      },
-      cache: 'no-store',
-    })
-      .then(r => r.ok ? r.json() : [])
-      .then((data: Array<{ time_slot: string }>) => {
-        setBookedSlotsMap(prev => ({
-          ...prev,
-          [key]: Array.isArray(data) ? data.map(b => b.time_slot) : []
-        }))
+    const duration = selectedService?.duration_min ?? 30
+    const url = `/api/availability?staff_id=${sid}&date=${ds}&org_id=${encodeURIComponent(org.id)}&duration=${duration}`
+    fetch(url, { cache: 'no-store' })
+      .then(r => r.ok ? r.json() : { slots: [] })
+      .then((data: { slots: Array<{ time: string; available: boolean }> }) => {
+        const booked = Array.isArray(data.slots)
+          ? data.slots.filter(s => !s.available).map(s => s.time)
+          : []
+        setBookedSlotsMap(prev => ({ ...prev, [key]: booked }))
       })
       .catch(() => {
         setBookedSlotsMap(prev => ({ ...prev, [key]: [] }))

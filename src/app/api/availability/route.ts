@@ -68,5 +68,7 @@ export async function GET(req: NextRequest) {
     staffId,
   )
 
-  return NextResponse.json({ slots })
+  return NextResponse.json({ slots }, {
+    headers: { 'Cache-Control': 'no-store, no-cache, must-revalidate' },
+  })
 }
