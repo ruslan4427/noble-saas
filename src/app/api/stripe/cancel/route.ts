@@ -19,13 +19,16 @@ export async function POST(req: NextRequest) {
   }
 
   // Cancel at period end so the user keeps access until billing cycle ends
-  await stripe.subscriptions.update(org.stripe_subscription_id, {
+  const sub = await stripe.subscriptions.update(org.stripe_subscription_id, {
     cancel_at_period_end: true,
   })
 
+  // Store period_end as trial_ends_at so middleware knows when access truly expires
+  const accessUntil = new Date((sub as unknown as { current_period_end: number }).current_period_end * 1000).toISOString()
+
   await supabaseAdmin
     .from('organizations')
-    .update({ sub_status: 'canceled' })
+    .update({ sub_status: 'canceled', trial_ends_at: accessUntil })
     .eq('id', org_id)
 
   return NextResponse.json({ ok: true })

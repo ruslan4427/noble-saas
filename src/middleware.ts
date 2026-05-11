@@ -45,8 +45,12 @@ export async function middleware(req: NextRequest) {
       trial_ends_at != null &&
       new Date(trial_ends_at) > new Date()
     const paidActive = sub_status === 'active'
+    // Canceled but still within paid period (cancel_at_period_end)
+    const canceledButPaid = sub_status === 'canceled' &&
+      trial_ends_at != null &&
+      new Date(trial_ends_at) > new Date()
 
-    if (!paidActive && !trialActive) {
+    if (!paidActive && !trialActive && !canceledButPaid) {
       return NextResponse.redirect(new URL('/billing?reason=trial_expired', url))
     }
   }

@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
 
   const { data: org } = await supabase
     .from('organizations')
-    .select('stripe_customer_id, name, owner_id')
+    .select('stripe_customer_id, name, owner_id, sub_status')
     .eq('id', org_id)
     .single()
 
@@ -56,13 +56,16 @@ export async function POST(req: NextRequest) {
     await supabase.from('organizations').update({ stripe_customer_id: customerId }).eq('id', org_id)
   }
 
+  // Returning customers (previously had a subscription) don't get a trial
+  const isReturning = !!org.stripe_customer_id && org.sub_status !== 'trialing'
+
   const session = await stripe.checkout.sessions.create({
     customer: customerId,
     mode: 'subscription',
     payment_method_types: ['card'],
     line_items: [{ price: PRICE_IDS[plan], quantity: 1 }],
     subscription_data: {
-      trial_period_days: 14,
+      ...(isReturning ? {} : { trial_period_days: 14 }),
       metadata: { org_id, plan_id: plan },
     },
     success_url: `${APP_URL}/billing?success=1`,
