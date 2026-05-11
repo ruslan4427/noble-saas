@@ -16,12 +16,16 @@ const T = {
     back: '← Back to dashboard',
     trialExpired: '⚠️ Your free trial has expired. Choose a plan to continue.',
     paymentSuccess: '✓ Payment successful! Your plan is now active.',
+    cancelSuccess: 'Your subscription has been cancelled. Access continues until the end of the billing period.',
     currentSub: 'Current subscription',
     stats: ['Plan', 'Status', 'Trial days left', 'Auto-renews'],
     yesNo: ['No', 'Yes'],
     choosePlan: 'Choose a plan',
     currentPlan: '✓ Current plan',
     upgrade: (name: string) => `Start ${name} →`,
+    cancelSub: 'Cancel subscription',
+    cancelConfirm: 'Are you sure you want to cancel? You will keep access until the end of your current billing period.',
+    cancelling: 'Cancelling…',
     loading: 'Loading...',
     footer: 'Payments secured by Stripe. Cancel anytime.',
     planDesc: 'Up to 5 staff',
@@ -31,12 +35,16 @@ const T = {
     back: '← Volver al panel',
     trialExpired: '⚠️ Tu prueba gratuita expiró. Elige un plan para continuar.',
     paymentSuccess: '✓ ¡Pago exitoso! Tu plan ya está activo.',
+    cancelSuccess: 'Tu suscripción fue cancelada. El acceso continúa hasta el final del período de facturación.',
     currentSub: 'Suscripción actual',
     stats: ['Plan', 'Estado', 'Días de prueba restantes', 'Renovación automática'],
     yesNo: ['No', 'Sí'],
     choosePlan: 'Elige un plan',
     currentPlan: '✓ Plan actual',
     upgrade: (name: string) => `Activar ${name} →`,
+    cancelSub: 'Cancelar suscripción',
+    cancelConfirm: '¿Seguro que quieres cancelar? Mantendrás el acceso hasta el final de tu período de facturación.',
+    cancelling: 'Cancelando…',
     loading: 'Cargando...',
     footer: 'Pagos protegidos por Stripe. Cancela cuando quieras.',
     planDesc: 'Hasta 5 empleados',
@@ -49,6 +57,8 @@ function BillingContent({ lang }: { lang: Lang }) {
   const [org, setOrg] = useState<Org | null>(null)
   const [loading, setLoading] = useState(true)
   const [checkoutLoading, setCheckoutLoading] = useState<string | null>(null)
+  const [cancelling, setCancelling] = useState(false)
+  const [cancelled, setCancelled] = useState(false)
   const router = useRouter()
   const searchParams = useSearchParams()
   const supabase = createClient()
@@ -65,6 +75,23 @@ function BillingContent({ lang }: { lang: Lang }) {
     }
     load()
   }, [])
+
+  async function handleCancel() {
+    if (!window.confirm(t.cancelConfirm)) return
+    setCancelling(true)
+    try {
+      await fetch('/api/stripe/cancel', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ org_id: org?.id }),
+      })
+      setCancelled(true)
+      setOrg(prev => prev ? { ...prev, sub_status: 'canceled' } : prev)
+    } catch {
+      alert('Something went wrong. Please try again.')
+    } finally {
+      setCancelling(false)
+    }
+  }
 
   async function handleCheckout(planId: string) {
     setCheckoutLoading(planId)
@@ -99,6 +126,9 @@ function BillingContent({ lang }: { lang: Lang }) {
       )}
       {success && (
         <div className="bg-green-500/10 border border-green-500/30 text-green-400 px-4 py-3 rounded-xl mb-8">{t.paymentSuccess}</div>
+      )}
+      {cancelled && (
+        <div className="bg-yellow-500/10 border border-yellow-500/30 text-yellow-400 px-4 py-3 rounded-xl mb-8">{t.cancelSuccess}</div>
       )}
       <div className="bg-white/5 border border-white/10 rounded-xl p-6 mb-8">
         <h2 className="font-semibold mb-4">{t.currentSub}</h2>
@@ -137,6 +167,14 @@ function BillingContent({ lang }: { lang: Lang }) {
           </button>
         )}
       </div>
+      {org?.stripe_subscription_id && org?.sub_status === 'active' && !cancelled && (
+        <div className="mt-4 mb-6 text-center">
+          <button onClick={handleCancel} disabled={cancelling}
+            className="text-sm text-white/30 hover:text-red-400 transition underline underline-offset-2 disabled:opacity-40">
+            {cancelling ? t.cancelling : t.cancelSub}
+          </button>
+        </div>
+      )}
       <p className="text-white/30 text-xs text-center">{t.footer}</p>
     </div>
   )
