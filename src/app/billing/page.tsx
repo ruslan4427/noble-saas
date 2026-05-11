@@ -167,7 +167,7 @@ function BillingContent({ lang }: { lang: Lang }) {
           </button>
         )}
       </div>
-      {org?.stripe_subscription_id && ['active', 'trialing'].includes(org?.sub_status) && !cancelled && (
+      {org?.stripe_subscription_id && ['active', 'trialing', 'canceled'].includes(org?.sub_status) && !cancelled && (
         <div className="mt-4 mb-6 text-center">
           <button onClick={handleCancel} disabled={cancelling}
             className="text-sm text-white/30 hover:text-red-400 transition underline underline-offset-2 disabled:opacity-40">
