@@ -15,6 +15,9 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Noble — Your barbershop online in 5 minutes",
   description: "Booking page, staff schedule, client management — all under your own link.",
+  other: {
+    "facebook-domain-verification": "c2dp8pqlos6i783pehtash768fk5wo",
+  },
 };
 
 export default function RootLayout({
