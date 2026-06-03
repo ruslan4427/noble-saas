@@ -159,6 +159,21 @@ function toTimeStr(minutes: number): string {
   return `${String(Math.floor(minutes / 60)).padStart(2, '0')}:${String(minutes % 60).padStart(2, '0')}`
 }
 
+// Expand DB bookings into all 30-min sub-slots they occupy.
+// Normalises time_slot to HH:MM (DB may return HH:MM:SS if column is `time` type).
+function expandBookedSlots(rows: { time_slot: string; duration_min?: number | null }[]): string[] {
+  const result: string[] = []
+  for (const b of rows) {
+    const raw = (b.time_slot ?? '').slice(0, 5)
+    const startMin = toMinutes(raw)
+    const dur = b.duration_min ?? 30
+    for (let m = startMin; m < startMin + dur; m += 30) {
+      result.push(toTimeStr(m))
+    }
+  }
+  return result
+}
+
 // BUG-05 FIX: compare block using UTC date string, not local browser date
 function isSlotBlocked(dateStr: string, slotMin: number, slotEndMin: number, staffId: string, blocks: CalendarBlock[]): boolean {
   return blocks.some(b => {
@@ -560,9 +575,9 @@ export default function SalonClient({ org, staff, services }: Props) {
       if (existing) {
         setError(t.slotTaken)
         const key = `${selectedStaff.id}_${ds}`
-        const { data } = await supabase.from('bookings').select('time_slot')
+        const { data } = await supabase.from('bookings').select('time_slot, duration_min')
           .eq('master_id', selectedStaff.id).eq('date', ds).neq('status', 'cancelled')
-        setBookedSlotsMap(prev => ({ ...prev, [key]: (data||[]).map((b:{time_slot:string})=>b.time_slot) }))
+        setBookedSlotsMap(prev => ({ ...prev, [key]: expandBookedSlots(data ?? []) }))
         setSelectedTime(null); setStep('time'); return
       }
       const [h, m] = selectedTime.split(':').map(Number)
@@ -581,13 +596,13 @@ export default function SalonClient({ org, staff, services }: Props) {
         service_name:selectedService.name, price_cents:selectedService.price_cents, status:'confirmed',
       }).select('id').single()
       if (bookingError) {
-        // BUG-03: handle DB unique constraint violation
-        if (bookingError.code === '23505') {
+        // BUG-03: handle DB unique/overlap constraint violation
+        if (bookingError.code === '23505' || bookingError.code === '23P01') {
           setError(t.slotTaken)
           const key = `${selectedStaff.id}_${ds}`
-          const { data } = await supabase.from('bookings').select('time_slot')
+          const { data } = await supabase.from('bookings').select('time_slot, duration_min')
             .eq('master_id', selectedStaff.id).eq('date', ds).neq('status', 'cancelled')
-          setBookedSlotsMap(prev => ({ ...prev, [key]: (data||[]).map((b:{time_slot:string})=>b.time_slot) }))
+          setBookedSlotsMap(prev => ({ ...prev, [key]: expandBookedSlots(data ?? []) }))
           setSelectedTime(null); setStep('time'); return
         }
         throw bookingError

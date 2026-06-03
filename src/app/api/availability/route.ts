@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase-server'
-import { buildSlots, toDateStr } from '@/lib/slots'
+import { buildSlots, toMinutes, toTimeStr } from '@/lib/slots'
 import type { DaySchedule } from '@/types'
 
 export async function GET(req: NextRequest) {
@@ -29,7 +29,7 @@ export async function GET(req: NextRequest) {
 
     supabaseAdmin
       .from('bookings')
-      .select('time_slot')
+      .select('time_slot, duration_min')
       .eq('master_id', staffId)
       .eq('date', date)
       .in('status', ['confirmed', 'pending']),
@@ -55,9 +55,21 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ slots: [], reason: 'vacation' })
   }
 
-  const schedule  = schedRes.data as DaySchedule | null
-  const booked    = (bookedRes.data ?? []).map(b => b.time_slot)
-  const blocks    = blockRes.data ?? []
+  const schedule = schedRes.data as DaySchedule | null
+  const blocks   = blockRes.data ?? []
+
+  // Expand each booking into all 30-min sub-slots it occupies.
+  // Also normalise time_slot to HH:MM — DB may return HH:MM:SS if column is `time` type.
+  const booked = (bookedRes.data ?? []).flatMap(b => {
+    const raw = (b.time_slot ?? '').slice(0, 5)  // "10:00:00" → "10:00"
+    const startMin = toMinutes(raw)
+    const dur = b.duration_min ?? 30
+    const slots: string[] = []
+    for (let m = startMin; m < startMin + dur; m += 30) {
+      slots.push(toTimeStr(m))
+    }
+    return slots
+  })
 
   const slots = buildSlots(
     new Date(date + 'T12:00:00Z'),
