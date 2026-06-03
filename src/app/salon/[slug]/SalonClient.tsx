@@ -488,7 +488,8 @@ export default function SalonClient({ org, staff, services }: Props) {
     // Route through server-side API so response has Cache-Control: no-store,
     // which WebViews (Instagram/Telegram) must respect — unlike request-side hints.
     const duration = selectedService?.duration_min ?? 30
-    const url = `/api/availability?staff_id=${sid}&date=${ds}&org_id=${encodeURIComponent(org.id)}&duration=${duration}`
+    // Timestamp busts browser/CDN caches — every request must hit the DB fresh
+    const url = `/api/availability?staff_id=${sid}&date=${ds}&org_id=${encodeURIComponent(org.id)}&duration=${duration}&_=${Date.now()}`
     fetch(url, { cache: 'no-store' })
       .then(r => r.ok ? r.json() : { slots: [] })
       .then((data: { slots: Array<{ time: string; available: boolean }> }) => {
