@@ -556,12 +556,10 @@ export default function SalonClient({ org, staff, services }: Props) {
     else setStep('staff')
   }
 
-  // BUG-01 + BUG-02 FIX: on date select, always invalidate cache to force fresh fetch
   function handleSelectDate(d: Date) {
     if (!selectedStaff) return
-    const key = `${selectedStaff.id}_${toDateStr(d)}`
-    // Invalidate cache for this key so useEffect triggers a fresh fetch
-    setBookedSlotsMap(prev => { const n = { ...prev }; delete n[key]; return n })
+    // Do NOT delete cache — useEffect re-fetches fresh data on every selectedDate change.
+    // Deleting would wipe locally-cached booked slots (breaking "Book another" flow).
     setSelectedDate(d)
     setSelectedTime(null)
   }
