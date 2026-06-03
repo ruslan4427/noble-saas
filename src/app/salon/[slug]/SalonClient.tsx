@@ -492,10 +492,15 @@ export default function SalonClient({ org, staff, services }: Props) {
     fetch(url, { cache: 'no-store' })
       .then(r => r.ok ? r.json() : { slots: [] })
       .then((data: { slots: Array<{ time: string; available: boolean }> }) => {
-        const booked = Array.isArray(data.slots)
+        const apiBooked = Array.isArray(data.slots)
           ? data.slots.filter(s => !s.available).map(s => s.time)
           : []
-        setBookedSlotsMap(prev => ({ ...prev, [key]: booked }))
+        // Merge API result with locally-booked slots so a just-booked slot
+        // is never accidentally cleared by a stale API response.
+        setBookedSlotsMap(prev => {
+          const local = Array.isArray(prev[key]) ? (prev[key] as string[]) : []
+          return { ...prev, [key]: [...new Set([...apiBooked, ...local])] }
+        })
       })
       .catch(() => {
         // On error, don't wipe existing data — keep whatever was cached
@@ -628,10 +633,14 @@ export default function SalonClient({ org, staff, services }: Props) {
         time:selectedTime, price_cents:selectedService.price_cents, booking_id:newBooking?.id,
         sms_consent: smsConsent,
       }) }).catch(()=>{})
-      // After booking: record sub-slots in localBookedSlots so they stay unavailable
-      // regardless of API re-fetch results (survives "Book another" flow).
+      // After booking: update BOTH caches so the slot is immediately unavailable.
+      // bookedSlotsMap drives slotsLoading, localBookedSlots survives API overwrites.
       const bookedKey = `${selectedStaff.id}_${ds}`
       const newSubSlots = expandBookedSlots([{ time_slot: selectedTime, duration_min: selectedService.duration_min }])
+      setBookedSlotsMap(prev => ({
+        ...prev,
+        [bookedKey]: [...new Set([...((prev[bookedKey] as string[]) || []), ...newSubSlots])]
+      }))
       setLocalBookedSlots(prev => ({
         ...prev,
         [bookedKey]: [...new Set([...(prev[bookedKey] || []), ...newSubSlots])]
