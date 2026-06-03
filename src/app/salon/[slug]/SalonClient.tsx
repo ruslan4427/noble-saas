@@ -476,9 +476,14 @@ export default function SalonClient({ org, staff, services }: Props) {
     // Only skip if currently in-flight (null)
     if (bookedSlotsMap[key] === null) return
 
+    // If we already have data (e.g. after "Book another"), keep it visible during re-fetch
+    const hasExistingData = Array.isArray(bookedSlotsMap[key])
+    if (!hasExistingData) {
+      setBookedSlotsMap(prev => ({ ...prev, [key]: null }))
+    }
+
     // Route through server-side API so response has Cache-Control: no-store,
     // which WebViews (Instagram/Telegram) must respect — unlike request-side hints.
-    setBookedSlotsMap(prev => ({ ...prev, [key]: null }))
     const duration = selectedService?.duration_min ?? 30
     const url = `/api/availability?staff_id=${sid}&date=${ds}&org_id=${encodeURIComponent(org.id)}&duration=${duration}`
     fetch(url, { cache: 'no-store' })
@@ -490,7 +495,10 @@ export default function SalonClient({ org, staff, services }: Props) {
         setBookedSlotsMap(prev => ({ ...prev, [key]: booked }))
       })
       .catch(() => {
-        setBookedSlotsMap(prev => ({ ...prev, [key]: [] }))
+        // On error, don't wipe existing data — keep whatever was cached
+        if (!hasExistingData) {
+          setBookedSlotsMap(prev => ({ ...prev, [key]: [] }))
+        }
       })
   }, [selectedStaff, selectedDate])
 
@@ -616,21 +624,18 @@ export default function SalonClient({ org, staff, services }: Props) {
       }) }).catch(()=>{})
       // BUG-01 FIX: update cache immediately after booking so "Book again" shows correct state
       const bookedKey = `${selectedStaff.id}_${ds}`
+      const newSubSlots = expandBookedSlots([{ time_slot: selectedTime, duration_min: selectedService.duration_min }])
       setBookedSlotsMap(prev => ({
         ...prev,
-        [bookedKey]: [...((prev[bookedKey] as string[]) || []), selectedTime]
+        [bookedKey]: [...new Set([...((prev[bookedKey] as string[]) || []), ...newSubSlots])]
       }))
       setStep('done')
     } catch (e) { setError(e instanceof Error ? e.message : t.somethingWrong) }
     finally { setSubmitting(false) }
   }
 
-  // BUG-01 FIX: resetBooking invalidates cache for currently viewed date
   function resetBooking() {
-    if (selectedStaff && selectedDate) {
-      const key = `${selectedStaff.id}_${toDateStr(selectedDate)}`
-      setBookedSlotsMap(prev => { const n = { ...prev }; delete n[key]; return n })
-    }
+    // DO NOT delete cache — preserve booked slots so "Book another" shows correct state
     setStep('hero'); setSelectedStaff(null); setSelectedService(null)
     setSelectedDate(null); setSelectedTime(null)
     setName(''); setPhoneLocal(''); setPhoneError(''); setClientEmail(''); setSmsConsent(false); setError('')
