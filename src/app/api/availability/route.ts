@@ -3,6 +3,9 @@ import { supabaseAdmin } from '@/lib/supabase-server'
 import { buildSlots, toMinutes, toTimeStr } from '@/lib/slots'
 import type { DaySchedule } from '@/types'
 
+// Prevent Next.js from caching Supabase fetch calls — bookings change in real time
+export const dynamic = 'force-dynamic'
+
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url)
   const date      = searchParams.get('date')       // YYYY-MM-DD
