@@ -21,7 +21,8 @@ interface DaySchedule {
   break_start: string | null; break_end: string | null
 }
 interface CalendarBlock { staff_id: string | null; start_time: string; end_time: string; type?: string }
-interface Props { org: Org; staff: Staff[]; services: Service[] }
+interface InitialBooking { master_id: string; date: string; time_slot: string; duration_min: number | null }
+interface Props { org: Org; staff: Staff[]; services: Service[]; initialBookings?: InitialBooking[] }
 
 const TRANSLATIONS = {
   en: {
@@ -411,7 +412,7 @@ function LoadingState() {
 // Cache key maps to: undefined (never fetched) | null (in-flight) | string[] (loaded)
 type SlotCache = Record<string, string[] | null>
 
-export default function SalonClient({ org, staff, services }: Props) {
+export default function SalonClient({ org, staff, services, initialBookings }: Props) {
   const [step, setStep] = useState<'hero'|'staff'|'service'|'time'|'confirm'|'done'>('hero')
   const [selectedStaff, setSelectedStaff] = useState<Staff | null>(null)
   const [selectedService, setSelectedService] = useState<Service | null>(null)
@@ -428,8 +429,22 @@ export default function SalonClient({ org, staff, services }: Props) {
   const [pageLoading, setPageLoading] = useState(true)
   const [scheduleMap, setScheduleMap] = useState<Record<string, DaySchedule[]>>({})
   const [vacationMap, setVacationMap] = useState<Record<string, { date_from: string; date_to: string }[]>>({})
-  // BUG-01 + BUG-02 FIX: null = in-flight, string[] = loaded. Always re-fetch on new date select.
-  const [bookedSlotsMap, setBookedSlotsMap] = useState<SlotCache>({})
+  // Seed from server-fetched bookings so slots are correct on first render (no client query needed).
+  const [bookedSlotsMap, setBookedSlotsMap] = useState<SlotCache>(() => {
+    if (!initialBookings?.length) return {}
+    const map: SlotCache = {}
+    for (const b of initialBookings) {
+      const key = `${b.master_id}_${b.date}`
+      const existing = (map[key] as string[]) || []
+      const raw = (b.time_slot ?? '').slice(0, 5)
+      const startMin = toMinutes(raw)
+      const dur = b.duration_min ?? 30
+      const slots: string[] = []
+      for (let m = startMin; m < startMin + dur; m += 30) slots.push(toTimeStr(m))
+      map[key] = [...new Set([...existing, ...slots])]
+    }
+    return map
+  })
   // Tracks sub-slots booked in this browser session. Merged into allSlots so
   // just-booked slots are immediately unavailable even if API lags behind.
   const [localBookedSlots, setLocalBookedSlots] = useState<Record<string, string[]>>({})
@@ -468,9 +483,9 @@ export default function SalonClient({ org, staff, services }: Props) {
     })
   }, [selectedStaff])
 
-  // Query booked slots directly from Supabase (browser client, no server cache involved).
-  // This is more reliable than going through /api/availability which is subject to
-  // Next.js Data Cache and Vercel serverless instance caching.
+  // Background refresh: keeps slot data fresh when navigating dates.
+  // Initial data already seeded from server (initialBookings prop), so this
+  // only shows a loading spinner for dates not yet in cache.
   useEffect(() => {
     if (!selectedStaff || !selectedDate) return
     const sid = selectedStaff.id
@@ -480,31 +495,29 @@ export default function SalonClient({ org, staff, services }: Props) {
     // Only skip if currently in-flight (null)
     if (bookedSlotsMap[key] === null) return
 
-    // If we already have data keep it visible while re-fetching (no loading flash)
+    // If server already seeded this key, keep data visible while re-fetching
     const hasExistingData = Array.isArray(bookedSlotsMap[key])
     if (!hasExistingData) {
       setBookedSlotsMap(prev => ({ ...prev, [key]: null }))
     }
 
-    supabase
+    const query = supabase
       .from('bookings')
       .select('time_slot, duration_min')
       .eq('master_id', sid)
       .eq('date', ds)
       .neq('status', 'cancelled')
-      .then(({ data }) => {
-        const dbBooked = expandBookedSlots(data ?? [])
-        setBookedSlotsMap(prev => {
-          // Merge DB result with any locally-tracked slots from this session
-          const local = Array.isArray(prev[key]) ? (prev[key] as string[]) : []
-          return { ...prev, [key]: [...new Set([...dbBooked, ...local])] }
-        })
+    Promise.resolve(query).then(({ data }) => {
+      const dbBooked = expandBookedSlots(data ?? [])
+      setBookedSlotsMap(prev => {
+        const local = Array.isArray(prev[key]) ? (prev[key] as string[]) : []
+        return { ...prev, [key]: [...new Set([...dbBooked, ...local])] }
       })
-      .catch(() => {
-        if (!hasExistingData) {
-          setBookedSlotsMap(prev => ({ ...prev, [key]: [] }))
-        }
-      })
+    }).catch(() => {
+      if (!hasExistingData) {
+        setBookedSlotsMap(prev => ({ ...prev, [key]: [] }))
+      }
+    })
   }, [selectedStaff, selectedDate])
 
   function isVacationDate(staffId: string, date: Date) {

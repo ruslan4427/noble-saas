@@ -1,15 +1,12 @@
-import { createClient } from '@supabase/supabase-js'
 import { notFound } from 'next/navigation'
+import { supabaseAdmin } from '@/lib/supabase-server'
 import SalonClient from './SalonClient'
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
+export const dynamic = 'force-dynamic'
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
-  const { data: org } = await supabase
+  const { data: org } = await supabaseAdmin
     .from('organizations')
     .select('name, slug')
     .eq('slug', slug)
@@ -24,25 +21,15 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   return {
     title,
     description,
-    openGraph: {
-      title,
-      description,
-      url,
-      siteName: 'Noble',
-      type: 'website',
-    },
-    twitter: {
-      card: 'summary',
-      title,
-      description,
-    },
+    openGraph: { title, description, url, siteName: 'Noble', type: 'website' },
+    twitter: { card: 'summary', title, description },
   }
 }
 
 export default async function SalonPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
 
-  const { data: org } = await supabase
+  const { data: org } = await supabaseAdmin
     .from('organizations')
     .select('*')
     .eq('slug', slug)
@@ -50,23 +37,24 @@ export default async function SalonPage({ params }: { params: Promise<{ slug: st
 
   if (!org) notFound()
 
-  const { data: staff } = await supabase
-    .from('staff')
-    .select('*')
-    .eq('org_id', org.id)
-    .eq('is_active', true)
-
-  const { data: services } = await supabase
-    .from('services')
-    .select('*')
-    .eq('org_id', org.id)
-    .eq('is_active', true)
+  const [staffRes, servicesRes, bookingsRes] = await Promise.all([
+    supabaseAdmin.from('staff').select('*').eq('org_id', org.id).eq('is_active', true),
+    supabaseAdmin.from('services').select('*').eq('org_id', org.id).eq('is_active', true),
+    // Fetch bookings for the next 16 days (covers all timezone offsets)
+    supabaseAdmin
+      .from('bookings')
+      .select('master_id, date, time_slot, duration_min')
+      .gte('date', (() => { const d = new Date(); d.setDate(d.getDate() - 1); return d.toISOString().slice(0, 10) })())
+      .lte('date', (() => { const d = new Date(); d.setDate(d.getDate() + 16); return d.toISOString().slice(0, 10) })())
+      .in('status', ['confirmed', 'pending']),
+  ])
 
   return (
     <SalonClient
       org={org}
-      staff={staff || []}
-      services={services || []}
+      staff={staffRes.data || []}
+      services={servicesRes.data || []}
+      initialBookings={bookingsRes.data || []}
     />
   )
 }
