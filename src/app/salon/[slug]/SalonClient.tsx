@@ -430,6 +430,9 @@ export default function SalonClient({ org, staff, services }: Props) {
   const [vacationMap, setVacationMap] = useState<Record<string, { date_from: string; date_to: string }[]>>({})
   // BUG-01 + BUG-02 FIX: null = in-flight, string[] = loaded. Always re-fetch on new date select.
   const [bookedSlotsMap, setBookedSlotsMap] = useState<SlotCache>({})
+  // Tracks sub-slots booked in this browser session. Merged into allSlots so
+  // just-booked slots are immediately unavailable even if API lags behind.
+  const [localBookedSlots, setLocalBookedSlots] = useState<Record<string, string[]>>({})
   const [blocks, setBlocks] = useState<CalendarBlock[]>([])
   const [lang, setLang] = useState<Lang>('en')
   const supabase = createClient()
@@ -530,15 +533,20 @@ export default function SalonClient({ org, staff, services }: Props) {
   const allSlots = useMemo(() => {
     const key = getCacheKey()
     if (!key || slotsLoading || !selectedService || !selectedDate || !selectedStaff) return []
+    // Merge API booked slots with locally-tracked slots from this session.
+    // This guarantees just-booked slots stay unavailable even if API lags.
+    const apiBooked = (bookedSlotsMap[key] as string[]) || []
+    const localBooked = localBookedSlots[key] || []
+    const combinedBooked = localBooked.length ? [...new Set([...apiBooked, ...localBooked])] : apiBooked
     return buildSlots(
       selectedDate,
       getScheduleForDate(selectedStaff.id, selectedDate),
-      (bookedSlotsMap[key] as string[]) || [],
+      combinedBooked,
       selectedService.duration_min,
       blocks,
       selectedStaff.id
     )
-  }, [bookedSlotsMap, selectedStaff, selectedDate, selectedService, blocks, slotsLoading])
+  }, [bookedSlotsMap, localBookedSlots, selectedStaff, selectedDate, selectedService, blocks, slotsLoading])
 
   const freeCount = useMemo(() => allSlots.filter(s => s.available).length, [allSlots])
 
@@ -620,12 +628,13 @@ export default function SalonClient({ org, staff, services }: Props) {
         time:selectedTime, price_cents:selectedService.price_cents, booking_id:newBooking?.id,
         sms_consent: smsConsent,
       }) }).catch(()=>{})
-      // BUG-01 FIX: update cache immediately after booking so "Book again" shows correct state
+      // After booking: record sub-slots in localBookedSlots so they stay unavailable
+      // regardless of API re-fetch results (survives "Book another" flow).
       const bookedKey = `${selectedStaff.id}_${ds}`
       const newSubSlots = expandBookedSlots([{ time_slot: selectedTime, duration_min: selectedService.duration_min }])
-      setBookedSlotsMap(prev => ({
+      setLocalBookedSlots(prev => ({
         ...prev,
-        [bookedKey]: [...new Set([...((prev[bookedKey] as string[]) || []), ...newSubSlots])]
+        [bookedKey]: [...new Set([...(prev[bookedKey] || []), ...newSubSlots])]
       }))
       setStep('done')
     } catch (e) { setError(e instanceof Error ? e.message : t.somethingWrong) }
