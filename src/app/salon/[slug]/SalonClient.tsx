@@ -468,8 +468,9 @@ export default function SalonClient({ org, staff, services }: Props) {
     })
   }, [selectedStaff])
 
-  // BUG-01 + BUG-02 FIX: always fetch fresh — remove "already loaded" guard.
-  // This ensures cancelled bookings are reflected immediately on re-select.
+  // Query booked slots directly from Supabase (browser client, no server cache involved).
+  // This is more reliable than going through /api/availability which is subject to
+  // Next.js Data Cache and Vercel serverless instance caching.
   useEffect(() => {
     if (!selectedStaff || !selectedDate) return
     const sid = selectedStaff.id
@@ -479,32 +480,27 @@ export default function SalonClient({ org, staff, services }: Props) {
     // Only skip if currently in-flight (null)
     if (bookedSlotsMap[key] === null) return
 
-    // If we already have data (e.g. after "Book another"), keep it visible during re-fetch
+    // If we already have data keep it visible while re-fetching (no loading flash)
     const hasExistingData = Array.isArray(bookedSlotsMap[key])
     if (!hasExistingData) {
       setBookedSlotsMap(prev => ({ ...prev, [key]: null }))
     }
 
-    // Route through server-side API so response has Cache-Control: no-store,
-    // which WebViews (Instagram/Telegram) must respect — unlike request-side hints.
-    const duration = selectedService?.duration_min ?? 30
-    // Timestamp busts browser/CDN caches — every request must hit the DB fresh
-    const url = `/api/availability?staff_id=${sid}&date=${ds}&org_id=${encodeURIComponent(org.id)}&duration=${duration}&_=${Date.now()}`
-    fetch(url, { cache: 'no-store' })
-      .then(r => r.ok ? r.json() : { slots: [] })
-      .then((data: { slots: Array<{ time: string; available: boolean }> }) => {
-        const apiBooked = Array.isArray(data.slots)
-          ? data.slots.filter(s => !s.available).map(s => s.time)
-          : []
-        // Merge API result with locally-booked slots so a just-booked slot
-        // is never accidentally cleared by a stale API response.
+    supabase
+      .from('bookings')
+      .select('time_slot, duration_min')
+      .eq('master_id', sid)
+      .eq('date', ds)
+      .neq('status', 'cancelled')
+      .then(({ data }) => {
+        const dbBooked = expandBookedSlots(data ?? [])
         setBookedSlotsMap(prev => {
+          // Merge DB result with any locally-tracked slots from this session
           const local = Array.isArray(prev[key]) ? (prev[key] as string[]) : []
-          return { ...prev, [key]: [...new Set([...apiBooked, ...local])] }
+          return { ...prev, [key]: [...new Set([...dbBooked, ...local])] }
         })
       })
       .catch(() => {
-        // On error, don't wipe existing data — keep whatever was cached
         if (!hasExistingData) {
           setBookedSlotsMap(prev => ({ ...prev, [key]: [] }))
         }
