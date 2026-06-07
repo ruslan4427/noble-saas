@@ -1,0 +1,81 @@
+name: Noble Instagram Engagement
+
+on:
+  schedule:
+    # 3x/day Mon–Fri: 9am, 2pm, 7pm EDT (UTC-4)
+    # 2x/day Sat–Sun: 10am, 3pm EDT (lighter weekend activity)
+    - cron: '0 13 * * 1-5'   # 9:00 EDT (13:00 UTC)
+    - cron: '0 18 * * 1-5'   # 2:00 EDT (18:00 UTC)
+    - cron: '0 23 * * 1-5'   # 7:00 EDT (23:00 UTC)
+    - cron: '0 14 * * 0,6'   # 10:00 EDT Sat/Sun (14:00 UTC)
+    - cron: '0 19 * * 0,6'   # 3:00 EDT Sat/Sun (19:00 UTC)
+
+  # Manual trigger — run engagement session immediately
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry run (log only, no real actions)'
+        required: false
+        type: boolean
+        default: false
+
+concurrency:
+  group: noble-engagement
+  cancel-in-progress: true   # cancel stale run if new one triggers
+
+jobs:
+  engage:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install instagrapi anthropic python-dotenv
+
+      - name: Check kill switch
+        id: killswitch
+        run: |
+          if [ -f "marketing_system/output/engagement/PAUSED" ]; then
+            echo "paused=true" >> "$GITHUB_OUTPUT"
+            echo "⏸ Engagement PAUSED — delete marketing_system/output/engagement/PAUSED to resume"
+          else
+            echo "paused=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Run engagement session
+        if: steps.killswitch.outputs.paused == 'false'
+        env:
+          ANTHROPIC_API_KEY:  ${{ secrets.ANTHROPIC_API_KEY }}
+          INSTAGRAM_USERNAME: ${{ secrets.IG_USERNAME }}
+          INSTAGRAM_PASSWORD: ${{ secrets.IG_PASSWORD }}
+          IG_SESSION_JSON:    ${{ secrets.IG_SESSION_JSON }}
+          DRY_RUN: ${{ github.event.inputs.dry_run || 'false' }}
+        run: |
+          cd marketing_system
+
+          # Restore Instagram session from secret
+          mkdir -p mcp_instagram
+          echo "$IG_SESSION_JSON" > mcp_instagram/session.json
+
+          python3 engagement_runner.py
+
+      - name: Commit updated engagement log + skip_days
+        if: steps.killswitch.outputs.paused == 'false'
+        run: |
+          git config user.name  "noble-bot"
+          git config user.email "bot@noblelink.app"
+          git add marketing_system/output/engagement_run.log \
+                  marketing_system/output/engagement/ \
+                  || true
+          git diff --cached --quiet && echo "Nothing to commit" || \
+            git commit -m "auto(engage): session $(date -u +'%Y-%m-%d %H:%M UTC')"
+          git push || echo "Push skipped (nothing new)"

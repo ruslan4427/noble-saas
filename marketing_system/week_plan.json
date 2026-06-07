@@ -1,0 +1,179 @@
+[
+  {
+    "day": 1, "weekday": "Monday",
+    "content_type": "reel",
+    "pillar": "Awareness",
+    "goal": "Hook new audience — show the problem barbers face",
+    "reel_type": "reel_typewriter_bokeh",
+    "reel_overrides": {
+      "line1":   "Most barbers",
+      "line2":   "get this",
+      "line3":   "wrong.",
+      "eyebrow": "Noble Booking Platform",
+      "subtext": "Your shop should book itself — automatically.",
+      "cta":     "Try Free for 14 Days"
+    },
+    "post_type": "a",
+    "post_overrides": {
+      "hook":    "Stop chasing clients. Let them come to you.",
+      "eyebrow": "Booking Automation",
+      "body":    "With Noble, your barbershop gets a booking page that works 24/7. Clients pick their slot, get a confirmation, and show up — no DMs, no calls.",
+      "cta":     "Start Free Trial"
+    },
+    "music": "Money Maker — Ludacris ft. Pharrell"
+  },
+  {
+    "day": 2, "weekday": "Tuesday",
+    "content_type": "carousel",
+    "pillar": "Education",
+    "goal": "Teach barbers 5 signs they need booking software — saves & shares",
+    "slides": [
+      {"title": "5 signs your barbershop needs booking software", "body": "Swipe to see if this is you →"},
+      {"title": "1. You take bookings by DM", "body": "Clients message you, you reply hours later. You lose bookings while you're cutting."},
+      {"title": "2. You have no-shows every week", "body": "No reminder system = clients forget. Noble sends automatic SMS reminders."},
+      {"title": "3. You work late answering texts", "body": "Your evenings belong to you. Not to managing a calendar."},
+      {"title": "4. Double-bookings happen", "body": "Two clients, same slot. Noble prevents this automatically in real time."},
+      {"title": "5. You have no idea what you made this month", "body": "Noble tracks every booking and payment. Dashboard always ready."},
+      {"title": "If you nodded at 2+", "body": "Try Noble free for 14 days. noblelink.app", "cta": true}
+    ],
+    "reel_type": "reel_counter",
+    "reel_overrides": {
+      "headline_line1": "Numbers",
+      "headline_line2": "don't lie.",
+      "eyebrow": "This Month's Stats",
+      "subtext": "Noble tracks every booking, payment, and no-show automatically.",
+      "cta":     "See Your Numbers Free"
+    },
+    "post_type": "d",
+    "post_overrides": {
+      "hook":    "47 bookings. $3,240 revenue. 0 no-shows. This month.",
+      "eyebrow": "Monthly Report",
+      "body":    "Noble gives you a live dashboard with every metric that matters. Bookings, revenue, retention — all in one place.",
+      "cta":     "Start Free Trial"
+    },
+    "music": "EVERYTHING HALLELUJAH — Trending Audio"
+  },
+  {
+    "day": 3, "weekday": "Wednesday",
+    "content_type": "reel",
+    "pillar": "Product Demo",
+    "goal": "Show how Noble works in real time — demo converts",
+    "reel_type": "reel_notification",
+    "reel_overrides": {
+      "headline_line1": "Clients book",
+      "headline_line2": "while you work.",
+      "eyebrow": "Automated Booking",
+      "subtext": "Instant confirmation. SMS reminder. Zero no-shows.",
+      "cta":     "Start Booking Today"
+    },
+    "post_type": "c",
+    "post_overrides": {
+      "hook":    "You're in the middle of a cut. A client just booked for tomorrow.",
+      "eyebrow": "Auto Confirmations",
+      "body":    "Noble sends booking confirmations and SMS reminders automatically. Your clients never forget their appointment.",
+      "cta":     "Try for Free"
+    },
+    "music": "Material Lover — Sienna Spiro"
+  },
+  {
+    "day": 4, "weekday": "Thursday",
+    "content_type": "feed_post",
+    "pillar": "Social Proof",
+    "goal": "Single strong testimonial — trust builder for mid-week",
+    "reel_type": "reel_calendar",
+    "reel_overrides": {
+      "headline_line1": "Your calendar,",
+      "headline_line2": "always full.",
+      "eyebrow": "Noble Calendar",
+      "subtext": "Spots fill automatically. No phone calls. No DMs.",
+      "cta":     "Fill Your Calendar"
+    },
+    "post_type": "e",
+    "post_overrides": {
+      "hook":    "What does a full calendar feel like? Ask Noble users.",
+      "eyebrow": "Calendar Management",
+      "body":    "Noble manages your schedule in real time. Clients see only open slots — no double bookings, no gaps, no stress.",
+      "cta":     "Start Free Trial"
+    },
+    "music": "Money Maker — Ludacris ft. Pharrell"
+  },
+  {
+    "day": 5, "weekday": "Friday",
+    "content_type": "reel",
+    "pillar": "Promotional",
+    "goal": "Friday energy — push free trial CTA hard",
+    "reel_type": "reel_typewriter_bokeh",
+    "reel_overrides": {
+      "line1":   "Your shop",
+      "line2":   "never",
+      "line3":   "sleeps.",
+      "eyebrow": "24/7 Online Booking",
+      "subtext": "If you own a barbershop, your booking page should never sleep.",
+      "cta":     "Go Live in Minutes"
+    },
+    "post_type": "b",
+    "post_overrides": {
+      "hook":    "Your shop is open. Even when you're not.",
+      "eyebrow": "24/7 Booking",
+      "body":    "Noble gives you a custom booking page at noblelink.app/yourshop. Share it once — clients book anytime, day or night.",
+      "cta":     "Get Your Page"
+    },
+    "music": "Dracula (JENNIE Remix) — Tame Impala"
+  },
+  {
+    "day": 6, "weekday": "Saturday",
+    "content_type": "reel",
+    "pillar": "Weekend Stats",
+    "goal": "Saturday reach peak — high traffic day for barbers",
+    "reel_type": "reel_counter",
+    "reel_overrides": {
+      "headline_line1": "Zero calls.",
+      "headline_line2": "47 bookings.",
+      "eyebrow": "Weekend Report",
+      "subtext": "Saturday. You cut hair. Noble handled the schedule.",
+      "cta":     "Try Free for 14 Days"
+    },
+    "post_type": "f",
+    "post_overrides": {
+      "hook":    "It's Saturday. You cut 12 heads. Took zero phone calls.",
+      "eyebrow": "Weekend Wins",
+      "body":    "Noble's automated scheduling means your weekends are for cutting — not managing a calendar. Let the software do the admin.",
+      "cta":     "Start Free Trial"
+    },
+    "music": "EVERYTHING HALLELUJAH — Trending Audio"
+  },
+  {
+    "day": 7, "weekday": "Sunday",
+    "content_type": "story",
+    "pillar": "Engagement",
+    "goal": "Sunday poll / question sticker — warm up existing followers",
+    "story_brief": {
+      "format":   "1080x1920 PNG",
+      "duration": "5-7 sec static",
+      "elements": [
+        "Background: dark brown #1a1208",
+        "Question sticker: 'Do you take bookings by DM or have a booking page?'",
+        "Options: 'DM 📱' / 'Booking page ✅'",
+        "Noble logo top-left",
+        "CTA at bottom: 'Link in bio → noblelink.app'"
+      ],
+      "note": "Post manually via Instagram app — use poll sticker for engagement"
+    },
+    "reel_type": "reel_notification",
+    "reel_overrides": {
+      "headline_line1": "14 days free.",
+      "headline_line2": "No excuses.",
+      "eyebrow": "Free Trial — No Card Needed",
+      "subtext": "Start today. Your booking page goes live in under 5 minutes.",
+      "cta":     "Start Free Trial Now"
+    },
+    "post_type": "a",
+    "post_overrides": {
+      "hook":    "14 days. No credit card. No risk. Just a full calendar.",
+      "eyebrow": "Free Trial",
+      "body":    "Try Noble free for 14 days. Set up your booking page in minutes, invite your first client, and watch the calendar fill itself.",
+      "cta":     "Start Free Trial Now"
+    },
+    "music": "Material Lover — Sienna Spiro"
+  }
+]

@@ -11,6 +11,10 @@ on:
         description: 'ISO week to report (e.g. 2026-W23) — blank = current'
         required: false
 
+concurrency:
+  group: noble-git-push
+  cancel-in-progress: false
+
 jobs:
   review:
     runs-on: ubuntu-latest

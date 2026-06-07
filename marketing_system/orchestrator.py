@@ -11,18 +11,21 @@ Agents:
   Design Agent   → designer/design_agent.py      (AI image prompt via Claude)
   Gemini         → designer/gemini_generator.py  (image generation via Gemini)
   CSS Animator   → designer/css_animator.py      (HTML/CSS → MP4 animations)
-  Reels Gen      → generate_week_reels.py        (7 Reels + 7 posts week set)
+  Reel Maker     → make_reel.py                  (full reel: CSS anim + Pexels video + music)
+  Feed Posts     → generate_week_reels.py        (7 Feed posts 1080×1080)
+  Schedule       → build_schedule.py             (week_content/schedule.json)
   Analyzer       → analyzer/metrics_check.py
   Moderator      → moderator/comment_responder.py
   Publisher      → publisher/instagram_agent.py
 
 Modes:
-  create      Strategist + Creator
-  animate     Strategist (animated posts) + Creator + Animation Agent (HTML/CSS per post)
-  week        Full week pipeline: plan → posts → templates (A-H) → drafts + animations
-  reels       Generate full week Reels set (7 Reels 1080×1920 + 7 Feed posts 1080×1080)
+  week-full   ★ MAIN: weekly plan → captions → 7 reels (video+anim+music) → feed posts → schedule
+  create      Strategist + Creator (plan + captions only)
+  reels       Generate 7 Reels via full pipeline (make_reel.py x7 + Pexels video + music)
   reels-only  Generate only the 7 Reels (no Feed posts)
   posts-only  Generate only the 7 Feed posts (no Reels)
+  animate     Strategist (animated posts) + Creator + Animation Agent (HTML/CSS per post)
+  week        Full week pipeline: plan → posts → templates (A-H) → drafts + animations
   template    Generate HTML/CSS template for a single post (--post N, --type a-h)
   reel-brief  Print a formatted Reel production checklist for --post N (no AI call needed)
   reel-animate  Generate HTML/CSS animated Reel from reels_script for --post N
@@ -33,6 +36,18 @@ Modes:
   analyze     Analyzer
   moderate    Moderator
   full        All agents end-to-end
+
+Standalone scripts (NOT managed by orchestrator — run directly if needed):
+  kenburns_agent.py       Ken Burns zoom/pan reels from static photos (ffmpeg, no API)
+  kling_video_agent.py    Kling AI video generation (requires Kling API key)
+  weekly_cycle.py         Legacy autonomous cycle (superseded by week-full mode)
+  publish_scheduled.py    Legacy scheduler (superseded by GitHub Actions instagram_post.yml)
+  generate_photo_posts.py Legacy photo post generator (superseded by generate_week_reels.py)
+  generate_week_feed_posts.py  Legacy feed-only generator (superseded by --posts-only flag)
+  week_post_creator.py    Legacy week creator (superseded by week-full mode)
+  auto_learnings.py       Learning rebuilder (called by analyzer agents internally)
+  weekly_report.py        Legacy weekly report (superseded by analyzer/growth_reporter.py)
+  test_templates.py       Template smoke test (run manually: python test_templates.py)
 
 Feed post templates (--type a-h):
   a  Bold text dark background
@@ -74,8 +89,29 @@ from pathlib import Path
 from typing import Optional
 
 ROOT   = Path(__file__).parent
-_py311 = ROOT / "mcp_instagram" / ".venv" / "bin" / "python3"
-PYTHON = str(_py311) if _py311.exists() else str(ROOT / "venv" / "bin" / "python")
+
+def _resolve_python() -> str:
+    candidates = [
+        ROOT / "mcp_instagram" / ".venv" / "bin" / "python3",
+        ROOT / "venv" / "bin" / "python3",
+        ROOT / "venv" / "bin" / "python",
+    ]
+    for p in candidates:
+        if p.exists():
+            return str(p)
+    # Fall back to system Python with a clear warning
+    import shutil as _sh
+    sys_py = _sh.which("python3") or _sh.which("python")
+    if sys_py:
+        print(f"[WARNING] No venv found in marketing_system/. Using system Python: {sys_py}")
+        print(f"  Recommended: cd marketing_system && python3 -m venv venv && pip install -r requirements.txt")
+        return sys_py
+    print("[ERROR] No Python interpreter found. Install Python 3.11+ and create a venv:")
+    print(f"  cd {ROOT}")
+    print("  python3 -m venv venv && pip install -r requirements.txt")
+    sys.exit(1)
+
+PYTHON = _resolve_python()
 
 # Mark all child processes as orchestrated so agents skip their direct-run warning
 os.environ["_NOBLE_ORCHESTRATED"] = "1"
@@ -106,29 +142,31 @@ def main() -> None:
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Modes:
-  create      Strategist + Creator                    (default)
-  animate     Animated pipeline: plan (animated posts) → expand → HTML/CSS per post
+  week-full   ★ MAIN: weekly plan → captions → 7 reels (video+anim+music) → feed posts → schedule
+  create      Strategist + Creator (plan + captions only)
+  reels       Generate 7 Reels via full pipeline (make_reel.py x7 + Pexels video + music)
+  reels-only  Generate only the 7 Reels
+  posts-only  Generate only the 7 Feed posts
+  animate     Animated pipeline: plan → expand → HTML/CSS per post
   week        Full week pipeline: plan → posts → templates (A-E) → drafts (auto)
   template    Generate HTML/CSS template for a single post (--post N, --type a/b/c/d/e)
-  reel-brief  Print a formatted Reel production checklist for --post N (no AI call needed)
+  reel-brief  Print a formatted Reel production checklist for --post N
   reel-animate  Generate HTML/CSS animated Reel from reels_script for --post N
   design      Asset briefs for Figma/Canva
   visual      Design Agent → AI image prompt + capture
   gemini      Design Agent → Gemini Imagen (prompt + auto-generate image)
   draft       Save ready post as local draft (open in Finder)
-  publish   Instagram Agent → publish image to IG
-  analyze   Analyzer (run after posts go live)
-  moderate  Moderator (run daily)
-  full      All agents end-to-end
+  publish     Instagram Agent → publish image to IG
+  analyze     Analyzer (run after posts go live)
+  moderate    Moderator (run daily)
+  full        All agents end-to-end
 
 Examples:
-  python orchestrator.py --mode week
-  python orchestrator.py --mode week --focus mixed
+  python orchestrator.py                          # week-full (default)
+  python orchestrator.py --mode week-full         # full weekly pipeline
+  python orchestrator.py --mode reels             # reels only (no AI plan)
+  python orchestrator.py --mode posts-only        # feed posts only
   python orchestrator.py --mode template --post 1 --type c
-  python orchestrator.py --mode template --post 1 --type b --bg designer/assets/backgrounds/barber_chairs.jpg
-  python orchestrator.py --mode gemini --post 1
-  python orchestrator.py --mode draft --image output/images/noble_post1_typec_....png --post 1
-  python orchestrator.py --mode publish --image output/images/hero.png --post 3 --schedule "2026-05-10 10:00"
   python orchestrator.py --mode analyze --mock
   python orchestrator.py --mode moderate --dry-run
         """,
@@ -137,16 +175,18 @@ Examples:
     # ── Mode ──
     parser.add_argument(
         "--mode",
-        choices=["create", "week", "reels", "reels-only", "posts-only",
+        choices=["week-full", "create", "week", "reels", "reels-only", "posts-only",
                  "template", "animate", "reel-brief", "reel-animate",
                  "analyze", "moderate", "design", "visual", "gemini",
                  "publish", "draft", "full"],
-        default="create",
+        default="week-full",
     )
 
     # ── Content pipeline args ──
     parser.add_argument("--platform", choices=["instagram", "tiktok", "telegram"], default="instagram")
     parser.add_argument("--period",   choices=["weekly", "monthly"], default="monthly")
+    parser.add_argument("--day",      type=int, default=None, choices=range(1, 8),
+                        help="[reels/week-full] Generate only this day (1=Mon … 7=Sun)")
     parser.add_argument("--focus",    default="features",
                         choices=["features", "testimonials", "education", "promotional", "engagement", "mixed"])
     parser.add_argument("--posts",    default="all",
@@ -192,6 +232,8 @@ Examples:
                         help="[publish] Schedule time UTC: 'YYYY-MM-DD HH:MM'")
 
     # ── Shared flags ──
+    parser.add_argument("--no-approve", action="store_true", dest="no_approve",
+                        help="[week-full] Skip human approval gate, build schedule immediately")
     parser.add_argument("--dry-run",  action="store_true", dest="dry_run",
                         help="Moderator/Publisher: generate output but do not send/publish")
     parser.add_argument("--mock",     action="store_true",
@@ -211,9 +253,10 @@ Examples:
         print(f"  Posts    : {args.posts}")
     print("=" * 60)
 
-    run_trends      = args.mode in ("create", "week", "reels", "full")
-    run_hooks       = args.mode in ("create", "week", "reels", "full")
-    run_hashtags    = args.mode in ("create", "week", "reels", "full")
+    run_week_full   = args.mode in ("week-full",)
+    run_trends      = args.mode in ("week-full", "create", "week", "reels", "full")
+    run_hooks       = args.mode in ("week-full", "create", "week", "reels", "full")
+    run_hashtags    = args.mode in ("week-full", "create", "week", "reels", "full")
     run_schedule    = args.mode in ("create", "week", "reels", "full")
     run_create      = args.mode in ("create", "full")
     run_week        = args.mode in ("week",)
@@ -268,6 +311,19 @@ Examples:
         print("\nStarting HookWriter...")
         run("HookWriter", ROOT / "strategist" / "hook_writer.py", [],
             stop_on_error=False)
+
+        _hook_files = sorted((ROOT / "output" / "hooks").glob("hooks_*.json"), reverse=True)
+        if _hook_files:
+            try:
+                with open(_hook_files[0]) as _f:
+                    _h = _json.load(_f)
+                _hook_count = len(_h.get("hooks", []))
+                if _hook_count == 0:
+                    print("\n[WARNING] HookWriter returned 0 hooks — content will use generic hooks.")
+                else:
+                    print(f"[OK] Hooks quality check passed (hooks={_hook_count})")
+            except Exception:
+                print("\n[WARNING] Could not read hooks file for quality check.\n")
 
     if run_hashtags:
         print("\nStarting HashtagResearcher...")
@@ -357,20 +413,171 @@ Examples:
             print(f"  Desktop folder           : {Path.home() / 'Desktop' / 'Noble Images'}")
             print(f"{'=' * 60}\n")
 
+    # ── WEEK-FULL mode: plan → captions → reels → posts → schedule ──
+    if run_week_full:
+        import json as _json, shutil as _shutil
+
+        MARKETING_WEEK = ROOT / "week_content"
+        DESKTOP_WEEK   = Path.home() / "Desktop" / "Noble Images" / "Week Content"
+        DAY_FOLDERS_W  = [
+            "Day01_Monday", "Day02_Tuesday", "Day03_Wednesday", "Day04_Thursday",
+            "Day05_Friday",  "Day06_Saturday", "Day07_Sunday",
+        ]
+
+        print("\n" + "=" * 60)
+        print("  WEEK-FULL PIPELINE")
+        print("  plan → captions → 7 reels → feed posts → schedule")
+        print("=" * 60)
+
+        # W1: Weekly plan (7 posts Mon-Sun)
+        print("\n[W1] Strategist — weekly plan...")
+        run("Strategist", ROOT / "strategist" / "plan_generator.py",
+            ["--platform", args.platform, "--period", "weekly", "--focus", args.focus])
+
+        # W2: Creator — expand captions
+        print("\n[W2] Creator — expanding captions...")
+        run("Creator", ROOT / "creator" / "content_expander.py", ["--posts", "all"])
+
+        # W3: Write captions to week_content/Day0X/caption.txt
+        print("\n[W3] Copying captions to week_content/...")
+        cf_files = sorted((ROOT / "output").glob("content_final_*.json"),
+                          key=lambda p: p.stat().st_mtime, reverse=True)
+        if not cf_files:
+            print("\n[ERROR] No content_final_*.json found — Creator step produced no output.")
+            print("  Cannot continue without captions. Check Creator logs above.")
+            sys.exit(1)
+
+        with open(cf_files[0]) as _f:
+            _content = _json.load(_f)
+        _posts = _content.get("posts", [])
+
+        if len(_posts) < 3:
+            print(f"\n[ERROR] content_final has only {len(_posts)} post(s) — expected at least 3.")
+            print(f"  File: {cf_files[0].name}")
+            print("  Creator output is too sparse to generate a full week. Re-run --mode create.")
+            sys.exit(1)
+
+        for _i, _post in enumerate(_posts[:7]):
+            _folder = MARKETING_WEEK / DAY_FOLDERS_W[_i]
+            _folder.mkdir(parents=True, exist_ok=True)
+            _cap = (_post.get("caption") or "").strip()
+            _tags = _post.get("hashtags", [])
+            if _tags:
+                _cap += "\n\n" + " ".join(f"#{h.lstrip('#')}" for h in _tags)
+            (_folder / "caption.txt").write_text(_cap)
+            print(f"  ✓ {DAY_FOLDERS_W[_i]}: caption saved")
+        print(f"  Quality gate: {len(_posts[:7])} captions written ✓")
+
+        # W4: Generate Reels (make_reel.py: CSS anim + Pexels video + music)
+        _days_to_gen = [args.day] if args.day else list(range(1, 8))
+        print(f"\n[W4] Reel Maker — generating {len(_days_to_gen)} reel(s): {_days_to_gen}...")
+        _failed_days = []
+        for _day in _days_to_gen:
+            _rc = run(f"Reel Day {_day} ({DAY_FOLDERS_W[_day-1]})",
+                      ROOT / "make_reel.py", ["--day", str(_day)],
+                      stop_on_error=False)
+            if _rc == 0:
+                _src = DESKTOP_WEEK / DAY_FOLDERS_W[_day - 1] / "reel_final.mp4"
+                if _src.exists():
+                    _dst = MARKETING_WEEK / DAY_FOLDERS_W[_day - 1]
+                    _dst.mkdir(parents=True, exist_ok=True)
+                    _shutil.copy(_src, _dst / "reel_video_bg.mp4")
+                    _kb = (_dst / "reel_video_bg.mp4").stat().st_size // 1024
+                    print(f"  → week_content/{DAY_FOLDERS_W[_day-1]}/reel_video_bg.mp4 ({_kb} KB)")
+            else:
+                _failed_days.append(_day)
+
+        # W5: Generate feed posts (generate_week_reels.py --posts-only)
+        print("\n[W5] Feed Posts Generator...")
+        run("Feed Posts", ROOT / "generate_week_reels.py", ["--posts-only"])
+
+        # W5.5: Human approval gate (skipped with --no-approve flag)
+        _no_approve = os.environ.get("NOBLE_NO_APPROVE") == "1" or getattr(args, "no_approve", False)
+        _approve_file = ROOT / "output" / "APPROVED"
+        if not _no_approve:
+            _approve_file.parent.mkdir(parents=True, exist_ok=True)
+            _approve_file.unlink(missing_ok=True)
+            print(f"\n{'=' * 60}")
+            print("  ⏸  HUMAN APPROVAL REQUIRED")
+            print(f"{'=' * 60}")
+            print(f"  Review content in:")
+            print(f"    Desktop: {DESKTOP_WEEK}")
+            print(f"    Repo:    {MARKETING_WEEK}")
+            print()
+            print("  To approve and build the schedule, run ONE of:")
+            print("    touch marketing_system/output/APPROVED   # from repo root")
+            print("    python orchestrator.py --mode week-full --no-approve  # skip gate")
+            print(f"{'=' * 60}\n")
+            print("  Waiting for approval file... (Ctrl+C to abort)")
+            import time as _time
+            try:
+                while not _approve_file.exists():
+                    _time.sleep(3)
+                print(f"\n  ✓ Approved — continuing to schedule build...")
+            except KeyboardInterrupt:
+                print("\n  [ABORTED] Run with NOBLE_NO_APPROVE=1 to skip approval gate.")
+                sys.exit(0)
+
+        # W6: Build posting schedule
+        print("\n[W6] Schedule Builder...")
+        run("Schedule", ROOT / "build_schedule.py", [], stop_on_error=False)
+
+        print(f"\n{'=' * 60}")
+        print("  WEEK-FULL PIPELINE COMPLETE")
+        print(f"{'=' * 60}")
+        print(f"  week_content/ → {MARKETING_WEEK}")
+        print(f"  Desktop/      → {DESKTOP_WEEK}")
+        if _failed_days:
+            print(f"  Failed reels  : days {_failed_days}")
+        print(f"{'=' * 60}\n")
+
     # ── REELS mode: generate full week Reels + Feed posts ────────
     if run_reels:
+        import shutil as _shutil
+
+        MARKETING_WEEK = ROOT / "week_content"
+        DESKTOP_WEEK   = Path.home() / "Desktop" / "Noble Images" / "Week Content"
+        DAY_FOLDERS_R  = [
+            "Day01_Monday", "Day02_Tuesday", "Day03_Wednesday", "Day04_Thursday",
+            "Day05_Friday",  "Day06_Saturday", "Day07_Sunday",
+        ]
+
         print("\n" + "=" * 60)
-        print("  REELS WEEK PIPELINE")
+        print("  REELS PIPELINE")
         print(f"  Mode: {args.mode.upper()}")
         print("=" * 60)
 
-        reels_args = []
-        if args.mode == "reels-only":
-            reels_args.append("--reels-only")
-        elif args.mode == "posts-only":
-            reels_args.append("--posts-only")
+        # Feed posts
+        if args.mode != "reels-only":
+            run("Feed Posts Generator", ROOT / "generate_week_reels.py", ["--posts-only"])
 
-        run("Week Reels Generator", ROOT / "generate_week_reels.py", reels_args)
+        # Reels via make_reel.py (full pipeline: CSS anim + Pexels video + music)
+        if args.mode != "posts-only":
+            _days_to_gen = [args.day] if args.day else list(range(1, 8))
+            _failed_days = []
+            for _day in _days_to_gen:
+                _rc = run(f"Reel Day {_day}", ROOT / "make_reel.py",
+                          ["--day", str(_day)], stop_on_error=False)
+                if _rc == 0:
+                    _src = DESKTOP_WEEK / DAY_FOLDERS_R[_day - 1] / "reel_final.mp4"
+                    if _src.exists():
+                        _dst = MARKETING_WEEK / DAY_FOLDERS_R[_day - 1]
+                        _dst.mkdir(parents=True, exist_ok=True)
+                        _shutil.copy(_src, _dst / "reel_video_bg.mp4")
+                        _kb = (_dst / "reel_video_bg.mp4").stat().st_size // 1024
+                        print(f"  → week_content/{DAY_FOLDERS_R[_day-1]}/reel_video_bg.mp4 ({_kb} KB)")
+                else:
+                    _failed_days.append(_day)
+            if _failed_days:
+                print(f"\n  [!] Failed days: {_failed_days}")
+
+        # Build schedule
+        run("Schedule Builder", ROOT / "build_schedule.py", [], stop_on_error=False)
+
+        print(f"\n{'=' * 60}")
+        print("  REELS PIPELINE COMPLETE")
+        print(f"  week_content/ → {MARKETING_WEEK}")
+        print(f"{'=' * 60}\n")
 
     # ── TEMPLATE mode: generate HTML/CSS template for a single post ──
     if run_template:

@@ -1,6 +1,6 @@
 {
   "week": "2026-W24",
-  "generated_at": "2026-06-07T14:45:42.432689+00:00",
+  "generated_at": "2026-06-07T17:39:01.730595+00:00",
   "posts": [
     {
       "day": 1,
@@ -43,13 +43,6 @@
       "type": "reel",
       "post_at_utc": "2026-06-13T14:00:00Z",
       "post_at_edt": "2026-06-13 10:00 EDT"
-    },
-    {
-      "day": 7,
-      "folder": "Day07_Sunday",
-      "type": "reel",
-      "post_at_utc": "2026-06-14T15:00:00Z",
-      "post_at_edt": "2026-06-14 11:00 EDT"
     }
   ]
 }

@@ -16,8 +16,12 @@ The instagram_post.yml workflow reads this file hourly to decide what to post.
 """
 
 import json
+import os
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
+from dotenv import load_dotenv
+
+load_dotenv(Path(__file__).parent / ".env")
 
 ROOT         = Path(__file__).parent
 WEEK_CONTENT = ROOT / "week_content"
@@ -51,7 +55,9 @@ POST_TYPES = {
     7: "reel",   # Sun — community
 }
 
-EDT_OFFSET = timedelta(hours=-4)  # EDT = UTC-4
+# Timezone offset: override via POSTING_UTC_OFFSET env var (e.g. "-4" for EDT, "-5" for EST)
+_tz_hours = int(os.environ.get("POSTING_UTC_OFFSET", "-4"))
+EDT_OFFSET = timedelta(hours=_tz_hours)
 
 
 def get_monday(next_week: bool = False) -> date:

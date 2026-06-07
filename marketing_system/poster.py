@@ -70,36 +70,67 @@ def login() -> object:
 
     cl = Client()
 
-    # Try loading session from env var (GitHub Secret) or file
+    def _session_ok(client: object) -> bool:
+        """Quick health check — fetch own user_id without triggering challenge."""
+        try:
+            client.get_timeline_feed()
+            return True
+        except Exception:
+            return False
+
+    # 1. Try session from GitHub Secret (env var)
     if session_json:
         tmp_session = ROOT / "_session_tmp.json"
         tmp_session.write_text(session_json)
         try:
             cl.load_settings(tmp_session)
             cl.login(username, password)
-            cl.dump_settings(SESSION_FILE)
             tmp_session.unlink(missing_ok=True)
-            print("  Logged in via session (env)")
-            return cl
+            if _session_ok(cl):
+                cl.dump_settings(SESSION_FILE)
+                print("  Logged in via session (env) ✓")
+                return cl
+            print("  Env session failed health check — trying file session...")
         except Exception as e:
-            print(f"  Session login failed ({e}), trying fresh login...")
-            tmp_session.unlink(missing_ok=True)
+            print(f"  Env session error: {e}")
+        tmp_session.unlink(missing_ok=True)
 
+    # 2. Try session from file
     if SESSION_FILE.exists():
         try:
-            cl.load_settings(SESSION_FILE)
-            cl.login(username, password)
-            cl.dump_settings(SESSION_FILE)
-            print("  Logged in via session (file)")
-            return cl
-        except Exception:
-            SESSION_FILE.unlink(missing_ok=True)
+            cl2 = Client()
+            cl2.load_settings(SESSION_FILE)
+            cl2.login(username, password)
+            if _session_ok(cl2):
+                cl2.dump_settings(SESSION_FILE)
+                print("  Logged in via session (file) ✓")
+                return cl2
+            print("  File session failed health check — fresh login...")
+        except Exception as e:
+            print(f"  File session error: {e}")
+        SESSION_FILE.unlink(missing_ok=True)
 
-    cl.login(username, password)
+    # 3. Fresh login (will require SMS challenge if account is new/suspicious)
+    print("  Attempting fresh login...")
+    cl3 = Client()
+    cl3.login(username, password)
     SESSION_FILE.parent.mkdir(parents=True, exist_ok=True)
-    cl.dump_settings(SESSION_FILE)
-    print("  Fresh login successful")
-    return cl
+    cl3.dump_settings(SESSION_FILE)
+    print("  Fresh login successful ✓")
+    return cl3
+
+
+def _merge_published(folder: Path, kind: str, media_id: str):
+    """Merge into published.json without overwriting other keys (reel + feed can coexist)."""
+    pub_file = folder / "published.json"
+    data: dict = {}
+    if pub_file.exists():
+        try:
+            data = json.loads(pub_file.read_text())
+        except Exception:
+            pass
+    data[kind] = media_id
+    pub_file.write_text(json.dumps(data, indent=2))
 
 
 def _save_post_stat(day_number: int, post_type: str, media_id: str, caption: str):
@@ -140,8 +171,7 @@ def post_reel(day_number: int):
     media = cl.clip_upload(video, caption)
     media_id = str(media.pk)
 
-    published = {"reel": media_id}
-    (folder / "published.json").write_text(json.dumps(published, indent=2))
+    _merge_published(folder, "reel", media_id)
     _save_post_stat(day_number, "reel", media_id, caption)
 
     print(f"  ✓ Reel published — media_id: {media_id}")
@@ -163,8 +193,7 @@ def post_feed(day_number: int):
     media = cl.photo_upload(image, caption)
     media_id = str(media.pk)
 
-    published = {"feed": media_id}
-    (folder / "published.json").write_text(json.dumps(published, indent=2))
+    _merge_published(folder, "feed", media_id)
     _save_post_stat(day_number, "feed", media_id, caption)
 
     print(f"  ✓ Feed image published — media_id: {media_id}")

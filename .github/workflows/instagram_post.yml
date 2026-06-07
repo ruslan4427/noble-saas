@@ -19,6 +19,10 @@ on:
         type: choice
         options: [reel, feed]
 
+concurrency:
+  group: noble-git-push
+  cancel-in-progress: false
+
 jobs:
   post:
     runs-on: ubuntu-latest

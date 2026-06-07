@@ -11,6 +11,10 @@ on:
         description: 'Theme name (blank = auto-rotate by week number)'
         required: false
 
+concurrency:
+  group: noble-git-push
+  cancel-in-progress: false
+
 jobs:
   plan:
     runs-on: ubuntu-latest
