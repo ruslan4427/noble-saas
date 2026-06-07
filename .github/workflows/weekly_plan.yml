@@ -1,0 +1,173 @@
+name: Noble Weekly Plan (Monday auto-run)
+
+on:
+  schedule:
+    # Monday 08:00 EDT = Monday 12:00 UTC
+    - cron: '0 12 * * 1'
+
+  workflow_dispatch:
+    inputs:
+      theme:
+        description: 'Theme name (blank = auto-rotate by week number)'
+        required: false
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Python dependencies
+        run: |
+          pip install anthropic python-dotenv instagrapi pillow requests
+
+      - name: Rotate weekly theme
+        run: |
+          cd marketing_system
+          WEEK_NUM=$(python3 -c "from datetime import date; print(date.today().isocalendar().week)")
+
+          THEME_ARG=""
+          if [ -n "${{ github.event.inputs.theme }}" ]; then
+            THEME_ARG="--theme ${{ github.event.inputs.theme }}"
+          fi
+
+          python3 -c "
+          import sys
+          sys.path.insert(0, 'strategist')
+          from weekly_refresh import generate_week_theme
+          theme = generate_week_theme(week_number=${WEEK_NUM})
+          print(f'Theme: {theme[\"name\"]} — {theme[\"title\"]}')
+          "
+          echo "✓ Theme rotated"
+
+      - name: Generate weekly content plan
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          cd marketing_system
+          python3 strategist/plan_generator.py \
+            --platform instagram \
+            --period weekly \
+            --focus mixed
+          echo "✓ Content plan generated"
+
+      - name: Expand captions for all 7 days
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          cd marketing_system
+          # Find latest plan file and expand captions
+          PLAN=$(ls -t output/content_plan_*.json 2>/dev/null | head -1)
+          if [ -n "$PLAN" ]; then
+            python3 creator/content_expander.py --input "$PLAN"
+            echo "✓ Captions expanded"
+          else
+            echo "⚠ No plan file found — skipping caption expansion"
+          fi
+
+      - name: Download Pexels background video
+        env:
+          PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
+        run: |
+          cd marketing_system
+          python3 -c "
+          import json, requests, sys
+          from pathlib import Path
+
+          api_key = '${PEXELS_API_KEY}'
+          if not api_key:
+              print('No PEXELS_API_KEY — skipping video download')
+              sys.exit(0)
+
+          theme_file = Path('data/active_theme.json')
+          if not theme_file.exists():
+              print('No active theme — skipping')
+              sys.exit(0)
+
+          theme_name = json.loads(theme_file.read_text()).get('theme_name','')
+
+          # Load theme pexels_query
+          sys.path.insert(0, 'strategist')
+          from weekly_refresh import WEEK_THEMES
+          theme = next((t for t in WEEK_THEMES if t['name'] == theme_name), WEEK_THEMES[0])
+          query = theme['pexels_query']
+
+          bg_dir = Path('week_content/video_backgrounds')
+          bg_dir.mkdir(parents=True, exist_ok=True)
+
+          resp = requests.get(
+              'https://api.pexels.com/videos/search',
+              headers={'Authorization': api_key},
+              params={'query': query, 'per_page': 3, 'orientation': 'portrait'},
+              timeout=15,
+          )
+          videos = resp.json().get('videos', [])
+          if not videos:
+              print(f'No videos found for: {query}')
+              sys.exit(0)
+
+          video = videos[0]
+          video_url = next(
+              (f['link'] for f in video.get('video_files', [])
+               if f.get('quality') in ('hd', 'sd') and f.get('height', 0) >= 720),
+              None
+          )
+          if not video_url:
+              sys.exit(0)
+
+          out = bg_dir / f'bg_{theme_name}.mp4'
+          r = requests.get(video_url, stream=True, timeout=60)
+          with open(out, 'wb') as f:
+              for chunk in r.iter_content(chunk_size=8192):
+                  f.write(chunk)
+          size_mb = out.stat().st_size // (1024*1024)
+          print(f'✓ Downloaded: {out.name} ({size_mb}MB) — query: {query}')
+          "
+
+      - name: Build posting schedule
+        run: |
+          cd marketing_system
+          python3 build_schedule.py
+          echo "✓ schedule.json built"
+
+      - name: Commit plan + schedule
+        run: |
+          git config user.name  "noble-bot"
+          git config user.email "bot@noblelink.app"
+
+          git add marketing_system/output/
+          git add marketing_system/data/active_theme.json
+          git add marketing_system/week_content/schedule.json
+          git add marketing_system/week_content/video_backgrounds/ 2>/dev/null || true
+
+          WEEK=$(python3 -c "from datetime import date; d=date.today(); print(f'{d.year}-W{d.isocalendar().week:02d}')")
+          git diff --cached --quiet && echo "Nothing to commit" || \
+            git commit -m "auto(weekly-plan): theme + plan + schedule for $WEEK"
+
+          git push
+          echo "✓ Committed and pushed"
+
+      - name: Summary
+        run: |
+          cd marketing_system
+          echo ""
+          echo "═══════════════════════════════════════"
+          echo "  Weekly Planning Complete"
+          echo "═══════════════════════════════════════"
+          cat data/active_theme.json 2>/dev/null || echo "(no theme file)"
+          echo ""
+          cat week_content/schedule.json 2>/dev/null || echo "(no schedule)"
+          echo ""
+          echo "⚠  Video reels need to be generated locally:"
+          echo "   python3 generate_week_reels.py"
+          echo "   Then: git add week_content/ && git push"

@@ -1,0 +1,74 @@
+name: Noble Weekly Review (Sunday auto-run)
+
+on:
+  schedule:
+    # Sunday 21:00 EDT = Monday 01:00 UTC
+    - cron: '0 1 * * 1'
+
+  workflow_dispatch:
+    inputs:
+      week:
+        description: 'ISO week to report (e.g. 2026-W23) — blank = current'
+        required: false
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install instagrapi python-dotenv openpyxl google-auth google-auth-oauthlib google-api-python-client
+
+      - name: Generate weekly report
+        env:
+          IG_USERNAME: ${{ secrets.IG_USERNAME }}
+          IG_PASSWORD: ${{ secrets.IG_PASSWORD }}
+          IG_SESSION_JSON: ${{ secrets.IG_SESSION_JSON }}
+        run: |
+          cd marketing_system
+
+          # Restore Instagram session from secret
+          mkdir -p mcp_instagram
+          echo "$IG_SESSION_JSON" > mcp_instagram/session.json
+
+          WEEK_ARG=""
+          if [ -n "${{ github.event.inputs.week }}" ]; then
+            WEEK_ARG="--week ${{ github.event.inputs.week }}"
+          fi
+
+          python3 weekly_report.py $WEEK_ARG
+          echo "✓ Report generated"
+
+      - name: Update learnings.json from post stats
+        run: |
+          cd marketing_system
+          python3 auto_learnings.py
+          echo "✓ learnings.json updated"
+
+      - name: Commit report + learnings
+        run: |
+          git config user.name  "noble-bot"
+          git config user.email "bot@noblelink.app"
+
+          git add marketing_system/output/optimization/learnings.json
+          git add marketing_system/output/reports/
+          git add marketing_system/week_content/
+
+          WEEK=$(python3 -c "from datetime import date; d=date.today(); print(f'{d.year}-W{d.isocalendar().week:02d}')")
+          git diff --cached --quiet && echo "Nothing to commit" || \
+            git commit -m "auto(weekly-review): report + learnings update $WEEK"
+
+          git push
+          echo "✓ Committed and pushed"
