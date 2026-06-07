@@ -1,0 +1,45 @@
+{
+  "last_updated": "2026-05-02",
+  "updates": [
+    {
+      "feature_name": "Instant Booking Confirmation",
+      "status": "new",
+      "launched_at": "2026-04-28",
+      "benefit": "Clients get an SMS confirmation the moment they book — no more 'did my booking go through?' messages to the owner.",
+      "content_angle": "Show the client side: they book, phone buzzes with confirmation in seconds. Zero anxiety.",
+      "priority": 1
+    },
+    {
+      "feature_name": "Vacation Blocks",
+      "status": "improved",
+      "launched_at": "2026-04-20",
+      "benefit": "Owners can now block multiple days at once — entire weeks, not just single days. Calendar updates instantly for all clients.",
+      "content_angle": "Barber going on vacation without chaos — clients see 'not available' automatically, no need to text everyone.",
+      "priority": 2
+    },
+    {
+      "feature_name": "Multi-Staff Scheduling",
+      "status": "improved",
+      "launched_at": "2026-04-15",
+      "benefit": "Each barber now has their own independent schedule — different hours, breaks, and days off. No more one-size-fits-all.",
+      "content_angle": "Shop with 3 barbers, each with different schedules. All managed in one place, clients see only their barber's availability.",
+      "priority": 3
+    },
+    {
+      "feature_name": "TikTok & Telegram Profile Links",
+      "status": "new",
+      "launched_at": "2026-04-10",
+      "benefit": "Salon owners can now add TikTok and Telegram links to their booking page — clients can follow them directly from the booking screen.",
+      "content_angle": "Your booking page is now also a social media hub. One link, everything the client needs.",
+      "priority": 4
+    },
+    {
+      "feature_name": "Mobile-First Booking Page",
+      "status": "improved",
+      "launched_at": "2026-04-05",
+      "benefit": "Booking page fully redesigned for phones — bigger buttons, faster loading, zero pinching or zooming. 90% of bookings happen on mobile.",
+      "content_angle": "Side-by-side: old cramped mobile view vs. new clean touch-friendly design. Night and day.",
+      "priority": 5
+    }
+  ]
+}

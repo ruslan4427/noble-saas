@@ -1,0 +1,546 @@
+{
+  "meta": {
+    "platform": "instagram",
+    "period": "weekly",
+    "focus": "mixed",
+    "start_date": "2026-06-07",
+    "end_date": "2026-06-13",
+    "total_posts": 6,
+    "priority_updates_used": [
+      "Instant Booking Confirmation",
+      "Vacation Blocks",
+      "Multi-Staff Scheduling"
+    ],
+    "expanded_posts": 6
+  },
+  "posts": [
+    {
+      "post_number": 1,
+      "post_date": "2026-06-09",
+      "platform": "instagram",
+      "post_type": "reel",
+      "content_pillar": "product",
+      "caption": "POV: You're mid-fade. Your phone just filled tomorrow's chair.\n\nOld way: client DMs 'hey did my booking go through?' You stop, wipe your hands, type back 'yeah you're good' — mid-cut.\n\nNew way: they book on your Noble page. SMS confirmation hits their phone in seconds. They never have to ask. You never have to answer.\n\nZero DMs. Zero anxiety. Just a full chair.\n\nTry it free for 14 days — link in bio.\n\nSend this to a barber who needs to hear it.\n\n#BarberLife #BarberCulture #BarbershopConnect #BlackOwnedBarbershop #FreshCut #MensGrooming #BarberTech #BookingApp #OnlineBooking #BarberBusiness #ShopOwner #NobleApp #BarberTools #AutomaticConfirmation #NoMoreDMs #BarberSchedule #ClientExperience #NobleSalon #SalonSoftware #HairSalonOwner #BookOnline #BarberLife2026",
+      "visual_description": null,
+      "reels_script": {
+        "total_duration": "15 seconds",
+        "sections": [
+          {
+            "section": "Hook",
+            "timestamp": "0–3s",
+            "on_screen_text": "POV: You're mid-fade.\nYour phone just filled tomorrow's chair.",
+            "action": "Extreme close-up of barber's hands working a clean fade. Clippers moving. Skin fading. No face. Pure craft. Text animates in bold white over the shot.",
+            "voiceover": null
+          },
+          {
+            "section": "Problem",
+            "timestamp": "3–7s",
+            "on_screen_text": "'Did my booking go through?' 😤",
+            "action": "Cut to a mock DM notification sliding down from the top of the screen — the classic client message every barber knows. Barber's hand visible, clippers still in frame. Visual tension: mid-cut, mid-message.",
+            "voiceover": "You know the message. You hate the message."
+          },
+          {
+            "section": "Solution",
+            "timestamp": "7–12s",
+            "on_screen_text": "Noble sends the confirmation.\nThey never have to ask.",
+            "action": "Noble-branded phone screen composited into the corner of the frame. An SMS confirmation notification buzzes in — subtle haptic-style pulse animation. Text reads: 'You're booked for tomorrow at 10am. See you then.' Barber's hands never stop moving.",
+            "voiceover": "Book through Noble — they get an SMS instantly. You don't lift a finger."
+          },
+          {
+            "section": "CTA",
+            "timestamp": "12–15s",
+            "on_screen_text": "Book. Confirm. Done.\nTry free — link in bio.",
+            "action": "Hard cut to dark Noble-branded end card. Background #1a1208. 'Book. Confirm. Done.' in bold cream #f5f0e8. CTA line below in gold #C9A84C. Noble logo bottom center. Clean. Still. Confident.",
+            "voiceover": "14 days free. No credit card."
+          }
+        ],
+        "audio_note": "Trending lo-fi trap beat with a phone buzz or notification sound effect synced to the SMS arrival at 7s. Search TikTok/Reels for 'barber aesthetic beat 2026' or use a royalty-free track with a dark, smooth groove — think Lucid Dreams x Barbershop vibes. Keep music low under voiceover sections.",
+        "production_note": "Film the fade close-up in portrait 9:16 with natural window light or a ring light aimed at the client's head — not the barber's face. Use a phone gimbal or stabilizer for the opening shot; shaky hands will kill the scroll-stop. The DM notification and Noble SMS overlay are composited in post via generate_week_reels.py — barber does not need to stage these on a real device. End card is a static Noble-branded frame exported from the brand template. Total setup time: under 20 minutes."
+      },
+      "animation_brief": null,
+      "hook": "POV: You're mid-fade. Your phone just filled tomorrow's chair.",
+      "concept": "A POV-style reel that shows the client experience: they tap 'Book Now' on a Noble booking page and within seconds their phone buzzes with an SMS confirmation. The barber never has to lift a finger. It closes with a Noble-branded screen showing the confirmation message and the line 'Zero DMs. Zero anxiety.'",
+      "visual_direction": "Pexels video background: close-up of a barber's hands working a fade. Noble alpha composite overlay: animated phone screen appears in the corner showing a booking confirmation SMS arriving with a buzz animation. End card: dark Noble-branded frame, white text — 'Book. Confirm. Done.' Bold and clean.",
+      "animation_concept": null,
+      "notes": "Use trending audio: 'EVERYTHING HALLELUJAH — Justin Bieber' to sync the phone buzz moment to the beat. Keep reel under 12 seconds. The phone notification animation is the hero moment — make it land on the beat drop. Film or source Pexels barber hands footage in warm shop lighting. Post Tuesday 9–11am window for peak reach.",
+      "feature_update": "Instant Booking Confirmation"
+    },
+    {
+      "post_number": 2,
+      "post_date": "2026-06-10",
+      "platform": "instagram",
+      "post_type": "feed_post",
+      "content_pillar": "product",
+      "caption": "You're going on vacation. Your clients don't need to know yet — Noble handles it.\n\nOld way: you post on your story, spend two days in your DMs telling everyone you're closed, and someone still shows up at the shop on Tuesday.\n\nWith Noble, you block the entire week in under 60 seconds. Your booking page flips to unavailable — automatically. Any client who tries to book sees it immediately. No texts. No DMs. No showing up to a locked door.\n\nYour vacation should actually feel like one.\n\nSet your vacation block today — start free at noblelink.app\n\nFollow @noble.booking for weekly tips on running a tighter shop.\n\n#BarberLife #BarbershopOwner #BlackOwnedBarbershop #BarberBusiness #SalonOwner #ShopOwner #BarberSchedule #WorkLifeBalance #BarberCulture #OnlineBooking #NobleApp #SalonSoftware #HairSalonOwner #BarberTools #SchedulingApp #BarberTips #BarbershopConnect #SmallBusinessOwner #VacationMode #NoMoreDMs #BarberLife2026 #BookOnline #MensGrooming",
+      "visual_description": {
+        "format": "single image",
+        "slides": [
+          {
+            "slide_number": 1,
+            "background": "#1a1208 (Noble brand dark — near-black warm brown)",
+            "text_elements": [
+              {
+                "text": "Going on vacation?",
+                "size": "large",
+                "weight": "bold",
+                "color": "#f5f0e8"
+              },
+              {
+                "text": "Here's what used to happen — and what happens now.",
+                "size": "small",
+                "weight": "regular",
+                "color": "#C9A84C"
+              },
+              {
+                "text": "BEFORE NOBLE",
+                "size": "medium",
+                "weight": "bold",
+                "color": "#ff6b6b"
+              },
+              {
+                "text": "📱 40 DMs to answer\n😤 Someone still shows up\n🤯 Vacation? What vacation?",
+                "size": "small",
+                "weight": "regular",
+                "color": "#f5f0e8"
+              },
+              {
+                "text": "AFTER NOBLE",
+                "size": "medium",
+                "weight": "bold",
+                "color": "#6bcb77"
+              },
+              {
+                "text": "📅 Block the whole week in seconds\n✅ Booking page auto-updates\n✈️ Actually relax",
+                "size": "small",
+                "weight": "regular",
+                "color": "#f5f0e8"
+              },
+              {
+                "text": "Your vacation should actually feel like one.",
+                "size": "medium",
+                "weight": "bold",
+                "color": "#C9A84C"
+              },
+              {
+                "text": "noblelink.app",
+                "size": "small",
+                "weight": "bold",
+                "color": "#f5f0e8"
+              }
+            ],
+            "layout_notes": "Vertical layout. Top 20% of canvas: headline 'Going on vacation?' centered, large and bold, with gold subheadline beneath it. Below that, a two-column card section spanning 55% of the canvas. LEFT column: subtle red-tinted dark panel (#2a1010 bg, thin red border #ff6b6b), 'BEFORE NOBLE' label top in red, three bullet lines below in cream. RIGHT column: subtle green-tinted dark panel (#0f2a12 bg, thin green border #6bcb77), 'AFTER NOBLE' label top in green, three bullet lines below in cream. Columns sit side by side with ~16px gap. Bottom 20%: gold italic tagline 'Your vacation should actually feel like one.' centered, followed by 'noblelink.app' in small bold cream. Noble wordmark logo bottom-right corner at ~10% canvas width. All text left-aligned within their respective columns. 32px horizontal padding on outer edges.",
+            "brand_elements": "Noble wordmark logo (white or gold version) pinned to bottom-right corner, 24px from edge. Gold accent #C9A84C used on subheadline and tagline only — not overused. Overall palette: dark warm background, cream body text, gold accents, red/green tints limited strictly to the two comparison panels."
+          }
+        ]
+      },
+      "reels_script": null,
+      "animation_brief": null,
+      "hook": "You're going on vacation. Your clients don't need to know yet — Noble handles it.",
+      "concept": "A bold Template A (text-dominant) feed post that walks through what used to happen when a barber went on vacation — 40 DMs, manual replies, someone still showing up — versus what happens now with Noble's multi-day vacation blocks. The calendar updates instantly and clients see 'not available' without the owner sending a single message.",
+      "visual_direction": "Template A: bold dark background (Noble brand dark), large white headline text — 'Going on vacation?' followed by a two-column layout: LEFT column red-tinted — 'Before Noble' with 3 bullet icons (📱 40 DMs, 😤 Someone still shows up, 🤯 Cut your vacation short). RIGHT column green-tinted — 'After Noble' (📅 Block the whole week in seconds, ✅ Booking page auto-updates, ✈️ Actually relax). Noble logo bottom right. 1080×1080 PNG.",
+      "animation_concept": null,
+      "notes": "This post is strong for saves — the before/after two-column format is highly shareable. Add a save prompt in the caption: 'Save this for your next vacation.' Post Wednesday 6–8pm. Template A format works best here — keep it scannable, high contrast, no clutter.",
+      "feature_update": "Vacation Blocks"
+    },
+    {
+      "post_number": 3,
+      "post_date": "2026-06-11",
+      "platform": "instagram",
+      "post_type": "carousel",
+      "content_pillar": "product",
+      "caption": "3 barbers. 3 schedules. Zero confusion.\n\nOne works mornings. One does afternoons. One takes Wednesdays off. Before Noble, that's three different schedules living in your head — and clients booking whoever they want, whenever they want.\n\nWrong barber. Wrong time. Awkward calls. Every week.\n\nNow each barber in Noble has their own independent schedule. Marcus is open Mon–Sat 9–6. DeShawn runs Tue–Fri 12–8. Jordan's on Mon, Wed, Fri 10–5. Clients only see their barber's real availability — nothing else.\n\nNo overlap. No double-bookings. No you playing referee.\n\nAll three schedules managed from one dashboard on your phone. Setup takes 5 minutes.\n\nManage your whole crew in one place — try Noble free for 14 days. Link in bio.\n\nFollow @noble.booking for weekly tips on running a tighter shop.\n\n#BarbershopOwner #BarberLife #BlackOwnedBarbershop #BarberCulture #BarbershopConnect #MultiStaff #SalonOwner #ShopOwner #BarberBusiness #BarberSchedule #OnlineBooking #NobleApp #SalonSoftware #BarberTools #TeamManagement #BarberTips #SmallBusinessOwner #HairSalonOwner #BookOnline #BarberLife2026 #MensGrooming #FreshCut #SchedulingApp",
+      "visual_description": {
+        "format": "carousel",
+        "slides": [
+          {
+            "slide_number": 1,
+            "background": "#1a1208 (Noble dark brown-black)",
+            "text_elements": [
+              {
+                "text": "3 barbers.",
+                "size": "large",
+                "weight": "bold",
+                "color": "#f5f0e8"
+              },
+              {
+                "text": "3 schedules.",
+                "size": "large",
+                "weight": "bold",
+                "color": "#f5f0e8"
+              },
+              {
+                "text": "Zero confusion.",
+                "size": "large",
+                "weight": "bold",
+                "color": "#C9A84C"
+              },
+              {
+                "text": "Swipe →",
+                "size": "small",
+                "weight": "regular",
+                "color": "#C9A84C"
+              }
+            ],
+            "layout_notes": "Text stacked center of slide, vertically centered with generous line height. 'Zero confusion.' on its own line in gold to land as the payoff. 'Swipe →' sits bottom-center, at least 40px above edge. Each phrase on its own line — treat as three punches, not one sentence.",
+            "brand_elements": "Noble wordmark top-center in cream #f5f0e8, small (approx 120px wide). Thin gold (#C9A84C) horizontal rule beneath the wordmark. No other decorative elements — let the text breathe."
+          },
+          {
+            "slide_number": 2,
+            "background": "#1a1208",
+            "text_elements": [
+              {
+                "text": "Managing 3 barbers from your phone should not feel like this.",
+                "size": "medium",
+                "weight": "bold",
+                "color": "#f5f0e8"
+              }
+            ],
+            "layout_notes": "Headline sits top third of slide, left-aligned with 48px side padding. Below it, fill the center with an illustration-style chaos graphic: 3 overlapping calendar blocks in muted red/grey, 4–5 DM speech bubbles with '??', 'He said 2pm?', 'Double booked again' scattered at angles, crossed scheduling lines in light grey. Keep the graphic slightly desaturated — Noble gold should be absent here to signal 'before Noble'. Caption below graphic in small cream text: 'Sound familiar?' centered.",
+            "brand_elements": "Noble wordmark top-left, small, cream. No gold accents on this slide — intentionally brand-cold to emphasize the pain state."
+          },
+          {
+            "slide_number": 3,
+            "background": "#1a1208",
+            "text_elements": [
+              {
+                "text": "Each barber gets their own schedule.",
+                "size": "medium",
+                "weight": "bold",
+                "color": "#f5f0e8"
+              },
+              {
+                "text": "Marcus",
+                "size": "small",
+                "weight": "bold",
+                "color": "#C9A84C"
+              },
+              {
+                "text": "Mon–Sat · 9am–6pm",
+                "size": "small",
+                "weight": "regular",
+                "color": "#f5f0e8"
+              },
+              {
+                "text": "DeShawn",
+                "size": "small",
+                "weight": "bold",
+                "color": "#C9A84C"
+              },
+              {
+                "text": "Tue–Fri · 12pm–8pm",
+                "size": "small",
+                "weight": "regular",
+                "color": "#f5f0e8"
+              },
+              {
+                "text": "Jordan",
+                "size": "small",
+                "weight": "bold",
+                "color": "#C9A84C"
+              },
+              {
+                "text": "Mon / Wed / Fri · 10am–5pm",
+                "size": "small",
+                "weight": "regular",
+                "color": "#f5f0e8"
+              }
+            ],
+            "layout_notes": "Headline top third, left-aligned, 48px side padding. Below headline: a clean UI mockup card (dark #22180a rounded rectangle, 8px border radius, subtle 1px gold border) showing a staff list. Each barber is a row: avatar circle (initials) left, name in gold bold, hours in cream regular. Rows separated by a thin #C9A84C/20 divider line. Mockup should feel like a real mobile app — use system-style fonts inside the card. Card centered horizontally, takes up approx 55% of slide height.",
+            "brand_elements": "Noble wordmark top-left, small, cream. Gold border on the UI card reinforces brand. This is the 'after' slide — gold returns as the solution color."
+          },
+          {
+            "slide_number": 4,
+            "background": "#1a1208",
+            "text_elements": [
+              {
+                "text": "Clients see exactly when their barber is free.",
+                "size": "medium",
+                "weight": "bold",
+                "color": "#f5f0e8"
+              },
+              {
+                "text": "Nothing more.",
+                "size": "medium",
+                "weight": "bold",
+                "color": "#C9A84C"
+              }
+            ],
+            "layout_notes": "Headline split across two lines — 'Clients see exactly when their barber is free.' in cream, then 'Nothing more.' on next line in gold as the punchy close. Text sits top third. Below: a phone mockup (thin-bezel dark phone frame, portrait) showing a booking flow UI — barber selector at top with three name pills (Marcus selected, highlighted gold), then a clean availability calendar showing only Marcus's open slots in gold. Empty slots shown in dark grey — visually sparse to show the client only sees what they need. Phone centered, bottom of mockup at slide edge.",
+            "brand_elements": "Noble wordmark top-left, small, cream. Gold used for selected barber pill and available time slots inside the phone mockup — consistent product color language."
+          },
+          {
+            "slide_number": 5,
+            "background": "#1a1208",
+            "text_elements": [
+              {
+                "text": "Everything you need. Nothing you don't.",
+                "size": "medium",
+                "weight": "bold",
+                "color": "#f5f0e8"
+              },
+              {
+                "text": "Individual hours ✅",
+                "size": "small",
+                "weight": "regular",
+                "color": "#f5f0e8"
+              },
+              {
+                "text": "Individual breaks ✅",
+                "size": "small",
+                "weight": "regular",
+                "color": "#f5f0e8"
+              },
+              {
+                "text": "Individual days off ✅",
+                "size": "small",
+                "weight": "regular",
+                "color": "#f5f0e8"
+              },
+              {
+                "text": "One dashboard ✅",
+                "size": "small",
+                "weight": "bold",
+                "color": "#C9A84C"
+              }
+            ],
+            "layout_notes": "Headline top third, center-aligned. Checklist items stacked center of slide, left-aligned within a center-justified block (treat as a pill card). Each checklist row has approx 32px vertical spacing. The final item 'One dashboard ✅' is bold and gold — it's the hero benefit that closes the list. Use a slightly larger font size for that final line (18–20px vs 16px for the others). Clean whitespace around the list — no icons, no background card, just text on dark.",
+            "brand_elements": "Noble wordmark top-left, small, cream. Thin gold divider line above the checklist block. Gold used only on the final summary line to signal resolution."
+          },
+          {
+            "slide_number": 6,
+            "background": "#C9A84C (Noble gold — full bleed CTA slide)",
+            "text_elements": [
+              {
+                "text": "Run your whole crew from one place.",
+                "size": "large",
+                "weight": "bold",
+                "color": "#1a1208"
+              },
+              {
+                "text": "Start free at noblelink.app",
+                "size": "medium",
+                "weight": "bold",
+                "color": "#1a1208"
+              },
+              {
+                "text": "14-day free trial. No credit card.",
+                "size": "small",
+                "weight": "regular",
+                "color": "#1a1208"
+              }
+            ],
+            "layout_notes": "Full gold background — maximum contrast, maximum attention. All text in Noble dark #1a1208. Headline large and bold, vertically and horizontally centered, 48px side padding. URL on its own line beneath headline, underlined style to signal clickability. Trust line '14-day free trial. No credit card.' in small regular text below URL, adds reassurance without clutter. Noble wordmark centered at bottom in dark #1a1208, approx 100px wide. No other elements — this slide should feel like a billboard.",
+            "brand_elements": "Noble wordmark bottom-center in #1a1208. No gold accents needed — the entire slide IS the gold. This is the only slide where the color hierarchy inverts."
+          }
+        ]
+      },
+      "reels_script": null,
+      "animation_brief": null,
+      "hook": "3 barbers. 3 schedules. Zero confusion.",
+      "concept": "A carousel that walks through the Multi-Staff Scheduling feature from the shop owner's perspective. Each slide shows one pain point of managing multiple barbers and how Noble solves it. Ends with a slide showing a mockup of Noble's staff dashboard with three barbers' individual schedules visible, and a CTA slide.",
+      "visual_direction": "Slide 1 (Hook): Dark Noble background, bold white text — '3 barbers. 3 schedules. Zero confusion.' Noble wordmark top. Slide 2: Pain slide — 'Managing 3 barbers from your phone should not feel like this.' Illustration-style chaos: overlapping calendar blocks, DM bubbles, crossed lines. Slide 3: Solution — 'Each barber gets their own schedule.' Show a clean mockup of Noble's staff list with Marcus (Mon–Sat, 9am–6pm), DeShawn (Tue–Fri, 12pm–8pm), Jordan (Mon/Wed/Fri, 10am–5pm). Slide 4: Client-side benefit — 'Clients see exactly when their barber is free. Nothing more.' Clean phone mockup showing a booking flow with barber selector. Slide 5: Summary checklist — Individual hours ✅ Individual breaks ✅ Individual days off ✅ One dashboard ✅. Slide 6: CTA slide — 'Run your whole crew from one place. Start free at noblelink.app.' Each slide 1080×1080.",
+      "animation_concept": null,
+      "notes": "Carousel format is highest priority for saves per W23 learnings — include an explicit 'Save this if you run a multi-barber shop' line in the caption. Add a DM share prompt: 'Send this to a shop owner who needs it.' Post Thursday 9–11am. Keep slide copy tight — one idea per slide, max 10 words of headline text.",
+      "feature_update": "Multi-Staff Scheduling"
+    },
+    {
+      "post_number": 4,
+      "post_date": "2026-06-11",
+      "platform": "instagram",
+      "post_type": "feed_post",
+      "content_pillar": "social_proof",
+      "caption": "47 bookings. Zero no-shows. One Black-owned shop. One month.\n\nBefore Noble, Marcus was running his whole book through DMs. Clients would say 'I'll be there' — then just not show. He'd hold a slot for 45 minutes, lose $60, and have nothing to show for it. He estimates he was giving away $1,500–$1,800 a month just in empty chairs.\n\nOne afternoon he set up Noble. Took him less than five minutes. He dropped his booking link — noblelink.app/salon/marcus — in his Instagram bio and his last three posts.\n\nThat month: 47 bookings. Automatic SMS reminders went out two hours before every appointment. Zero no-shows. Not one.\n\n'That's when I knew this wasn't just an app. It was money I was leaving on the table every single week.'\n\nIf you're still booking through DMs, this is for you. $15/month. 14-day free trial. No credit card.\n\nFollow @noble.booking for weekly tips on running a tighter shop.\n\nStart your free 14-day trial at noblelink.app — link in bio.\n\n#BlackOwnedBarbershop #BarberCulture #BarbershopConnect #BarberLife #BarberBusiness #ShopOwner #NoShowPrevention #BarberSuccess #SMSReminders #OnlineBooking #NobleApp #SalonSoftware #BarberTestimonial #BarberTips #FreshCut #MensGrooming #BlackOwnedBusiness #BarberLife2026 #BookOnline #SalonOwner #HairSalonOwner #BarberTools #ClientRetention",
+      "visual_description": {
+        "format": "single image",
+        "slides": [
+          {
+            "slide_number": 1,
+            "background": "#1a1208 (Noble dark brown-black, full bleed)",
+            "text_elements": [
+              {
+                "text": "❝ 47 bookings. Zero no-shows. That's when I knew. ❞",
+                "size": "large",
+                "weight": "bold",
+                "color": "#f5f0e8"
+              },
+              {
+                "text": "Marcus T. — Shop Owner, Atlanta, GA",
+                "size": "small",
+                "weight": "regular",
+                "color": "#C9A84C"
+              },
+              {
+                "text": "47 Bookings",
+                "size": "medium",
+                "weight": "bold",
+                "color": "#f5f0e8"
+              },
+              {
+                "text": "0 No-Shows",
+                "size": "medium",
+                "weight": "bold",
+                "color": "#f5f0e8"
+              },
+              {
+                "text": "$1,800 Recovered",
+                "size": "medium",
+                "weight": "bold",
+                "color": "#C9A84C"
+              },
+              {
+                "text": "BOOKINGS",
+                "size": "small",
+                "weight": "regular",
+                "color": "#C9A84C"
+              },
+              {
+                "text": "NO-SHOWS",
+                "size": "small",
+                "weight": "regular",
+                "color": "#C9A84C"
+              },
+              {
+                "text": "RECOVERED",
+                "size": "small",
+                "weight": "regular",
+                "color": "#C9A84C"
+              },
+              {
+                "text": "Noble",
+                "size": "small",
+                "weight": "bold",
+                "color": "#C9A84C"
+              }
+            ],
+            "layout_notes": "Vertical layout, 1080×1080px. Top 10%: a thin gold (#C9A84C) horizontal rule spanning 80% of the card width — acts as an eyebrow separator. Center 55% of the card: the pull-quote in large bold cream text, left-aligned with generous left padding (80px). Quotation marks are oversized and gold. Attribution line (owner name, city, shop) sits 24px below the closing quote mark, in small gold text, left-aligned. Bottom 25%: a dark card strip with a subtle #C9A84C top border (2px). Inside this strip, three stat blocks sit side by side, equally spaced, each containing a bold large number on top and a small gold label beneath — '47 / BOOKINGS', '0 / NO-SHOWS', '$1,800 / RECOVERED'. Vertical dividers (1px, gold, 40% opacity) separate the three blocks. Noble logo (wordmark) sits bottom-right inside the strip at small size, gold color. Leave breathing room — do not crowd elements.",
+            "brand_elements": "Noble wordmark bottom-right of stat strip in #C9A84C. Gold accent rule at top of card. Gold dividers between stat blocks. Two-pixel gold border on top edge of stat strip. All text on #1a1208 background for maximum contrast."
+          }
+        ]
+      },
+      "reels_script": null,
+      "animation_brief": null,
+      "hook": "47 bookings. Zero no-shows. One Black-owned shop. One month.",
+      "concept": "A testimonial-style feed post using Template D (review card style) featuring a real or composite owner story showing measurable results after switching to Noble. Focuses on no-show reduction and revenue gained. The format reads like a scoreboard — numbers front and center, owner voice throughout.",
+      "visual_direction": "Template D: Review card format. Dark Noble background. Large pull-quote in white: '47 bookings. Zero no-shows. That's when I knew.' Attribution below: owner name, city, shop name (can be composite/anonymized if needed). Bottom strip: three stat blocks side by side — '47 Bookings', '0 No-Shows', '$1,800 Recovered'. Noble logo bottom right. Clean, credible, high contrast. 1080×1080 PNG.",
+      "animation_concept": null,
+      "notes": "Social proof is the highest-performing pillar at 59% ER — prioritize this post. Use real testimonial data if available; if not, build a composite that is truthful to aggregate results. Include explicit follow CTA in caption per W23 directive: 'Follow us for weekly business tips for shop owners.' Post Friday 6–8pm for peak engagement window.",
+      "feature_update": null
+    },
+    {
+      "post_number": 5,
+      "post_date": "2026-06-12",
+      "platform": "instagram",
+      "post_type": "reel",
+      "content_pillar": "education",
+      "caption": "35% of your clients want to book right now. You're asleep.\n\nThat's not a guess — 35% of online bookings happen after 8pm. While you're on the couch, clients are on their phones looking for a barber.\n\nIf you don't have a booking link, they find one who does. They don't text. They don't wait. They just move on — and you never knew they were interested.\n\nThat's the silent client loss nobody talks about.\n\nNoble's booking page is live 24/7. Your clients book while you sleep. You wake up to a full calendar.\n\nSet up your booking page in 5 minutes — link in bio.\n\nSend this to a barber who needs to hear it.\n\n#BarberBusiness #BarberLife #BarbershopOwner #BlackOwnedBarbershop #BarberTips #OnlineBooking #AfterHoursBooking #BarberCulture #BarbershopConnect #NobleApp #SalonSoftware #ShopOwner #BarberEducation #BookOnline #SalonOwner #HairSalonOwner #MensGrooming #FreshCut #BarberLife2026 #BarberTools #SmallBusinessOwner #ClientRetention #BarberSchedule",
+      "visual_description": null,
+      "reels_script": {
+        "total_duration": "18 seconds",
+        "sections": [
+          {
+            "section": "Hook",
+            "timestamp": "0–3s",
+            "on_screen_text": "35% of your clients want to book right now.\nYou're asleep.",
+            "action": "Cut straight to a dark barbershop exterior at night — closed sign visible, quiet street, no movement. Bold white stat text slams onto screen in two lines, no fade, hard cut timing.",
+            "voiceover": "35% of your clients want to book right now. You're asleep."
+          },
+          {
+            "section": "Problem",
+            "timestamp": "3–10s",
+            "on_screen_text": "35% of online bookings happen after 8pm.\nNo link = they find someone who has one.\nThey don't text. They just move on.",
+            "action": "Stay on the dark exterior shot or cut to a slow zoom on the closed sign. Text lines appear one at a time, staggered every 2 seconds — white bold on dark background. Each line hits like a gut punch. No transitions, no fluff.",
+            "voiceover": "35% of online bookings happen after 8pm. No booking link? They find a barber who has one. They don't text — they just move on."
+          },
+          {
+            "section": "Solution",
+            "timestamp": "10–15s",
+            "on_screen_text": "Your shop is closed.\nNoble isn't.\n[phone screen: Noble booking page — time shows 11:07pm]",
+            "action": "Hard cut to a bright phone screen mockup — Noble booking page open, timestamp clearly showing 11:07pm. High contrast against the previous dark exterior shot. Text overlay appears over the phone: 'Your shop is closed. Noble isn't.' Screen shows a client selecting a service and tapping 'Book Appointment'.",
+            "voiceover": "Noble's booking page is live 24/7. Your clients book while you sleep. You wake up to a full calendar."
+          },
+          {
+            "section": "CTA",
+            "timestamp": "15–18s",
+            "on_screen_text": "Book while you sleep.\nnoblelink.app | 5-min setup | Free 14-day trial",
+            "action": "End card: Noble logo centered on deep dark background (#1a1208). Gold tagline 'Book while you sleep.' fades in beneath. Bottom third shows URL and social proof details in smaller cream text. Static hold for 3 seconds.",
+            "voiceover": "Set up your booking page in 5 minutes. Link in bio."
+          }
+        ],
+        "audio_note": "Trending lo-fi trap beat with a slow, late-night feel — think muted 808s, minimal melody, builds slightly at the Solution cut. Search trending audio on Reels: filter by 'used in 10K+ reels this week' in the audio browser. Alternatively: search 'late night beats' or 'night mode' trending tracks on Instagram audio. Keep volume low enough that voiceover sits clearly on top.",
+        "production_note": "No professional gear needed. For the exterior shot: film your own shop at night or a nearby barbershop — closed sign, dark window, streetlight overhead. Shoot vertical (1080×1920). For the phone mockup: screen-record Noble's booking page on your phone at 11pm and crop into frame. Alternatively, prop your phone against a dark surface and film someone tapping through a booking. Natural night lighting works — avoid flash. Keep all cuts hard, no dissolves. Fast pacing is the point."
+      },
+      "animation_brief": null,
+      "hook": "35% of your clients want to book right now. You're asleep.",
+      "concept": "A fast-paced, stat-driven reel that educates barbers on the after-hours booking window — the silent revenue loss most shop owners don't even know exists. Shows the gap between when clients want to book (after 8pm) and when most barbers are available to respond (next morning). Positions Noble as the 24/7 solution without it feeling like a hard sell.",
+      "visual_direction": "Pexels video background: a barbershop exterior at night, closed sign visible, quiet street. Noble alpha composite: bold white stat text appears over the dark scene — '35% of bookings happen after 8pm.' Cut to: bright phone screen mockup showing Noble's booking page being used at 11:07pm. Text overlay: 'Your shop is closed. Noble isn't.' End card: Noble logo on dark background with tagline 'Book while you sleep.'",
+      "animation_concept": null,
+      "notes": "Use trending audio: 'Beat It — Michael Jackson' to sync the beat drop to the stat reveal moment for maximum impact. Education pillar averages 45% ER — strong performer. Keep under 12 seconds. Include a DM share prompt at end of caption: 'Send this to a barber who's still taking bookings through DMs.' Post Saturday 9–11am. Add explicit follow CTA per W23 directive.",
+      "feature_update": null
+    },
+    {
+      "post_number": 6,
+      "post_date": "2026-06-13",
+      "platform": "instagram",
+      "post_type": "story",
+      "content_pillar": "engagement",
+      "caption": "What kills your Monday more?\n\nVote — then DM us your answer. We read every one.",
+      "visual_description": {
+        "format": "single image",
+        "slides": [
+          {
+            "slide_number": 1,
+            "background": "#1a1208 (Noble dark brown — full bleed, no gradient)",
+            "text_elements": [
+              {
+                "text": "NOBLE",
+                "size": "small",
+                "weight": "bold",
+                "color": "#C9A84C"
+              },
+              {
+                "text": "What kills your Monday more?",
+                "size": "large",
+                "weight": "bold",
+                "color": "#f5f0e8"
+              },
+              {
+                "text": "POLL STICKER GOES HERE — add natively in Instagram before posting",
+                "size": "medium",
+                "weight": "regular",
+                "color": "#C9A84C"
+              },
+              {
+                "text": "Option A: No-shows",
+                "size": "medium",
+                "weight": "bold",
+                "color": "#f5f0e8"
+              },
+              {
+                "text": "Option B: Unanswered DMs",
+                "size": "medium",
+                "weight": "bold",
+                "color": "#f5f0e8"
+              },
+              {
+                "text": "DM us your answer — we read every one.",
+                "size": "small",
+                "weight": "regular",
+                "color": "#C9A84C"
+              }
+            ],
+            "layout_notes": "Noble logo (wordmark, gold) pinned top-center with ~60px top margin. Main question text centered vertically at roughly 35% down the frame — large, bold, max 2 lines, ~72px font size. Leave a clear rectangular zone in the vertical center (approx 40–55% of frame height) blank — this is where the Instagram poll sticker gets placed manually before posting. Poll option labels (A and B) are NOT needed as static text if the poll sticker covers them — include only if designer wants a placeholder reference. CTA line sits at ~80% down the frame, small, gold, centered. Keep all elements center-aligned. No decorative elements — negative space is intentional.",
+            "brand_elements": "Noble wordmark top-center in gold (#C9A84C). Accent: single thin gold horizontal rule (~400px wide, 2px) separating the question text from the poll sticker zone. No other decorative elements. Background must be flat #1a1208 — no texture, no gradient."
+          }
+        ]
+      },
+      "reels_script": null,
+      "animation_brief": null,
+      "hook": null,
+      "concept": "A Sunday community poll story replacing the previously low-performing Sunday promo format (per W23 learnings). Directly asks the audience a relatable barbershop pain point question to drive replies, DMs, and profile visits. Two poll options — keeps it simple, binary, and instantly relatable.",
+      "visual_direction": "Story frame: dark Noble-branded background, bold white question text centered — 'What kills your Monday more?' Poll sticker with two options: Option A — 'No-shows' / Option B — 'Unanswered DMs'. Noble logo small at top. Simple, clean, one second to understand. 1080×1920 story frame. MANUAL POST — add poll sticker natively in Instagram before posting.",
+      "animation_concept": null,
+      "notes": "No hashtags on stories. This replaces the Sunday promo per W23 directive. The poll format drives replies which boosts story placement for existing followers. Follow up Monday with a response story sharing poll results to close the loop and build community habit. Consider adding a follow-up question sticker: 'What would fix it?' to generate qualitative insight for future content.",
+      "feature_update": null
+    }
+  ]
+}

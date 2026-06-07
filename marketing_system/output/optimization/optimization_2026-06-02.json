@@ -1,0 +1,57 @@
+{
+  "analyzed_date": "2026-06-02",
+  "weeks_analyzed": 1,
+  "key_findings": [
+    "Social Proof Feed posts are Noble's highest-engagement format — Tuesday's Social Proof post hit 59.01% ER on only 322 reach, meaning the audience that saw it was deeply compelled. Small reach, massive resonance. This signals strong content-market fit when real barber voices are featured.",
+    "Feed posts dramatically outperform Reels on engagement rate (avg ~57.7% ER for Feed vs ~33.6% for Reels), but Reels dominate raw reach — Wednesday's Features Reel hit 856 and Friday's Education Reel hit 814. The account needs both: Reels for discovery, Feed for conversion and trust-building.",
+    "Sunday Promotional Reels are the weakest content slot — 25.94% ER and the lowest engagement per reach ratio of the week. Promotional intent on Sundays is likely misaligned with how Black barbershop owners use Instagram on rest days. This slot is wasting potential reach.",
+    "Saves are exceptionally high across the board — 223 saves on 4,024 total reach is a 5.5% save rate, which is well above the 1–2% industry benchmark. This signals the content is genuinely useful and reference-worthy, not just scrolled past.",
+    "Education and Features Reels are driving the most shares (22 and 17 respectively), which aligns with the current trend that DM shares are the top algorithmic trust signal. These formats should be prioritized for wider distribution."
+  ],
+  "top_performing": {
+    "pillar": "Social Proof — Tuesday's post achieved 59.01% ER, the highest of the week. When Noble surfaces real barber testimonials or transformation stories, the audience stops and engages deeply. This pillar speaks directly to peer trust, which is the primary purchase driver for Black business owners who are skeptical of generic SaaS tools.",
+    "post_type": "Feed posts win on engagement rate (Saturday Feed: 56.46%, Tuesday Feed: 59.01%) while Reels win on reach (Wednesday: 856, Friday: 814). For Noble's current stage — still building trust with a niche audience — Feed posts are more valuable per impression. Reels should be used strategically for top-of-funnel discovery.",
+    "day": "Tuesday is the best day based on ER (59.01%), and Wednesday is the best day for raw reach (856). Mid-week posting from Tuesday through Friday shows consistently strong performance. Monday Reels underperformed relative to reach, suggesting the audience isn't fully warmed up to start the week.",
+    "pattern": "Top posts combined a specific, relatable pain point (social proof of a real problem solved, or a concrete feature that saves time/money) with Feed format that encourages saves. High-save posts appear to reference tangible business outcomes — money saved, no-shows prevented, time reclaimed — rather than abstract product benefits."
+  },
+  "underperforming": {
+    "pillar": "Promotional content is the clear underperformer — Sunday's Promotional Reel scored 25.94% ER, the lowest of the week and nearly 15 points below the weekly average.",
+    "reason": "Promotional posts push a sale or CTA before sufficient trust is built in a single scroll session. On Sundays, barbershop owners are likely mentally off-the-clock and resistant to sales messaging. Combine that with Reel format (which rewards entertainment and education over promotion) and the result is algorithmic suppression and audience disengagement.",
+    "fix": "Remove standalone Promotional Reels from the content calendar entirely. Instead, embed soft CTAs inside high-performing content types — end an Education Reel or Social Proof Feed post with a single-line CTA like 'Link in bio to lock in your first month free.' If promotional content must run, test it as a Feed post mid-week (Wednesday or Thursday) when attention is highest, and lead with a pain point rather than a product pitch."
+  },
+  "next_week_recommendations": [
+    {
+      "priority": 1,
+      "action": "Post a Social Proof Feed carousel on Tuesday featuring a real barber's before/after story — specifically around no-shows or slow Mondays/Tuesdays. Use their words, not marketing language. End with a soft CTA.",
+      "reasoning": "Tuesday Social Proof produced the week's highest ER at 59.01%. The trending topic of no-shows is the #1 pain point for barbers losing real money. Combining the best-performing format with the most resonant trending topic maximizes the probability of repeat high engagement.",
+      "applies_to": "Tuesday — Feed — Social Proof"
+    },
+    {
+      "priority": 2,
+      "action": "Create a sub-30-second Education Reel on Wednesday or Friday focused on 'how to fill your slow Monday/Tuesday chairs using automated booking reminders.' Hook in the first 2 seconds: 'Your Monday chair is empty. Here's why — and how to fix it.'",
+      "reasoning": "Wednesday Reels hit 856 reach and Friday hit 814 — the top two reach days. Education is the second-highest engagement pillar. The trending topic of midweek dead zones is highly searchable and DM-shareable among barbers who commiserate about this exact problem. Short Reels under 30 seconds also maximize completion rate and algorithmic push.",
+      "applies_to": "Wednesday or Friday — Reel — Education"
+    },
+    {
+      "priority": 3,
+      "action": "Replace Sunday's Promotional Reel with a Saturday or Sunday Feed Engagement post — a direct question or poll like 'How many no-shows did you get this week? Drop the number below.' No product mention. Pure community signal.",
+      "reasoning": "Saturday Feed already showed 56.46% ER with an Engagement post. Sunday Promotional Reel was the week's worst performer at 25.94%. Shifting Sunday away from promotion and toward community conversation maintains weekend momentum without alienating the audience with sales messaging.",
+      "applies_to": "Saturday/Sunday — Feed — Engagement"
+    },
+    {
+      "priority": 4,
+      "action": "Add an explicit DM-share prompt to every Reel's caption and spoken audio. Example ending: 'Send this to a barber who needs to hear it.' This should be baked into scripts, not added as an afterthought.",
+      "reasoning": "DM shares are now 3–5x more valuable as an algorithmic signal than likes. Wednesday's Features Reel already generated 22 shares — the week's highest. A deliberate share prompt on every Reel could compound that number significantly and push content to non-follower audiences faster.",
+      "applies_to": "All Reels — every day"
+    },
+    {
+      "priority": 5,
+      "action": "Launch a Features Reel on Thursday addressing 'running a business vs. just cutting hair' — position Noble as the tool that handles the business side so barbers can stay in their craft. Hook: 'You didn't open a shop to become an admin. So stop acting like one.'",
+      "reasoning": "Thursday Feed Features hit 39.19% ER — solid but not exceptional. Reels on this topic could outperform because it's a trending emotional pain point, not just a feature demo. Barbers deeply identify as craftsmen first, which makes this hook personal and shareable. Combining with Reel format on a mid-week day aligns with reach patterns.",
+      "applies_to": "Thursday — Reel — Features"
+    }
+  ],
+  "hook_insights": "The highest-engagement posts this week shared a hook structure rooted in identity or loss aversion rather than aspiration. Tuesday's Social Proof and Saturday's Engagement posts — both Feed format — likely opened with something the barber already believes or fears (e.g., 'This barber was losing $400/month to no-shows' or a direct question that mirrors their reality). Reels that drove the most shares (Wednesday: 22, Monday: 17) appear to have led with a problem statement in the first 2–3 seconds rather than a product feature. The pattern: lead with the barber's pain, not Noble's solution. Hooks that name a specific dollar amount, day of the week, or relatable scenario (slow Mondays, ghost clients) will consistently outperform generic 'grow your business' openers. For Reels, the hook must work visually AND verbally in the first 2 seconds since many viewers watch without sound initially.",
+  "hashtag_insights": "No direct hashtag performance data is available from this week's dataset. However, given that Reels are driving discovery reach (856 on Wednesday, 814 on Friday) while Feed posts show lower reach but higher ER, it's likely that hashtags are contributing more to Reel distribution than Feed. Recommendation: use 3–5 highly specific niche hashtags on Reels (#BlackBarbershop, #BarberBusiness, #BarberBooking, #BarberLife, #ShopOwner) rather than broad ones, and test adding a location-based hashtag to Feed posts to capture local barber discovery. Avoid hashtag stuffing — Instagram's current algorithm favors topical relevance over hashtag volume.",
+  "growth_forecast": "If the priority recommendations are implemented consistently for the next 4 weeks, Noble can expect: (1) average weekly ER to hold above 40% and potentially reach 45–50% as Social Proof and Education content compounds trust; (2) weekly reach to grow 15–25% as DM-share prompts and optimized Reel hooks push content to non-follower audiences more aggressively; (3) website clicks to increase from 23 to 35–50/week as soft CTAs are embedded in high-ER Feed posts rather than isolated in low-performing Promotional Reels; (4) follower growth to accelerate modestly (estimated 8–15% week-over-week) as Reels optimized for the first 2-second hook begin qualifying for broader algorithmic distribution. The save rate of 5.5% is a significant competitive moat — if maintained, it signals to Instagram that Noble's content is reference-grade, which compounds reach over time without requiring paid amplification."
+}

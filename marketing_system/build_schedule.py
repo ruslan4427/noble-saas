@@ -54,9 +54,12 @@ POST_TYPES = {
 EDT_OFFSET = timedelta(hours=-4)  # EDT = UTC-4
 
 
-def get_monday() -> date:
+def get_monday(next_week: bool = False) -> date:
     today = date.today()
-    return today - timedelta(days=today.weekday())
+    monday = today - timedelta(days=today.weekday())
+    if next_week or today.weekday() == 6:  # Sunday → auto next week
+        monday += timedelta(weeks=1)
+    return monday
 
 
 def build_schedule() -> dict:
