@@ -18,6 +18,7 @@ import argparse
 import json
 import os
 import sys
+from datetime import datetime, timezone
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -32,7 +33,8 @@ DAY_FOLDERS = [
 
 # Content lives in marketing_system/week_content/ (committed to repo)
 WEEK_CONTENT = ROOT / "week_content"
-SESSION_FILE = ROOT / "mcp_instagram" / "session.json"
+SESSION_FILE  = ROOT / "mcp_instagram" / "session.json"
+POST_STATS_FILE = ROOT / "output" / "engagement" / "post_stats.json"
 
 
 def get_day_folder(day_number: int) -> Path:
@@ -100,6 +102,29 @@ def login() -> object:
     return cl
 
 
+def _save_post_stat(day_number: int, post_type: str, media_id: str, caption: str):
+    POST_STATS_FILE.parent.mkdir(parents=True, exist_ok=True)
+    stats = {}
+    if POST_STATS_FILE.exists():
+        try:
+            stats = json.loads(POST_STATS_FILE.read_text())
+        except Exception:
+            pass
+    stats[media_id] = {
+        "day": day_number,
+        "folder": DAY_FOLDERS[day_number - 1],
+        "type": post_type,
+        "posted_at": datetime.now(timezone.utc).isoformat(),
+        "caption_preview": caption[:120],
+        "likes": 0,
+        "comments": 0,
+        "saves": 0,
+        "shares": 0,
+        "reach": 0,
+    }
+    POST_STATS_FILE.write_text(json.dumps(stats, indent=2))
+
+
 def post_reel(day_number: int):
     folder = get_day_folder(day_number)
     video = find_file(folder, "reel_video_bg.mp4") or find_file(folder, "*.mp4")
@@ -115,9 +140,9 @@ def post_reel(day_number: int):
     media = cl.clip_upload(video, caption)
     media_id = str(media.pk)
 
-    # Save published marker
     published = {"reel": media_id}
     (folder / "published.json").write_text(json.dumps(published, indent=2))
+    _save_post_stat(day_number, "reel", media_id, caption)
 
     print(f"  ✓ Reel published — media_id: {media_id}")
     return media_id
@@ -140,6 +165,7 @@ def post_feed(day_number: int):
 
     published = {"feed": media_id}
     (folder / "published.json").write_text(json.dumps(published, indent=2))
+    _save_post_stat(day_number, "feed", media_id, caption)
 
     print(f"  ✓ Feed image published — media_id: {media_id}")
     return media_id
