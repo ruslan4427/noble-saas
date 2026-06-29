@@ -2,8 +2,10 @@
   "updated": "2026-06-07",
   "source_week": "2026-W23",
   "total_posts_analyzed": 7,
-
-  "top_content_types": ["feed_post", "reel"],
+  "top_content_types": [
+    "feed_post",
+    "reel"
+  ],
   "content_type_avg_er": {
     "feed_post": 57.7,
     "reel": 33.6,
@@ -12,8 +14,10 @@
     "story": 0
   },
   "avoid_content_types": [],
-
-  "top_pillars": ["Social Proof", "Education"],
+  "top_pillars": [
+    "Social Proof",
+    "Education"
+  ],
   "pillar_avg_er": {
     "Social Proof": 59.01,
     "Education": 45.0,
@@ -21,8 +25,9 @@
     "Engagement": 56.46,
     "Promotional": 25.94
   },
-  "avoid_pillars": ["Promotional on Sunday"],
-
+  "avoid_pillars": [
+    "Promotional on Sunday"
+  ],
   "best_hook_patterns": [
     "Pain + dollar amount: 'Losing $800/month to no-shows?'",
     "Identity: 'You didn't open a shop to become an admin.'",
@@ -35,7 +40,6 @@
     "Result-first numbers": 45.0,
     "Generic product benefit": 26.0
   },
-
   "top_post_examples": [
     {
       "content_type": "feed_post",
@@ -68,7 +72,6 @@
       "why": "Education drives saves + reach simultaneously — dual win format"
     }
   ],
-
   "zero_post_patterns": [
     {
       "content_type": "reel",
@@ -80,17 +83,43 @@
       "why": "Barbers mentally off on Sundays, promotional intent misread the moment"
     }
   ],
-
   "recommended_weekly_mix": {
-    "Monday": {"funnel": "ATTRACT", "type": "reel", "pillar": "Awareness"},
-    "Tuesday": {"funnel": "ENGAGE", "type": "carousel", "pillar": "Social Proof"},
-    "Wednesday": {"funnel": "ENGAGE", "type": "reel", "pillar": "Education"},
-    "Thursday": {"funnel": "CONVINCE", "type": "reel", "pillar": "Features"},
-    "Friday": {"funnel": "CONVINCE", "type": "feed_post", "pillar": "Social Proof"},
-    "Saturday": {"funnel": "CONVERT", "type": "reel", "pillar": "Promotional"},
-    "Sunday": {"funnel": "ENGAGE", "type": "story", "pillar": "Engagement"}
+    "Monday": {
+      "funnel": "ATTRACT",
+      "type": "reel",
+      "pillar": "Awareness"
+    },
+    "Tuesday": {
+      "funnel": "ENGAGE",
+      "type": "carousel",
+      "pillar": "Social Proof"
+    },
+    "Wednesday": {
+      "funnel": "ENGAGE",
+      "type": "reel",
+      "pillar": "Education"
+    },
+    "Thursday": {
+      "funnel": "CONVINCE",
+      "type": "reel",
+      "pillar": "Features"
+    },
+    "Friday": {
+      "funnel": "CONVINCE",
+      "type": "feed_post",
+      "pillar": "Social Proof"
+    },
+    "Saturday": {
+      "funnel": "CONVERT",
+      "type": "reel",
+      "pillar": "Promotional"
+    },
+    "Sunday": {
+      "funnel": "ENGAGE",
+      "type": "story",
+      "pillar": "Engagement"
+    }
   },
-
   "reach_by_day": {
     "Monday": 643,
     "Tuesday": 322,
@@ -100,7 +129,6 @@
     "Saturday": 271,
     "Sunday": 748
   },
-
   "key_insights": [
     "Reels drive reach (643–856), Feed posts drive engagement rate (57.7% avg ER)",
     "Social Proof is Noble's sharpest weapon — 59% ER proves content-market fit",
@@ -110,6 +138,5 @@
     "5.5% save rate across week (223 saves / 4024 reach) — well above 1-2% industry benchmark",
     "Follow CTAs are missing — reach is strong but zero follower conversion; add explicit follow prompt to 3+ posts"
   ],
-
   "strategist_note": "W23 had 4,024 total reach and 223 saves with 0 new followers — the audience saves but doesn't follow yet. Priority for W24: (1) carousel Tuesday for saves + shares, (2) DM share prompt on every Reel, (3) explicit follow CTA in at least 3 posts, (4) replace Sunday promo with community poll."
 }
