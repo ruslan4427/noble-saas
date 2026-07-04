@@ -11,7 +11,10 @@ import re
 import sys
 from pathlib import Path
 
-import anthropic
+try:
+    import anthropic
+except ImportError:  # pragma: no cover - optional dependency in local runs
+    anthropic = None
 from dotenv import load_dotenv
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -22,6 +25,7 @@ from creator.prompts import (
     REELS_SCHEMA_DEFAULT,
     ANIMATION_SCHEMA_DEFAULT,
 )
+from creator.creative_enhancer import build_creative_enhancements
 
 load_dotenv(Path(__file__).parent.parent / ".env")
 
@@ -31,12 +35,144 @@ IS_CAROUSEL  = {"carousel"}
 IS_STORY     = {"story", "stories"}
 
 
-def get_client() -> anthropic.Anthropic:
+def get_client():
+    if anthropic is None:
+        return None
     api_key = os.environ.get("ANTHROPIC_API_KEY")
     if not api_key:
-        print("Error: ANTHROPIC_API_KEY not set in marketing_system/.env")
-        sys.exit(1)
+        return None
     return anthropic.Anthropic(api_key=api_key)
+
+
+def build_local_fallback(post: dict, platform: str, index: int, total: int) -> dict:
+    post_type = (post.get("post_type") or "").lower()
+    hook = post.get("hook") or "A clear, practical post for barbershop owners."
+    concept = post.get("concept") or ""
+    caption_outline = post.get("caption_outline") or "Keep it practical and direct."
+    cta = post.get("cta") or "Start free → noblelink.app"
+    hashtags = post.get("hashtags") or ["#NobleApp", "#BarberBusiness"]
+
+    caption_lines = [hook]
+    if concept:
+        caption_lines.append("")
+        caption_lines.append(concept)
+
+    if any(token in post_type for token in IS_REEL):
+        caption_lines.append("")
+        caption_lines.append(caption_outline)
+        caption_lines.append("")
+        caption_lines.append(f"CTA: {cta}")
+        caption_lines.append("")
+        caption_lines.append("Send this to a barber who needs to hear it.")
+    elif any(token in post_type for token in IS_CAROUSEL):
+        caption_lines.append("")
+        caption_lines.append("Swipe through the full breakdown.")
+        caption_lines.append("")
+        caption_lines.append(f"CTA: {cta}")
+        caption_lines.append("")
+        caption_lines.append("Follow @noble.booking for weekly tips on running a tighter shop.")
+    elif any(token in post_type for token in IS_STORY):
+        caption_lines.append("")
+        caption_lines.append("Quick reminder for your next post.")
+        caption_lines.append("")
+        caption_lines.append(f"CTA: {cta}")
+    else:
+        caption_lines.append("")
+        caption_lines.append("Short, practical, and easy to save.")
+        caption_lines.append("")
+        caption_lines.append(f"CTA: {cta}")
+
+    caption_lines.append("")
+    caption_lines.append(" ".join(hashtags))
+    caption = "\n".join(caption_lines)
+
+    result = {
+        "post_number": post.get("post_number", index + 1),
+        "post_date": post.get("post_date"),
+        "platform": platform,
+        "post_type": post.get("post_type"),
+        "content_pillar": post.get("content_pillar", ""),
+        "caption": caption,
+        "visual_description": None,
+        "reels_script": None,
+        "animation_brief": None,
+        "fallback_mode": "local",
+    }
+    result["creative_enhancements"] = build_creative_enhancements(post)
+
+    if any(token in post_type for token in IS_REEL):
+        result["reels_script"] = {
+            "total_duration": "12s",
+            "sections": [
+                {"section": "Hook", "timestamp": "0–3s", "on_screen_text": hook, "action": "Bold text on dark brand background", "voiceover": hook},
+                {"section": "Problem", "timestamp": "3–8s", "on_screen_text": "Missed bookings cost real money", "action": "Show a calendar with gaps and missed follow-ups", "voiceover": "Small problems become expensive ones."},
+                {"section": "Solution", "timestamp": "8–12s", "on_screen_text": cta, "action": "Overlay Noble CTA and booking link", "voiceover": "Use a booking link that works while you work."},
+            ],
+            "audio_note": "minimal upbeat music",
+            "production_note": "Use phone camera or screen recording",
+        }
+    elif any(token in post_type for token in IS_ANIMATED):
+        result["animation_brief"] = {
+            "total_duration": "5s",
+            "canvas": "1080×1350px portrait 4:5",
+            "background": "#1a1208",
+            "loop": True,
+            "frames": [
+                {
+                    "frame": 1,
+                    "start_time": "0s",
+                    "duration": "5s",
+                    "elements": [
+                        {"type": "text", "content": hook, "animation": "fade-in", "delay": "0s", "style": "bold gold text"},
+                    ],
+                    "transition_out": "fade",
+                }
+            ],
+            "ambient": "slow pulse",
+            "audio_note": "no audio",
+            "production_note": "Keep the motion minimal and readable.",
+        }
+    elif any(token in post_type for token in IS_CAROUSEL):
+        result["visual_description"] = {
+            "format": "carousel",
+            "slides": [
+                {
+                    "slide_number": 1,
+                    "background": "#1a1208",
+                    "text_elements": [{"text": hook, "size": "large", "weight": "bold", "color": "#f5f0e8"}],
+                    "layout_notes": "Hero slide with bold hook and gold accent line.",
+                    "brand_elements": "Noble logo in the corner.",
+                }
+            ],
+        }
+    elif any(token in post_type for token in IS_STORY):
+        result["visual_description"] = {
+            "format": "single image",
+            "slides": [
+                {
+                    "slide_number": 1,
+                    "background": "#f5f0e8",
+                    "text_elements": [{"text": hook, "size": "medium", "weight": "bold", "color": "#1a1208"}],
+                    "layout_notes": "Simple story card with one clear CTA at the bottom.",
+                    "brand_elements": "Add a subtle gold divider.",
+                }
+            ],
+        }
+    else:
+        result["visual_description"] = {
+            "format": "single image",
+            "slides": [
+                {
+                    "slide_number": 1,
+                    "background": "#1a1208",
+                    "text_elements": [{"text": hook, "size": "large", "weight": "bold", "color": "#f5f0e8"}],
+                    "layout_notes": "Keep the message simple and direct.",
+                    "brand_elements": "Use gold CTA accent.",
+                }
+            ],
+        }
+
+    return result
 
 
 def build_expansion_prompt(post: dict, platform: str) -> str:
@@ -70,12 +206,16 @@ def build_expansion_prompt(post: dict, platform: str) -> str:
     )
 
 
-def expand_post(client: anthropic.Anthropic, post: dict, platform: str, index: int, total: int) -> dict:
+def expand_post(post: dict, platform: str, index: int, total: int, client=None, offline: bool = False) -> dict:
     label = f"[{post.get('post_date', '?')}] Post #{post.get('post_number', index + 1)} — {post.get('post_type', '').upper()}"
     print(f"\n{'─' * 60}")
     print(f"  {index + 1}/{total} {label}")
     print(f"  Hook: {(post.get('hook') or '')[:70]}...")
     print(f"{'─' * 60}")
+
+    if offline or client is None:
+        print("  Using local fallback generator (no API key required).")
+        return build_local_fallback(post, platform, index, total)
 
     prompt = build_expansion_prompt(post, platform)
     post_type   = post.get("post_type", "").lower()
@@ -114,6 +254,7 @@ def expand_post(client: anthropic.Anthropic, post: dict, platform: str, index: i
         for field in ("hook", "concept", "visual_direction", "animation_concept", "notes", "feature_update"):
             if field in post and field not in result:
                 result[field] = post[field]
+        result["creative_enhancements"] = build_creative_enhancements(post)
         return result
     except json.JSONDecodeError:
         print(f"  Warning: JSON parse failed for post #{post.get('post_number')}. Storing raw text.")
@@ -192,6 +333,11 @@ def main() -> None:
         default=Path(__file__).parent.parent / "output",
         help="Output directory (default: marketing_system/output/)",
     )
+    parser.add_argument(
+        "--offline",
+        action="store_true",
+        help="Use the built-in local fallback generator instead of Anthropic API",
+    )
 
     args = parser.parse_args()
 
@@ -234,10 +380,13 @@ def main() -> None:
 
     client = get_client()
     expanded = []
+    use_offline = args.offline or client is None
+    if use_offline:
+        print("Using local fallback mode (no Anthropic API required).")
 
     for i, post in enumerate(posts_to_expand):
         try:
-            result = expand_post(client, post, platform, i, len(posts_to_expand))
+            result = expand_post(post, platform, i, len(posts_to_expand), client=client, offline=use_offline)
             expanded.append(result)
         except Exception as e:
             print(f"\n  ⚠ Post #{post.get('post_number', i+1)} failed: {e} — skipping")
@@ -245,7 +394,13 @@ def main() -> None:
     print_final_summary(expanded)
 
     if expanded:
-        saved_path = save_output(expanded, meta, output_dir)
+        enhanced_posts = []
+        for post in expanded:
+            if "creative_enhancements" not in post:
+                post = dict(post)
+                post["creative_enhancements"] = build_creative_enhancements(post)
+            enhanced_posts.append(post)
+        saved_path = save_output(enhanced_posts, meta, output_dir)
         print(f"\nSaved to: {saved_path}")
     else:
         print("\nNo posts expanded — nothing saved.")

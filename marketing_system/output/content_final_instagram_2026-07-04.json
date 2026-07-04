@@ -1,0 +1,423 @@
+{
+  "meta": {
+    "platform": "instagram",
+    "period": "weekly",
+    "focus": "features",
+    "start_date": "2026-07-04",
+    "end_date": "2026-07-10",
+    "total_posts": 7,
+    "priority_updates_used": [
+      "Instant Booking Confirmation",
+      "Vacation Blocks",
+      "Multi-Staff Scheduling"
+    ],
+    "expanded_posts": 7
+  },
+  "posts": [
+    {
+      "post_number": 1,
+      "post_date": "2026-07-04",
+      "platform": "instagram",
+      "post_type": "reel",
+      "content_pillar": "product",
+      "caption": "Your barbershop booked clients while you slept.\n\nShow the client-side booking flow and instant confirmation experience.\n\nShow the pain point, then the payoff.\n\nCTA: Start free at noblelink.app — link in bio.\n\nSend this to a barber who needs to hear it.\n\n#NobleApp #BarberBusiness #BarberTech",
+      "visual_description": null,
+      "reels_script": {
+        "total_duration": "12s",
+        "sections": [
+          {
+            "section": "Hook",
+            "timestamp": "0–3s",
+            "on_screen_text": "Your barbershop booked clients while you slept.",
+            "action": "Bold text on dark brand background",
+            "voiceover": "Your barbershop booked clients while you slept."
+          },
+          {
+            "section": "Problem",
+            "timestamp": "3–8s",
+            "on_screen_text": "Missed bookings cost real money",
+            "action": "Show a calendar with gaps and missed follow-ups",
+            "voiceover": "Small problems become expensive ones."
+          },
+          {
+            "section": "Solution",
+            "timestamp": "8–12s",
+            "on_screen_text": "Start free at noblelink.app — link in bio.",
+            "action": "Overlay Noble CTA and booking link",
+            "voiceover": "Use a booking link that works while you work."
+          }
+        ],
+        "audio_note": "minimal upbeat music",
+        "production_note": "Use phone camera or screen recording"
+      },
+      "animation_brief": null,
+      "fallback_mode": "local",
+      "creative_enhancements": {
+        "creative_angle": "Fast, story-first, pain-to-solution pacing with a strong payoff frame. Focus on everyday workflow pain and the payoff of using Noble.",
+        "hook_variants": [
+          "Your barbershop booked clients while you slept.",
+          "Your barbershop booked clients while you slept. Here’s the faster way.",
+          "Stop doing this the hard way. Your barbershop booked clients while you slept."
+        ],
+        "visual_style": "Dark cinematic background, bold text overlays, gold CTA accent, real phone or screen-recorded motion.",
+        "shot_list": [
+          "Open on a strong pain point in the first second.",
+          "Show the friction visually before revealing the fix.",
+          "End on the clearest payoff and CTA."
+        ],
+        "cta_variants": [
+          "Start free at noblelink.app — link in bio.",
+          "Save this for later — Start free at noblelink.app — link in bio."
+        ],
+        "quality_tips": [
+          "Keep the first 2 seconds punchy and specific.",
+          "Use on-screen text instead of long voiceover.",
+          "Make the CTA feel like a next step, not a hard sell."
+        ]
+      }
+    },
+    {
+      "post_number": 2,
+      "post_date": "2026-07-05",
+      "platform": "instagram",
+      "post_type": "carousel",
+      "content_pillar": "product",
+      "caption": "You’re going on vacation. Your clients don’t need to know.\n\nWalk through how vacation blocks stop last-minute booking chaos.\n\nSwipe through the full breakdown.\n\nCTA: Save this before your next vacation.\n\nFollow @noble.booking for weekly tips on running a tighter shop.\n\n#BarberLife #SalonOwner #BookingSystem",
+      "visual_description": {
+        "format": "carousel",
+        "slides": [
+          {
+            "slide_number": 1,
+            "background": "#1a1208",
+            "text_elements": [
+              {
+                "text": "You’re going on vacation. Your clients don’t need to know.",
+                "size": "large",
+                "weight": "bold",
+                "color": "#f5f0e8"
+              }
+            ],
+            "layout_notes": "Hero slide with bold hook and gold accent line.",
+            "brand_elements": "Noble logo in the corner."
+          }
+        ]
+      },
+      "reels_script": null,
+      "animation_brief": null,
+      "fallback_mode": "local",
+      "creative_enhancements": {
+        "creative_angle": "Turn the feature into a saveable mini-course with one payoff slide. Focus on everyday workflow pain and the payoff of using Noble.",
+        "hook_variants": [
+          "You’re going on vacation. Your clients don’t need to know.",
+          "You’re going on vacation. Your clients don’t need to know. Here’s the faster way.",
+          "Stop doing this the hard way. You’re going on vacation. Your clients don’t need to know."
+        ],
+        "visual_style": "Clean educational layout, strong slide hierarchy, one big takeaway per slide, gold CTA accent.",
+        "shot_list": [
+          "Hook slide with the painful problem.",
+          "Show the obstacle in a relatable way.",
+          "Reveal the solution and end with a practical takeaway."
+        ],
+        "cta_variants": [
+          "Save this before your next vacation.",
+          "Save this for later — Save this before your next vacation."
+        ],
+        "quality_tips": [
+          "Make each slide solve one small question.",
+          "Use the final slide as the saveable takeaway.",
+          "Keep the language practical and confident."
+        ]
+      }
+    },
+    {
+      "post_number": 3,
+      "post_date": "2026-07-06",
+      "platform": "instagram",
+      "post_type": "reel",
+      "content_pillar": "product",
+      "caption": "POV: your phone just filled tomorrow’s chair.\n\nDemonstrate how multi-staff scheduling prevents double-booking and confusion.\n\nKeep the explanation crisp and client-focused.\n\nCTA: Try Noble free for 14 days — link in bio.\n\nSend this to a barber who needs to hear it.\n\n#BarberBoss #BarberSchedule #SmallBusinessOwner",
+      "visual_description": null,
+      "reels_script": {
+        "total_duration": "12s",
+        "sections": [
+          {
+            "section": "Hook",
+            "timestamp": "0–3s",
+            "on_screen_text": "POV: your phone just filled tomorrow’s chair.",
+            "action": "Bold text on dark brand background",
+            "voiceover": "POV: your phone just filled tomorrow’s chair."
+          },
+          {
+            "section": "Problem",
+            "timestamp": "3–8s",
+            "on_screen_text": "Missed bookings cost real money",
+            "action": "Show a calendar with gaps and missed follow-ups",
+            "voiceover": "Small problems become expensive ones."
+          },
+          {
+            "section": "Solution",
+            "timestamp": "8–12s",
+            "on_screen_text": "Try Noble free for 14 days — link in bio.",
+            "action": "Overlay Noble CTA and booking link",
+            "voiceover": "Use a booking link that works while you work."
+          }
+        ],
+        "audio_note": "minimal upbeat music",
+        "production_note": "Use phone camera or screen recording"
+      },
+      "animation_brief": null,
+      "fallback_mode": "local",
+      "creative_enhancements": {
+        "creative_angle": "Fast, story-first, pain-to-solution pacing with a strong payoff frame. Focus on everyday workflow pain and the payoff of using Noble.",
+        "hook_variants": [
+          "POV: your phone just filled tomorrow’s chair.",
+          "POV: your phone just filled tomorrow’s chair. Here’s the faster way.",
+          "Stop doing this the hard way. POV: your phone just filled tomorrow’s chair."
+        ],
+        "visual_style": "Dark cinematic background, bold text overlays, gold CTA accent, real phone or screen-recorded motion.",
+        "shot_list": [
+          "Open on a strong pain point in the first second.",
+          "Show the friction visually before revealing the fix.",
+          "End on the clearest payoff and CTA."
+        ],
+        "cta_variants": [
+          "Try Noble free for 14 days — link in bio.",
+          "Save this for later — Try Noble free for 14 days — link in bio."
+        ],
+        "quality_tips": [
+          "Keep the first 2 seconds punchy and specific.",
+          "Use on-screen text instead of long voiceover.",
+          "Make the CTA feel like a next step, not a hard sell."
+        ]
+      }
+    },
+    {
+      "post_number": 4,
+      "post_date": "2026-07-07",
+      "platform": "instagram",
+      "post_type": "animated_post",
+      "content_pillar": "product",
+      "caption": "Watch your calendar fill up without a phone call.\n\nAnimate a calendar filling up as bookings come in automatically.\n\nShort, practical, and easy to save.\n\nCTA: Start free at noblelink.app — your first 14 days are on us.\n\n#OnlineBooking #BarberApp #NobleApp",
+      "visual_description": null,
+      "reels_script": null,
+      "animation_brief": {
+        "total_duration": "5s",
+        "canvas": "1080×1350px portrait 4:5",
+        "background": "#1a1208",
+        "loop": true,
+        "frames": [
+          {
+            "frame": 1,
+            "start_time": "0s",
+            "duration": "5s",
+            "elements": [
+              {
+                "type": "text",
+                "content": "Watch your calendar fill up without a phone call.",
+                "animation": "fade-in",
+                "delay": "0s",
+                "style": "bold gold text"
+              }
+            ],
+            "transition_out": "fade"
+          }
+        ],
+        "ambient": "slow pulse",
+        "audio_note": "no audio",
+        "production_note": "Keep the motion minimal and readable."
+      },
+      "fallback_mode": "local",
+      "creative_enhancements": {
+        "creative_angle": "Make the feature feel premium and tangible through motion, not explanation. Focus on everyday workflow pain and the payoff of using Noble.",
+        "hook_variants": [
+          "Watch your calendar fill up without a phone call.",
+          "Watch your calendar fill up without a phone call. Here’s the faster way.",
+          "Stop doing this the hard way. Watch your calendar fill up without a phone call."
+        ],
+        "visual_style": "Minimal motion, premium dark palette, subtle gold pulse, one strong message per frame.",
+        "shot_list": [
+          "Animate the key value prop in a single clear loop.",
+          "Use one message per screen so the motion stays readable.",
+          "Let the final frame feel like a reward or payoff."
+        ],
+        "cta_variants": [
+          "Start free at noblelink.app — your first 14 days are on us.",
+          "Save this for later — Start free at noblelink.app — your first 14 days are on us."
+        ],
+        "quality_tips": [
+          "Keep the motion subtle and readable.",
+          "Avoid too many words in one frame.",
+          "Make the last frame memorable and shareable."
+        ]
+      }
+    },
+    {
+      "post_number": 5,
+      "post_date": "2026-07-08",
+      "platform": "instagram",
+      "post_type": "feed_post",
+      "content_pillar": "education",
+      "caption": "35% of clients want to book right now. You’re asleep.\n\nHighlight the cost of missed after-hours bookings with a simple, saveable stat.\n\nShort, practical, and easy to save.\n\nCTA: Your booking link never sleeps. Start free at noblelink.app.\n\n#BarberLife #ShopOwner #ClientBooking",
+      "visual_description": {
+        "format": "single image",
+        "slides": [
+          {
+            "slide_number": 1,
+            "background": "#1a1208",
+            "text_elements": [
+              {
+                "text": "35% of clients want to book right now. You’re asleep.",
+                "size": "large",
+                "weight": "bold",
+                "color": "#f5f0e8"
+              }
+            ],
+            "layout_notes": "Keep the message simple and direct.",
+            "brand_elements": "Use gold CTA accent."
+          }
+        ]
+      },
+      "reels_script": null,
+      "animation_brief": null,
+      "fallback_mode": "local",
+      "creative_enhancements": {
+        "creative_angle": "Bold, single-message social proof with a clean saveable takeaway. Teach one useful habit that feels immediately applicable.",
+        "hook_variants": [
+          "35% of clients want to book right now. You’re asleep.",
+          "35% of clients want to book right now. You’re asleep. Here’s the faster way.",
+          "Stop doing this the hard way. 35% of clients want to book right now. You’re asleep."
+        ],
+        "visual_style": "High contrast, strong headline, minimal clutter, clear CTA block.",
+        "shot_list": [
+          "Lead with the most useful sentence.",
+          "Keep the visual simple and readable.",
+          "End with an action-orientated CTA."
+        ],
+        "cta_variants": [
+          "Your booking link never sleeps. Start free at noblelink.app.",
+          "Save this for later — Your booking link never sleeps. Start free at noblelink.app."
+        ],
+        "quality_tips": [
+          "Make the headline feel specific rather than generic.",
+          "Use one big idea, not three competing ones.",
+          "Make the CTA obvious and easy to act on."
+        ]
+      }
+    },
+    {
+      "post_number": 6,
+      "post_date": "2026-07-09",
+      "platform": "instagram",
+      "post_type": "reel",
+      "content_pillar": "social_proof",
+      "caption": "It’s Saturday. 12 clients deep. Phone never rang once.\n\nShow how a busy Saturday can stay calm when Noble handles bookings.\n\nTurn the benefit into a clear fantasy outcome.\n\nCTA: Send this to a barber who needs to hear it.\n\nSend this to a barber who needs to hear it.\n\n#BarberCulture #AutomatedBooking #NoMoreDMs",
+      "visual_description": null,
+      "reels_script": {
+        "total_duration": "12s",
+        "sections": [
+          {
+            "section": "Hook",
+            "timestamp": "0–3s",
+            "on_screen_text": "It’s Saturday. 12 clients deep. Phone never rang once.",
+            "action": "Bold text on dark brand background",
+            "voiceover": "It’s Saturday. 12 clients deep. Phone never rang once."
+          },
+          {
+            "section": "Problem",
+            "timestamp": "3–8s",
+            "on_screen_text": "Missed bookings cost real money",
+            "action": "Show a calendar with gaps and missed follow-ups",
+            "voiceover": "Small problems become expensive ones."
+          },
+          {
+            "section": "Solution",
+            "timestamp": "8–12s",
+            "on_screen_text": "Send this to a barber who needs to hear it.",
+            "action": "Overlay Noble CTA and booking link",
+            "voiceover": "Use a booking link that works while you work."
+          }
+        ],
+        "audio_note": "minimal upbeat music",
+        "production_note": "Use phone camera or screen recording"
+      },
+      "animation_brief": null,
+      "fallback_mode": "local",
+      "creative_enhancements": {
+        "creative_angle": "Fast, story-first, pain-to-solution pacing with a strong payoff frame.",
+        "hook_variants": [
+          "It’s Saturday. 12 clients deep. Phone never rang once.",
+          "It’s Saturday. 12 clients deep. Phone never rang once. Here’s the faster way.",
+          "Stop doing this the hard way. It’s Saturday. 12 clients deep. Phone never rang once."
+        ],
+        "visual_style": "Dark cinematic background, bold text overlays, gold CTA accent, real phone or screen-recorded motion.",
+        "shot_list": [
+          "Open on a strong pain point in the first second.",
+          "Show the friction visually before revealing the fix.",
+          "End on the clearest payoff and CTA."
+        ],
+        "cta_variants": [
+          "Send this to a barber who needs to hear it.",
+          "Save this for later — Send this to a barber who needs to hear it."
+        ],
+        "quality_tips": [
+          "Keep the first 2 seconds punchy and specific.",
+          "Use on-screen text instead of long voiceover.",
+          "Make the CTA feel like a next step, not a hard sell."
+        ]
+      }
+    },
+    {
+      "post_number": 7,
+      "post_date": "2026-07-10",
+      "platform": "instagram",
+      "post_type": "story",
+      "content_pillar": "engagement",
+      "caption": "A quick question for shop owners who want better flow.\n\nUse a poll or question to drive community engagement around booking habits.\n\nQuick reminder for your next post.\n\nCTA: Tap the poll — it takes 1 second.\n\n#NobleApp #BarberBusiness #Engagement",
+      "visual_description": {
+        "format": "single image",
+        "slides": [
+          {
+            "slide_number": 1,
+            "background": "#f5f0e8",
+            "text_elements": [
+              {
+                "text": "A quick question for shop owners who want better flow.",
+                "size": "medium",
+                "weight": "bold",
+                "color": "#1a1208"
+              }
+            ],
+            "layout_notes": "Simple story card with one clear CTA at the bottom.",
+            "brand_elements": "Add a subtle gold divider."
+          }
+        ]
+      },
+      "reels_script": null,
+      "animation_brief": null,
+      "fallback_mode": "local",
+      "creative_enhancements": {
+        "creative_angle": "Low-friction engagement that feels conversational, not salesy. Prioritize community interaction and conversation starters.",
+        "hook_variants": [
+          "A quick question for shop owners who want better flow.",
+          "A quick question for shop owners who want better flow. Here’s the faster way.",
+          "Stop doing this the hard way. A quick question for shop owners who want better flow."
+        ],
+        "visual_style": "Light story card, one clear question or poll, simple CTA, warm brand colors.",
+        "shot_list": [
+          "Start with a direct, low-friction question.",
+          "Keep the design uncluttered.",
+          "Use a one-tap response CTA."
+        ],
+        "cta_variants": [
+          "Tap the poll — it takes 1 second.",
+          "Save this for later — Tap the poll — it takes 1 second."
+        ],
+        "quality_tips": [
+          "Make the question feel relevant to their day-to-day.",
+          "Keep the answer options obvious.",
+          "Avoid too much copy on the screen."
+        ]
+      }
+    }
+  ]
+}

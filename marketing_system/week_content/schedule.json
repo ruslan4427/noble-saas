@@ -1,48 +1,56 @@
 {
-  "week": "2026-W24",
-  "generated_at": "2026-06-07T17:39:01.730595+00:00",
+  "week": "2026-W27",
+  "generated_at": "2026-07-04T22:54:06.233391+00:00",
+  "timezone": "UTC",
   "posts": [
     {
       "day": 1,
       "folder": "Day01_Monday",
       "type": "reel",
-      "post_at_utc": "2026-06-08T15:00:00Z",
-      "post_at_edt": "2026-06-08 11:00 EDT"
+      "post_at_utc": "2026-06-29T08:00:00Z",
+      "post_at_edt": "2026-06-29 04:00 EDT"
     },
     {
       "day": 2,
       "folder": "Day02_Tuesday",
       "type": "feed",
-      "post_at_utc": "2026-06-09T15:30:00Z",
-      "post_at_edt": "2026-06-09 11:30 EDT"
+      "post_at_utc": "2026-06-30T08:00:00Z",
+      "post_at_edt": "2026-06-30 04:00 EDT"
     },
     {
       "day": 3,
       "folder": "Day03_Wednesday",
-      "type": "reel",
-      "post_at_utc": "2026-06-10T16:00:00Z",
-      "post_at_edt": "2026-06-10 12:00 EDT"
+      "type": "feed",
+      "post_at_utc": "2026-07-01T08:00:00Z",
+      "post_at_edt": "2026-07-01 04:00 EDT"
     },
     {
       "day": 4,
       "folder": "Day04_Thursday",
-      "type": "reel",
-      "post_at_utc": "2026-06-11T15:00:00Z",
-      "post_at_edt": "2026-06-11 11:00 EDT"
+      "type": "feed",
+      "post_at_utc": "2026-07-02T08:00:00Z",
+      "post_at_edt": "2026-07-02 04:00 EDT"
     },
     {
       "day": 5,
       "folder": "Day05_Friday",
       "type": "feed",
-      "post_at_utc": "2026-06-12T15:30:00Z",
-      "post_at_edt": "2026-06-12 11:30 EDT"
+      "post_at_utc": "2026-07-03T08:00:00Z",
+      "post_at_edt": "2026-07-03 04:00 EDT"
     },
     {
       "day": 6,
       "folder": "Day06_Saturday",
-      "type": "reel",
-      "post_at_utc": "2026-06-13T14:00:00Z",
-      "post_at_edt": "2026-06-13 10:00 EDT"
+      "type": "feed",
+      "post_at_utc": "2026-07-04T08:00:00Z",
+      "post_at_edt": "2026-07-04 04:00 EDT"
+    },
+    {
+      "day": 7,
+      "folder": "Day07_Sunday",
+      "type": "feed",
+      "post_at_utc": "2026-07-05T09:00:00Z",
+      "post_at_edt": "2026-07-05 05:00 EDT"
     }
   ]
 }

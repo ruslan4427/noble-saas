@@ -12,9 +12,13 @@ import sys
 from datetime import date, timedelta
 from pathlib import Path
 
-import anthropic
+try:
+    import anthropic
+except ImportError:  # pragma: no cover - optional dependency in local runs
+    anthropic = None
 from dotenv import load_dotenv
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 from prompts import NOBLE_BRAND_CONTEXT, PLATFORM_FORMATS, CONTENT_FOCUS_DESCRIPTIONS
 
 load_dotenv(Path(__file__).parent.parent / ".env")
@@ -25,11 +29,12 @@ HOOKS_DIR      = Path(__file__).parent.parent / "output" / "hooks"
 LEARNINGS_FILE = Path(__file__).parent.parent / "output" / "optimization" / "learnings.json"
 
 
-def get_client() -> anthropic.Anthropic:
+def get_client():
+    if anthropic is None:
+        return None
     api_key = os.environ.get("ANTHROPIC_API_KEY")
     if not api_key:
-        print("Error: ANTHROPIC_API_KEY not set. Copy .env.example to .env and add your key.")
-        sys.exit(1)
+        return None
     return anthropic.Anthropic(api_key=api_key)
 
 
@@ -232,7 +237,7 @@ def build_date_range(period: str):
 
 
 def posts_count(period: str) -> int:
-    return {"weekly": 6, "monthly": 24}.get(period, 6)
+    return {"weekly": 7, "monthly": 28}.get(period, 7)
 
 
 def build_system_prompt(updates: list, trends: dict, hooks_data: dict, learnings: dict) -> str:
@@ -318,8 +323,109 @@ Return a JSON object with this exact structure:
 }}"""
 
 
-def generate_plan(platform: str, period: str, focus: str, updates: list) -> dict:
-    client = get_client()
+def build_local_plan(platform: str, period: str, focus: str, updates: list) -> dict:
+    start_date, end_date = build_date_range(period)
+    count = posts_count(period)
+    update_names = [u["feature_name"] for u in updates[:3]] if updates else []
+    posts = []
+    post_types = ["reel", "carousel", "reel", "animated_post", "feed_post", "reel", "story"]
+    pillars = ["product", "product", "product", "product", "education", "social_proof", "engagement"]
+    hooks = [
+        "Your barbershop booked clients while you slept.",
+        "You’re going on vacation. Your clients don’t need to know.",
+        "POV: your phone just filled tomorrow’s chair.",
+        "Watch your calendar fill up without a phone call.",
+        "35% of clients want to book right now. You’re asleep.",
+        "It’s Saturday. 12 clients deep. Phone never rang once.",
+        "A quick question for shop owners who want better flow.",
+    ]
+    concepts = [
+        "Show the client-side booking flow and instant confirmation experience.",
+        "Walk through how vacation blocks stop last-minute booking chaos.",
+        "Demonstrate how multi-staff scheduling prevents double-booking and confusion.",
+        "Animate a calendar filling up as bookings come in automatically.",
+        "Highlight the cost of missed after-hours bookings with a simple, saveable stat.",
+        "Show how a busy Saturday can stay calm when Noble handles bookings.",
+        "Use a poll or question to drive community engagement around booking habits.",
+    ]
+    captions = [
+        "Show the pain point, then the payoff.",
+        "Use a simple educational angle with a practical takeaway.",
+        "Keep the explanation crisp and client-focused.",
+        "Make the value visual and immediate.",
+        "Use one bold stat and one clear CTA.",
+        "Turn the benefit into a clear fantasy outcome.",
+        "Keep it low-friction and conversational.",
+    ]
+    visual_directions = [
+        "Screen recording of the booking flow on mobile with bold text overlays.",
+        "Carousel showing the vacation block flow from problem to solution.",
+        "Mockup of the staff schedule with clear assignment logic.",
+        "Animated calendar filling with bookings in a premium dark style.",
+        "Single-image bold stat card with a clear CTA block.",
+        "Fast-paced reel with real shop energy and a strong payoff frame.",
+        "Story card with a one-tap poll or question.",
+    ]
+    ctas = [
+        "Start free at noblelink.app — link in bio.",
+        "Save this before your next vacation.",
+        "Try Noble free for 14 days — link in bio.",
+        "Start free at noblelink.app — your first 14 days are on us.",
+        "Your booking link never sleeps. Start free at noblelink.app.",
+        "Send this to a barber who needs to hear it.",
+        "Tap the poll — it takes 1 second.",
+    ]
+    hashtags = [
+        ["#NobleApp", "#BarberBusiness", "#BarberTech"],
+        ["#BarberLife", "#SalonOwner", "#BookingSystem"],
+        ["#BarberBoss", "#BarberSchedule", "#SmallBusinessOwner"],
+        ["#OnlineBooking", "#BarberApp", "#NobleApp"],
+        ["#BarberLife", "#ShopOwner", "#ClientBooking"],
+        ["#BarberCulture", "#AutomatedBooking", "#NoMoreDMs"],
+        ["#NobleApp", "#BarberBusiness", "#Engagement"],
+    ]
+
+    for i in range(count):
+        post_date = (date.fromisoformat(start_date) + timedelta(days=i)).strftime("%Y-%m-%d")
+        feature_update = updates[i]["feature_name"] if updates and i < len(updates) else None
+        if i == 0 and updates:
+            feature_update = updates[0]["feature_name"]
+        elif i == 1 and len(updates) > 1:
+            feature_update = updates[1]["feature_name"]
+        elif i == 2 and len(updates) > 2:
+            feature_update = updates[2]["feature_name"]
+        posts.append({
+            "post_number": i + 1,
+            "post_date": post_date,
+            "post_type": post_types[i % len(post_types)],
+            "content_pillar": pillars[i % len(pillars)],
+            "feature_update": feature_update,
+            "hook": hooks[i],
+            "concept": concepts[i],
+            "caption_outline": captions[i],
+            "visual_direction": visual_directions[i],
+            "animation_concept": "Animate the calendar filling with bookings while the copy stays bold and readable." if post_types[i % len(post_types)] == "animated_post" else None,
+            "cta": ctas[i],
+            "hashtags": hashtags[i],
+            "notes": "Keep the hook specific and the CTA clear.",
+        })
+
+    return {
+        "plan_meta": {
+            "platform": platform,
+            "period": period,
+            "focus": focus,
+            "start_date": start_date,
+            "end_date": end_date,
+            "total_posts": count,
+            "priority_updates_used": [u["feature_name"] for u in updates[:3]] if updates else [],
+        },
+        "posts": posts,
+        "strategy_notes": f"This {period} plan leads with a mix of product-first Reels, educational carousels, and a light engagement story to keep the feed varied while staying focused on {focus} benefits.",
+    }
+
+
+def generate_plan(platform: str, period: str, focus: str, updates: list, offline: bool = False) -> dict:
     start_date, end_date = build_date_range(period)
     trends     = load_latest_trends()
     hooks_data = load_latest_hooks()
@@ -343,23 +449,36 @@ def generate_plan(platform: str, period: str, focus: str, updates: list) -> dict
         print("Hooks: none found — run hook_writer.py first for better hooks")
     print()
 
+    if offline:
+        print("Using local fallback plan generator (no Anthropic API required).")
+        return build_local_plan(platform, period, focus, updates)
+
+    client = get_client()
+    if client is None:
+        print("Anthropic client unavailable. Falling back to local plan generator.")
+        return build_local_plan(platform, period, focus, updates)
+
     max_tokens = 16000 if period == "monthly" else 8192
 
-    with client.messages.stream(
-        model="claude-sonnet-4-6",
-        max_tokens=max_tokens,
-        system=build_system_prompt(updates, trends, hooks_data, learnings),
-        messages=[
-            {
-                "role": "user",
-                "content": build_user_prompt(platform, period, focus, start_date, end_date, updates),
-            }
-        ],
-    ) as stream:
-        response_text = ""
-        for text in stream.text_stream:
-            print(text, end="", flush=True)
-            response_text += text
+    try:
+        with client.messages.stream(
+            model="claude-sonnet-4-6",
+            max_tokens=max_tokens,
+            system=build_system_prompt(updates, trends, hooks_data, learnings),
+            messages=[
+                {
+                    "role": "user",
+                    "content": build_user_prompt(platform, period, focus, start_date, end_date, updates),
+                }
+            ],
+        ) as stream:
+            response_text = ""
+            for text in stream.text_stream:
+                print(text, end="", flush=True)
+                response_text += text
+    except Exception as exc:
+        print(f"\nAnthropic request failed ({exc}). Falling back to local plan generator.")
+        return build_local_plan(platform, period, focus, updates)
 
     print("\n")
     text = response_text.strip()
@@ -426,6 +545,7 @@ def main() -> None:
         type=Path,
         default=Path(__file__).parent.parent / "output",
     )
+    parser.add_argument("--offline", action="store_true", help="Use the built-in local generator instead of Anthropic")
     parser.add_argument("--no-save", action="store_true")
     parser.add_argument(
         "--no-updates",
@@ -439,7 +559,7 @@ def main() -> None:
     if updates and not args.no_updates:
         print(f"Loaded {len(updates)} Noble updates from data/noble_updates.json")
 
-    plan = generate_plan(args.platform, args.period, args.focus, updates)
+    plan = generate_plan(args.platform, args.period, args.focus, updates, offline=args.offline)
     print_summary(plan)
 
     if not args.no_save:

@@ -95,15 +95,15 @@ def login() -> object:
             print(f"  Env session error: {e}")
         tmp_session.unlink(missing_ok=True)
 
-    # 2. Try session from file
+    # 2. Try session from file — load WITHOUT calling .login() again
     if SESSION_FILE.exists():
         try:
             cl2 = Client()
             cl2.load_settings(SESSION_FILE)
-            cl2.login(username, password)
+            # Set username/user_id so the client knows who we are
+            cl2.set_locale("en_US")
             if _session_ok(cl2):
-                cl2.dump_settings(SESSION_FILE)
-                print("  Logged in via session (file) ✓")
+                print("  Logged in via saved session ✓")
                 return cl2
             print("  File session failed health check — fresh login...")
         except Exception as e:
@@ -158,7 +158,7 @@ def _save_post_stat(day_number: int, post_type: str, media_id: str, caption: str
 
 def post_reel(day_number: int):
     folder = get_day_folder(day_number)
-    video = find_file(folder, "reel_video_bg.mp4") or find_file(folder, "*.mp4")
+    video = find_file(folder, "reel_final.mp4") or find_file(folder, "reel_video_bg.mp4") or find_file(folder, "*.mp4")
     if not video:
         print(f"ERROR: no .mp4 found in {folder}")
         sys.exit(1)
