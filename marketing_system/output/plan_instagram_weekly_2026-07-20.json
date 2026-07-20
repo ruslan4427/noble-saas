@@ -1,0 +1,151 @@
+{
+  "plan_meta": {
+    "platform": "instagram",
+    "period": "weekly",
+    "focus": "mixed",
+    "start_date": "2026-07-20",
+    "end_date": "2026-07-26",
+    "total_posts": 7,
+    "priority_updates_used": [
+      "Instant Booking Confirmation",
+      "Vacation Blocks",
+      "Multi-Staff Scheduling"
+    ]
+  },
+  "posts": [
+    {
+      "post_number": 1,
+      "post_date": "2026-07-20",
+      "post_type": "reel",
+      "content_pillar": "product",
+      "feature_update": "Instant Booking Confirmation",
+      "hook": "Your barbershop booked clients while you slept.",
+      "concept": "Show the client-side booking flow and instant confirmation experience.",
+      "caption_outline": "Show the pain point, then the payoff.",
+      "visual_direction": "Screen recording of the booking flow on mobile with bold text overlays.",
+      "animation_concept": null,
+      "cta": "Start free at noblelink.app — link in bio.",
+      "hashtags": [
+        "#NobleApp",
+        "#BarberBusiness",
+        "#BarberTech"
+      ],
+      "notes": "Keep the hook specific and the CTA clear."
+    },
+    {
+      "post_number": 2,
+      "post_date": "2026-07-21",
+      "post_type": "carousel",
+      "content_pillar": "product",
+      "feature_update": "Vacation Blocks",
+      "hook": "You’re going on vacation. Your clients don’t need to know.",
+      "concept": "Walk through how vacation blocks stop last-minute booking chaos.",
+      "caption_outline": "Use a simple educational angle with a practical takeaway.",
+      "visual_direction": "Carousel showing the vacation block flow from problem to solution.",
+      "animation_concept": null,
+      "cta": "Save this before your next vacation.",
+      "hashtags": [
+        "#BarberLife",
+        "#SalonOwner",
+        "#BookingSystem"
+      ],
+      "notes": "Keep the hook specific and the CTA clear."
+    },
+    {
+      "post_number": 3,
+      "post_date": "2026-07-22",
+      "post_type": "reel",
+      "content_pillar": "product",
+      "feature_update": "Multi-Staff Scheduling",
+      "hook": "POV: your phone just filled tomorrow’s chair.",
+      "concept": "Demonstrate how multi-staff scheduling prevents double-booking and confusion.",
+      "caption_outline": "Keep the explanation crisp and client-focused.",
+      "visual_direction": "Mockup of the staff schedule with clear assignment logic.",
+      "animation_concept": null,
+      "cta": "Try Noble free for 14 days — link in bio.",
+      "hashtags": [
+        "#BarberBoss",
+        "#BarberSchedule",
+        "#SmallBusinessOwner"
+      ],
+      "notes": "Keep the hook specific and the CTA clear."
+    },
+    {
+      "post_number": 4,
+      "post_date": "2026-07-23",
+      "post_type": "animated_post",
+      "content_pillar": "product",
+      "feature_update": "TikTok & Telegram Profile Links",
+      "hook": "Watch your calendar fill up without a phone call.",
+      "concept": "Animate a calendar filling up as bookings come in automatically.",
+      "caption_outline": "Make the value visual and immediate.",
+      "visual_direction": "Animated calendar filling with bookings in a premium dark style.",
+      "animation_concept": "Animate the calendar filling with bookings while the copy stays bold and readable.",
+      "cta": "Start free at noblelink.app — your first 14 days are on us.",
+      "hashtags": [
+        "#OnlineBooking",
+        "#BarberApp",
+        "#NobleApp"
+      ],
+      "notes": "Keep the hook specific and the CTA clear."
+    },
+    {
+      "post_number": 5,
+      "post_date": "2026-07-24",
+      "post_type": "feed_post",
+      "content_pillar": "education",
+      "feature_update": "Mobile-First Booking Page",
+      "hook": "35% of clients want to book right now. You’re asleep.",
+      "concept": "Highlight the cost of missed after-hours bookings with a simple, saveable stat.",
+      "caption_outline": "Use one bold stat and one clear CTA.",
+      "visual_direction": "Single-image bold stat card with a clear CTA block.",
+      "animation_concept": null,
+      "cta": "Your booking link never sleeps. Start free at noblelink.app.",
+      "hashtags": [
+        "#BarberLife",
+        "#ShopOwner",
+        "#ClientBooking"
+      ],
+      "notes": "Keep the hook specific and the CTA clear."
+    },
+    {
+      "post_number": 6,
+      "post_date": "2026-07-25",
+      "post_type": "reel",
+      "content_pillar": "social_proof",
+      "feature_update": null,
+      "hook": "It’s Saturday. 12 clients deep. Phone never rang once.",
+      "concept": "Show how a busy Saturday can stay calm when Noble handles bookings.",
+      "caption_outline": "Turn the benefit into a clear fantasy outcome.",
+      "visual_direction": "Fast-paced reel with real shop energy and a strong payoff frame.",
+      "animation_concept": null,
+      "cta": "Send this to a barber who needs to hear it.",
+      "hashtags": [
+        "#BarberCulture",
+        "#AutomatedBooking",
+        "#NoMoreDMs"
+      ],
+      "notes": "Keep the hook specific and the CTA clear."
+    },
+    {
+      "post_number": 7,
+      "post_date": "2026-07-26",
+      "post_type": "story",
+      "content_pillar": "engagement",
+      "feature_update": null,
+      "hook": "A quick question for shop owners who want better flow.",
+      "concept": "Use a poll or question to drive community engagement around booking habits.",
+      "caption_outline": "Keep it low-friction and conversational.",
+      "visual_direction": "Story card with a one-tap poll or question.",
+      "animation_concept": null,
+      "cta": "Tap the poll — it takes 1 second.",
+      "hashtags": [
+        "#NobleApp",
+        "#BarberBusiness",
+        "#Engagement"
+      ],
+      "notes": "Keep the hook specific and the CTA clear."
+    }
+  ],
+  "strategy_notes": "This weekly plan leads with a mix of product-first Reels, educational carousels, and a light engagement story to keep the feed varied while staying focused on mixed benefits."
+}
