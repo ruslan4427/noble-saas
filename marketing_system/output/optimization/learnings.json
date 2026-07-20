@@ -1,6 +1,6 @@
 {
-  "updated": "2026-07-13",
-  "source_week": "2026-W29",
+  "updated": "2026-07-20",
+  "source_week": "2026-W30",
   "total_posts_analyzed": 0,
   "top_content_types": [],
   "content_type_avg_er": {},
@@ -24,6 +24,7 @@
   "zero_post_patterns": [],
   "reach_by_day": {
     "Monday": 0,
+    "Tuesday": 0,
     "Friday": 0
   },
   "recommended_weekly_mix": {
@@ -72,5 +73,5 @@
     "5.5% save rate across week (223 saves / 4024 reach) — well above 1-2% industry benchmark",
     "Follow CTAs are missing — reach is strong but zero follower conversion; add explicit follow prompt to 3+ posts"
   ],
-  "strategist_note": "Week 2026-W29: 0 reach, 0 saves. Top format: N/A. Best ER: 0% (N/A day 0). Sunday is always ENGAGE — never CONVERT."
+  "strategist_note": "Week 2026-W30: 0 reach, 0 saves. Top format: N/A. Best ER: 0% (N/A day 0). Sunday is always ENGAGE — never CONVERT."
 }
