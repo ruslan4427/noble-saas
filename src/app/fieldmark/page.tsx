@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Fieldmark — Field Installation Tracking App",
@@ -32,12 +31,12 @@ export default function FieldmarkPage() {
             </div>
             <div className="text-left">
               <div className="text-white font-semibold">Android</div>
-              <div className="text-[#9c8b7a] text-sm">Version 1.0.0</div>
+              <div className="text-[#9c8b7a] text-sm">Version 1.0.3</div>
             </div>
           </div>
 
           <a
-            href="/downloads/fieldmark.apk"
+            href="https://jvwzhgohvbdtyuekcxpu.supabase.co/storage/v1/object/public/apk/app-release.apk"
             download="fieldmark.apk"
             className="flex items-center justify-center gap-3 w-full bg-[#C9A84C] hover:bg-[#e8d08a] text-[#0F0A00] font-bold py-4 px-6 rounded-2xl transition-colors active:scale-[0.97] text-lg"
           >
@@ -50,10 +49,37 @@ export default function FieldmarkPage() {
           </a>
 
           <p className="text-[#9c8b7a] text-sm mt-4 leading-relaxed">
-            56 MB · Requires Android 5.0+
+            40 MB · Requires Android 5.0+
           </p>
         </div>
 
+        {/* Features */}
+        <div className="bg-white/5 border border-white/10 rounded-2xl p-6 text-left mb-6">
+          <h2 className="text-white font-semibold mb-4 text-sm uppercase tracking-wider">What&apos;s included</h2>
+          <ul className="space-y-3">
+            {[
+              { icon: "📍", text: "Pin status tracking — Not Started, In Progress, Done, Blocked" },
+              { icon: "🗺️", text: "Full floor plan view in task detail with zoomable overlay" },
+              { icon: "🎨", text: "Color-coded pins: orange / blue / green / red by status" },
+              { icon: "👥", text: "Marker color coding — gold for foreman, white for installer" },
+              { icon: "🔍", text: "Task filtering by status and by installer" },
+              { icon: "🔔", text: "In-app notification center with unread badge" },
+              { icon: "🚫", text: "Blocked pin with mandatory reason and optional photo" },
+              { icon: "📸", text: "Photo attachments when creating tasks" },
+              { icon: "📌", text: "Add pins directly to floor plans when creating a task" },
+              { icon: "✅", text: "Foreman notified only when task fully complete or pin blocked" },
+              { icon: "🗂️", text: "Bottom navigation: Plans / Tasks / Team tabs within each project" },
+              { icon: "📊", text: "Team screen with task stats and per-installer task breakdown" },
+            ].map(({ icon, text }, i) => (
+              <li key={i} className="flex gap-3 text-[#9c8b7a] text-sm">
+                <span className="flex-shrink-0">{icon}</span>
+                <span>{text}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        {/* Installation steps */}
         <div className="bg-white/5 border border-white/10 rounded-2xl p-5 text-left mb-8">
           <h2 className="text-white font-semibold mb-3 text-sm uppercase tracking-wider">Installation steps</h2>
           <ol className="space-y-2 text-[#9c8b7a] text-sm">
