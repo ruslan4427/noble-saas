@@ -49,7 +49,7 @@ export default function LexoraPage() {
           </a>
 
           <p className="text-[#8A94A6] text-sm mt-4 leading-relaxed">
-            20 MB · Requires Android 5.0+
+            59 MB · Requires Android 5.0+
           </p>
         </div>
 
@@ -62,7 +62,7 @@ export default function LexoraPage() {
               { icon: "📝", text: "Create playlists with word + translation pairs (Column A + Column B)" },
               { icon: "🤖", text: "Generate vocabulary lists with AI from any topic" },
               { icon: "📥", text: "Import from CSV, TSV, Anki decks, or Google Sheets URL" },
-              { icon: "🌍", text: "13 languages including English, Ukrainian, Spanish, French, German, Japanese, Chinese, Persian (Farsi)" },
+              { icon: "🌍", text: "12 languages including English, Ukrainian, Spanish, French, German, Italian, Polish, Portuguese, Japanese, Korean, Chinese" },
               { icon: "⚡", text: "Playback speed 0.5×–2.0×, repetitions 1–5, pause 1–5s between words" },
               { icon: "🔄", text: "Swap play order A→B or B→A to test recall" },
               { icon: "🔀", text: "Shuffle mode for randomized review" },
