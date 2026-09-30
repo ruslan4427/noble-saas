@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   description: 'Privacy Policy for Lexora — audio-based vocabulary learning app.',
 }
 
-const UPDATED = 'September 16, 2026'
+const UPDATED = 'September 22, 2026'
 const APP = 'Lexora'
 const CONTACT = 'support@noblelink.app'
 
@@ -91,7 +91,50 @@ export default function LexoraPrivacyPolicy() {
           </ul>
         </Section>
 
-        <Section title="5. Data Retention">
+        <Section title="5. AI-Generated Content (Google Gemini via Vertex AI)">
+          <p>
+            {APP} includes an optional &ldquo;Generate with AI&rdquo; feature that creates a word list
+            for a topic you describe. This feature uses <strong>Google Gemini</strong> through
+            Google&apos;s <strong>Vertex AI</strong> platform.
+          </p>
+          <p>
+            <strong>What is sent to Google:</strong> the topic text you type, the languages you
+            select, the mode (vocabulary or terminology), and the requested word count. That is all.
+          </p>
+          <p>
+            <strong>What is NOT sent to Google:</strong> your name, email address, account
+            identifier, existing playlists, or any other content you have saved in the app.
+          </p>
+          <p>
+            <strong>Routing:</strong> requests are relayed through our own secure backend (Supabase
+            Edge Function) so that no Google credentials live on your device. Google may temporarily
+            process the prompt to generate a response, subject to the{' '}
+            <a className="text-[#006FFD]" href="https://cloud.google.com/terms/cloud-privacy-notice">
+              Google Cloud Privacy Notice
+            </a>{' '}
+            and{' '}
+            <a className="text-[#006FFD]" href="https://cloud.google.com/vertex-ai/docs/general/data-governance">
+              Vertex AI Data Governance
+            </a>.
+          </p>
+          <p>
+            <strong>Consent:</strong> the first time you tap &ldquo;Generate&rdquo;, {APP} shows a
+            disclosure sheet describing what is sent and asks you to explicitly agree before any
+            request is made. If you cancel, no data is sent and the feature stays disabled.
+          </p>
+          <p>
+            <strong>Withdrawing consent:</strong> you can revoke your consent at any time in the app
+            via <em>Profile → Reset AI Consent</em>. You will be prompted again the next time you
+            try to use the AI feature. Using the app without ever tapping &ldquo;Generate&rdquo;
+            means Google is never contacted for AI generation.
+          </p>
+          <p>
+            <strong>Review before saving:</strong> generated lists are shown to you for review; no
+            AI-generated content is saved to your playlists unless you tap Save.
+          </p>
+        </Section>
+
+        <Section title="6. Data Retention">
           <p>
             We keep your account data and content for as long as your account is active. When you
             delete your account (Profile → Delete Account) we permanently delete: your profile,
@@ -100,7 +143,7 @@ export default function LexoraPrivacyPolicy() {
           </p>
         </Section>
 
-        <Section title="6. Your Rights">
+        <Section title="7. Your Rights">
           <ul>
             <li>
               <strong>Access &amp; portability:</strong> email {CONTACT} to request an export.
@@ -123,7 +166,7 @@ export default function LexoraPrivacyPolicy() {
           </p>
         </Section>
 
-        <Section title="7. Data Security">
+        <Section title="8. Data Security">
           <p>
             Data is transmitted over TLS. Authentication tokens are managed by Supabase. Passwords
             are never stored in plain text. Audio files are stored in Supabase Storage with access
@@ -131,21 +174,21 @@ export default function LexoraPrivacyPolicy() {
           </p>
         </Section>
 
-        <Section title="8. Children">
+        <Section title="9. Children">
           <p>
             {APP} is not directed at children under 13. If you believe a child has provided us
             personal data, contact {CONTACT} and we will delete it.
           </p>
         </Section>
 
-        <Section title="9. Changes to This Policy">
+        <Section title="10. Changes to This Policy">
           <p>
             We may update this policy. Material changes will be highlighted in the app or by email.
             The date at the top of this page shows the last update.
           </p>
         </Section>
 
-        <Section title="10. Contact">
+        <Section title="11. Contact">
           <p>
             Questions or requests: <a className="text-[#006FFD]" href={`mailto:${CONTACT}`}>{CONTACT}</a>.
           </p>
