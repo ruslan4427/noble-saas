@@ -93,9 +93,9 @@ export default function LexoraPrivacyPolicy() {
 
         <Section title="5. AI-Generated Content (Google Gemini via Vertex AI)">
           <p>
-            {APP} includes an optional &ldquo;Generate with AI&rdquo; feature that creates a word list
-            for a topic you describe. This feature uses <strong>Google Gemini</strong> through
-            Google&apos;s <strong>Vertex AI</strong> platform.
+            {APP}{' '}includes an optional &ldquo;Generate with AI&rdquo; feature that creates a word
+            list for a topic you describe. This feature uses <strong>Google Gemini</strong>{' '}
+            through Google&apos;s <strong>Vertex AI</strong> platform.
           </p>
           <p>
             <strong>What is sent to Google:</strong> the topic text you type, the languages you
