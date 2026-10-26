@@ -1,34 +1,34 @@
 {
-  "week": "2026-W43",
-  "generated_at": "2026-10-19T18:33:36.883109+00:00",
+  "week": "2026-W44",
+  "generated_at": "2026-10-26T18:31:10.538338+00:00",
   "posts": [
     {
       "day": 3,
       "folder": "Day03_Wednesday",
       "type": "reel",
-      "post_at_utc": "2026-10-21T16:00:00Z",
-      "post_at_edt": "2026-10-21 12:00 EDT"
+      "post_at_utc": "2026-10-28T16:00:00Z",
+      "post_at_edt": "2026-10-28 12:00 EDT"
     },
     {
       "day": 4,
       "folder": "Day04_Thursday",
       "type": "reel",
-      "post_at_utc": "2026-10-22T15:00:00Z",
-      "post_at_edt": "2026-10-22 11:00 EDT"
+      "post_at_utc": "2026-10-29T15:00:00Z",
+      "post_at_edt": "2026-10-29 11:00 EDT"
     },
     {
       "day": 6,
       "folder": "Day06_Saturday",
       "type": "reel",
-      "post_at_utc": "2026-10-24T14:00:00Z",
-      "post_at_edt": "2026-10-24 10:00 EDT"
+      "post_at_utc": "2026-10-31T14:00:00Z",
+      "post_at_edt": "2026-10-31 10:00 EDT"
     },
     {
       "day": 7,
       "folder": "Day07_Sunday",
       "type": "reel",
-      "post_at_utc": "2026-10-25T15:00:00Z",
-      "post_at_edt": "2026-10-25 11:00 EDT"
+      "post_at_utc": "2026-11-01T15:00:00Z",
+      "post_at_edt": "2026-11-01 11:00 EDT"
     }
   ]
 }
